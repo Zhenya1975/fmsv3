@@ -10,13 +10,13 @@ services:
       - flask_network
 
 
-#  proxy:
-#    build: proxy
-#    restart: always
-#    ports:
-#      - "80:80"
-#    networks:
-#      - flask_network
+  proxy:
+    build: proxy
+    restart: always
+    ports:
+      - "80:80"
+    networks:
+      - flask_network
 
   db:
     container_name: postgres_container
@@ -27,6 +27,7 @@ services:
     networks:
       - flask_network
     environment:
+      - POSTGRES_DATABASE=fms_v3_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=123456
       - POSTGRES_DB=flask_db4
