@@ -1,5 +1,21 @@
 version: "3.7"
 services:
+  db:
+    container_name: postgres_container
+    image: postgres:13
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - flask_network
+    environment:
+      - POSTGRES_DATABASE=fms_v3_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=flask_db4
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   web:
     build: project
     restart: always
@@ -18,21 +34,7 @@ services:
     networks:
       - flask_network
 
-  db:
-    container_name: postgres_container
-    image: postgres:13
-    restart: always
-    ports:
-      - "5432:5432"
-    networks:
-      - flask_network
-    environment:
-      - POSTGRES_DATABASE=fms_v3_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=flask_db4
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+
 
   pgadmin:
     container_name: pgadmin4_container

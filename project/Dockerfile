@@ -7,6 +7,8 @@ WORKDIR /app
 # CMD ["gunicorn", "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "--reload", "-b", "0.0.0.0:8000", "app:app"]
 # CMD ["gunicorn", "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "--reload", "-b", "0.0.0.0:8000", "app:app"]
 # CMD ["gunicorn", "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "--reload", "app:app"]
-CMD ["gunicorn", "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "--reload", "-b", "0.0.0.0:8000", "app:app"]
+# CMD ["gunicorn", "-k", "geventwebsocket.gunicorn.workers.GeventWebSocketWorker", "-w", "1", "--reload", "-b", "0.0.0.0:8000", "app:app"]
+RUN chmod +x start.sh
+ENTRYPOINT ["./start.sh"]
 # CMD gunicorn --bind 0.0.0.0:8000 -w 1 app:app
 # ENTRYPOINT gunicorn app:app -b 0.0.0.0:80
