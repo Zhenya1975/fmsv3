@@ -12,9 +12,7 @@
 <title>{% block title %}  {% endblock %}</title>
 </head>
 <body>
-    <div id="content">
-        {% block content %}
-        <!-- Это начало Nav Bar-->
+<!-- Это начало Nav Bar-->
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <a class="navbar-brand" href="#">Fights Management System</a>
 
@@ -41,7 +39,11 @@
                     </ul>
                 </div>
         </nav>
-        <!-- Это конец Nav Bar-->
+<!-- Это конец Nav Bar-->
+
+    <div id="content">
+        {% block content %}
+
         {% endblock %}
     </div> <!-- Это конец блока Content-->
 
