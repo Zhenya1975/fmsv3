@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   db:
-    container_name: postgres_container
+#    container_name: postgres_container
     image: postgres:13
     restart: always
     ports:
@@ -9,10 +9,9 @@ services:
     networks:
       - flask_network
     environment:
-      - POSTGRES_DATABASE=fms_v3_db
-      - POSTGRES_USER=postgres
+      - POSTGRES_DB=fms_v3_db
+      - POSTGRES_USER=postgres_fms_v3_user
       - POSTGRES_PASSWORD=123456
-      - POSTGRES_DB=flask_db4
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -21,6 +20,8 @@ services:
     restart: always
     ports:
       - "8000:8000"
+    depends_on:
+      - db
 
     networks:
       - flask_network

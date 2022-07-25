@@ -47,3 +47,13 @@ class BacklogDB(db.Model):
     reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     round_number = db.Column(db.Integer)
+
+
+class WeightcategoriesDB(db.Model):
+    """Модель для весовых категорий"""
+    weight_cat_id = db.Column(db.Integer, primary_key=True)
+    sort_index = db.Column(db.Integer)
+    weight_category_name = db.Column(db.String)
+    weight_category_start = db.Column(db.Integer)
+    weight_category_finish = db.Column(db.Integer)
+    registrations = db.relationship('RegistrationsDB', backref='registrations')
