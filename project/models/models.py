@@ -26,8 +26,7 @@ class RegistrationsDB(db.Model):
     reg_id = db.Column(db.Integer, primary_key=True)
     participant_id = db.Column(db.Integer, db.ForeignKey('participantsDB.participant_id'))
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
-    weight = db.Column(db.Float)
-    weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'))
+
     activity_status = db.Column(db.Integer, default=1)
     red_fighter = db.relationship('FightsDB', backref='red_fighter', foreign_keys="[FightsDB.red_fighter_id]")
     blue_fighter = db.relationship('FightsDB', backref='blue_fighter', foreign_keys="[FightsDB.blue_fighter_id]")
@@ -58,4 +57,4 @@ class WeightcategoriesDB(db.Model):
     weight_category_name = db.Column(db.String)
     weight_category_start = db.Column(db.Integer)
     weight_category_finish = db.Column(db.Integer)
-    registrations = db.relationship('RegistrationsDB', backref='registrations')
+
