@@ -12,11 +12,36 @@
 <title>{% block title %}  {% endblock %}</title>
 </head>
 <body>
-
-
-
     <div id="content">
         {% block content %}
+        <!-- Это начало Nav Bar-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="#">Fights Management System</a>
+
+
+                  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                          <li class="nav-item">
+                            {#<a class="nav-link" href="{{url_for('index')}}">Главная</a>#}
+                          </li>
+
+                          <li class="nav-item">
+                            (#<a class="nav-link" href="{{url_for('competitions')}}">Соревнования</a>#}
+                          </li>
+
+                          <li class="nav-item">
+                              {#<a class="nav-link" href="{{url_for('participants')}}">Участники</a>#}
+                          </li>
+
+                          <li class="nav-item">
+                              Настройки
+                            {#<a class="nav-link" href="{{url_for('settings_form')}}">Настройки</a>#}
+                          </li>
+
+                    </ul>
+                </div>
+        </nav>
+        <!-- Это конец Nav Bar-->
         {% endblock %}
     </div> <!-- Это конец блока Content-->
 
