@@ -27,13 +27,13 @@ services:
       - flask_network
 
 
-#  proxy:
-#    build: proxy
-#    restart: always
-#    ports:
-#      - "80:80"
-#    networks:
-#      - flask_network
+  proxy:
+    build: proxy
+    restart: always
+    ports:
+      - "8050:80"
+    networks:
+      - flask_network
 
 
 

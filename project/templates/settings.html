@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{#{% import "bootstrap/wtf.html" as wtf %}#}
+{% block title %}
+settings
+{% endblock %}
+
+{% block content %}
+<div class="container">
+      <h2 class="title">Соревнования</h2>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul style="padding-left: 0">
+                {% for message in messages %}
+                <div class="alert alert-success" role="alert">
+                    <li style="list-style-type: none;">{{ message }}</li>
+                </div>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+
+</div>
+{% endblock %} <!-- конец блока content -->
