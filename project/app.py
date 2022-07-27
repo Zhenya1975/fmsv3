@@ -4,8 +4,8 @@ from routes.routes import home
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@localhost:5432/fms_v3_db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@db:5432/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@localhost:5432/fms_v3_db'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123456@db:5432/postgres'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.secret_key = 'secret string'
 

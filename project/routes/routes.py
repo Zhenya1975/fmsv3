@@ -19,6 +19,8 @@ def my_event(message):
          {'data': 'datadata'})
 
 
+
+
 def fight_create_func(competition_id, round_number, final_status):
     competition_id = competition_id
     round_number = round_number
@@ -91,6 +93,19 @@ def clear_backlog(competition_id):
 def home_view():
     return redirect(url_for('home.competition_start'))
 
+
+# Competitions list
+@home.route('/competitions')
+def competitions():
+    competitions_data = CompetitionsDB.query.all()
+    return render_template('competitions_list.html', competitions_data = competitions_data)
+
+# competition view
+@home.route('/competitions/<int:competition_id>')
+def competition_page(competition_id):
+    competition_data = CompetitionsDB.query.get(competition_id)
+
+    return render_template('competition.html', competition_data = competition_data)
 
 @home.route('/competition_start/')
 def competition_start():
