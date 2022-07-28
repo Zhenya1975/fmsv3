@@ -22,29 +22,17 @@
                 <p><a href="{{url_for('home.competitions')}}">Список соревнований</a></p>
 {#                <p></p>#}
                 <h3>{{ competition_data.competition_name }}</h3>
-                <ul class="nav nav-tabs" id="competition_tabs">
-                  <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#competition_general_info">Общая информация</a>
-                  </li>
-                  <li class="nav-item">
-{#                    <a class="nav-link" data-toggle="tab" href="#participants">Участники</a>#}
-                      <a class="nav-link" href="#participants">Участники</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#opinion">Отзывы</a>
-                  </li>
+                <ul class="nav nav-tabs">
+                    <li class="nav-item"><a class="nav-link" href="#aaa" data-toggle="tab">AAA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#bbb" data-toggle="tab">BBB</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#ccc" data-toggle="tab">CCC</a></li>
                 </ul>
-                <div class="tab-content">
-                  <div class="tab-pane fade show active" id="competition_general_info">
-                    Описание товара...
-                  </div>
-                  <div class="tab-pane fade" id="participants">
-                    Характеристики товара...
-                  </div>
-                  <div class="tab-pane fade" id="opinion">
-                    Отзывы...
-                  </div>
+                <div class="tab-content" id="tabs">
+                    <div class="tab-pane" id="aaa">...Content...aaa</div>
+                    <div class="tab-pane" id="bbb">...Content...bbb</div>
+                    <div class="tab-pane" id="ccc">...Content...ccc</div>
                 </div>
+
 
 
             </div>
@@ -52,15 +40,15 @@
     </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-$(document).ready(function(){
-    var competition_tab = '#participants'
-    $('#competition_tabs a[href="#participants"] ').click(function(e){
-    e.preventDefault();
-    $(this).tab('show');
-  });
+    $(document).ready(function(){
+        var active_tab = 'ccc'
+        activaTab(active_tab);
+    });
 
+    function activaTab(tab){
+      $('.nav-tabs a[href="#' + tab + '"]').tab('show');
+    };
 
-})
 </script>
 
 
