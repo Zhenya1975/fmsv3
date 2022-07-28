@@ -13,6 +13,20 @@
 
         <div class="row">
             <div class="col">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <ul style="padding-left: 0">
+                        {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <li style="list-style-type: none;">{{ message }}</li>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                {% endwith %}
 {#                <nav aria-label="breadcrumb">#}
 {#                  <ol class="breadcrumb">#}
 {#                    <li class="breadcrumb-item"><a href="{{url_for('home.competitions')}}">Список соревнований</a></li>#}
@@ -23,12 +37,60 @@
 {#                <p></p>#}
                 <h3>{{ competition_data.competition_name }}</h3>
                 <ul class="nav nav-tabs">
-                    <li class="nav-item"><a class="nav-link" href="#aaa" data-toggle="tab">AAA</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#competition_general_info" data-toggle="tab">Общая информация</a></li>
                     <li class="nav-item"><a class="nav-link" href="#bbb" data-toggle="tab">BBB</a></li>
                     <li class="nav-item"><a class="nav-link" href="#ccc" data-toggle="tab">CCC</a></li>
                 </ul>
                 <div class="tab-content" id="tabs">
-                    <div class="tab-pane" id="aaa">...Content...aaa</div>
+                    <div class="tab-pane" id="competition_general_info">
+                        <div style="margin-top: 10px"> <!-- div формы общие сведения о соревновании -->
+                            <form method="POST" action="{{ url_for('home.competition_page', competition_id = competition_data.competition_id) }}">
+                                {{ form_general_info.csrf_token }}
+                                    <div class="form-group">
+                                        {{ form_general_info.competition_name_form.label }}
+                                        {{ form_general_info.competition_name_form (class ='form-control', value = competition_data.competition_name)}}
+                                    <br>
+                                          {% for error in form_general_info.competition_name_form.errors %}
+                                            <span style="color: red;">[{{ error }}]</span>
+                                          {% endfor %}
+                                    </div>
+
+                                    <div class="form-group">
+                                        {{ form_general_info.competition_date_start.label }}
+                                        {{ form_general_info.competition_date_start (class ='form-control', type="date", value = competition_data.competition_date_start)}}
+                                    <br>
+                                          {% for error in form_general_info.competition_date_start.errors %}
+                                            <span style="color: red;">[{{ error }}]</span>
+                                          {% endfor %}
+                                    </div>
+
+                                    <div class="form-group">
+                                        {{ form_general_info.competition_date_finish.label }}
+                                        {{ form_general_info.competition_date_finish (class ='form-control', type="date", value = competition_data.competition_date_finish)}}
+                                    <br>
+                                          {% for error in form_general_info.competition_date_start.errors %}
+                                            <span style="color: red;">[{{ error }}]</span>
+                                          {% endfor %}
+                                    </div>
+
+                                     <div class="form-group">
+                                        {{ form_general_info.competition_city.label }}
+                                        {{ form_general_info.competition_city (class ='form-control', type="text", value = competition_data.competition_city)}}
+                                    <br>
+                                          {% for error in form_general_info.competition_date_start.errors %}
+                                            <span style="color: red;">[{{ error }}]</span>
+                                          {% endfor %}
+                                    </div>
+
+
+                                     {{ form_general_info.submit (class ='btn btn-primary')}}
+
+
+                              </form>
+                        </div> <!-- конец div формы общие сведения о соревновании -->
+
+
+                    </div>
                     <div class="tab-pane" id="bbb">...Content...bbb</div>
                     <div class="tab-pane" id="ccc">...Content...ccc</div>
                 </div>
@@ -38,16 +100,24 @@
             </div>
         </div>
     </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
 <script>
+    data_dict = {{ data | tojson }}
     $(document).ready(function(){
-        var active_tab = 'ccc'
+
+        console.log("c бека пришло: ", data_dict['active_tab_pass'])
+
+        var active_tab = data_dict['active_tab_pass']
         activaTab(active_tab);
+        function activaTab(tab){
+          $('.nav-tabs a[href="#' + tab + '"]').tab('show');
+        };
+
     });
 
-    function activaTab(tab){
-      $('.nav-tabs a[href="#' + tab + '"]').tab('show');
-    };
+
 
 </script>
 

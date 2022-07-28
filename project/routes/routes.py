@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB
+from forms.forms import CompetitionForm
 from extensions import extensions
 from sqlalchemy import desc
 from flask_socketio import SocketIO, emit
@@ -101,11 +102,28 @@ def competitions():
     return render_template('competitions_list.html', competitions_data = competitions_data)
 
 # competition view
-@home.route('/competitions/<int:competition_id>')
+@home.route('/competitions/<int:competition_id>', methods=["POST", "GET"])
 def competition_page(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
+    form_general_info = CompetitionForm()
+    tab_name = "competition_general_tab"
+    data = {'active_tab_pass': 'competition_general_info'}
+    if form_general_info.validate_on_submit():
+        flash('Изменения сохранены')
+        competition_data.competition_name = form_general_info.competition_name_form.data
+        competition_data.competition_date_start = form_general_info.competition_date_start.data
+        competition_data.competition_date_finish = form_general_info.competition_date_finish.data
+        competition_data.competition_city = form_general_info.competition_city.data
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
 
-    return render_template('competition.html', competition_data = competition_data)
+        data = {'active_tab_pass': 'competition_general_info'}
+        return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
+    return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
+
 
 @home.route('/competition_start/')
 def competition_start():
@@ -195,7 +213,7 @@ def competition_create_new():
     return redirect(url_for('home.competition_view', competition_id=competition_id))
 
 
-@home.route('/competition/<int:competition_id>')
+@home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
 def competition_view(competition_id):
     competition_id = competition_id
     # round_number = fight_create_func(round_number_prev)
