@@ -101,7 +101,7 @@ def competitions():
     competitions_data = CompetitionsDB.query.all()
     return render_template('competitions_list.html', competitions_data = competitions_data)
 
-# competition view
+# competition page
 @home.route('/competitions/<int:competition_id>', methods=["POST", "GET"])
 def competition_page(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
@@ -124,6 +124,25 @@ def competition_page(competition_id):
         return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
     return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
 
+# competition delete
+@home.route('/competitions/<int:competition_id>/delete/')
+def delete_registration(competition_id, registration_id):
+    competition_data = CompetitionsDB.query.get(competition_id)
+    registration_data = RegistrationsDB.query.filter_by(competition_id=registration_id).all()
+    number_of_comp_regs = len(list(registration_data))
+    if number_of_comp_regs >0:
+        data = {'active_tab_pass': 'competition_settings'}
+        flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.", 'alert-danger')
+    else:
+        db.session.delete(competition_data)
+        try:
+            db.session.commit()
+            flash(f'Соревнование "{competition_data.competition_name}" удалено', 'alert-success')
+        except Exception as e:
+            print(e)
+            flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
+            db.session.rollback()
+    return render_template('competition.html', competition_data=competition_data, data=data)
 
 @home.route('/competition_start/')
 def competition_start():

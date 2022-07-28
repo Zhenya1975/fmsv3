@@ -16,8 +16,8 @@
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
                     <ul style="padding-left: 0">
-                        {% for message in messages %}
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {% for category, message in messages %}
+                        <div class="alert {{category}} alert-dismissible fade show" role="alert">
                             <li style="list-style-type: none;">{{ message }}</li>
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -39,7 +39,7 @@
                 <ul class="nav nav-tabs">
                     <li class="nav-item"><a class="nav-link" href="#competition_general_info" data-toggle="tab">Общая информация</a></li>
                     <li class="nav-item"><a class="nav-link" href="#bbb" data-toggle="tab">BBB</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#ccc" data-toggle="tab">CCC</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#competition_settings" data-toggle="tab">Настройки</a></li>
                 </ul>
                 <div class="tab-content" id="tabs">
                     <div class="tab-pane" id="competition_general_info">
@@ -92,7 +92,18 @@
 
                     </div>
                     <div class="tab-pane" id="bbb">...Content...bbb</div>
-                    <div class="tab-pane" id="ccc">...Content...ccc</div>
+                    <div class="tab-pane" id="competition_settings">
+                        <div style="margin-top: 20px">
+                            <h5>Удаление соревнования "{{ competition_data.competition_name }}"</h5>
+                            <p></p>
+                            <p>Удаление соревнования возможно, если нет связанных регистраций</p>
+
+                            <a href="{{url_for('home.competition_delete', competition_id=competition_data.competition_id)}}"><button type="button" class="btn btn-danger">Удалить</button></a>
+
+
+
+                        </div>
+                    </div>
                 </div>
 
 
@@ -106,8 +117,7 @@
 <script>
     data_dict = {{ data | tojson }}
     $(document).ready(function(){
-
-        console.log("c бека пришло: ", data_dict['active_tab_pass'])
+        //console.log("c бека пришло: ", data_dict['active_tab_pass'])
 
         var active_tab = data_dict['active_tab_pass']
         activaTab(active_tab);
