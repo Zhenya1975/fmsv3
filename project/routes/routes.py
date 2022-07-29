@@ -172,12 +172,10 @@ def competition_create_new():
         return redirect(url_for('home.competition_page', competition_id=competition_id))
 
 
-
 # генерация отображения формы создания соревнования
 @home.route('/new_comp_ajaxfile', methods=["POST", "GET"])
 def new_comp_ajaxfile():
     if request.method == 'POST':
-
         form = CompetitionForm()
         return jsonify({'htmlresponse': render_template('response_competition_create.html', form=form)})
 

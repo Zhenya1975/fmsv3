@@ -41,7 +41,7 @@
         <table id="competitions_table" class="table table-striped table-bordered" style="width:100%">
             <thead>
                 <tr>
-                    <th>id</th>
+                    <th>№</th>
                     <th>Наименование</th>
                     <th>Дата начала</th>
                     <th>Дата завершения</th>
@@ -51,7 +51,7 @@
             <tbody>
             {% for competition_row in competitions_data %}
                 <tr>
-                    <td>{{ competition_row.competition_id }}</td>
+                    <td>{{ loop.index }}</td>
                     <td>
                         <a href="{{url_for('home.competition_page', competition_id = competition_row.competition_id)}}">
                               {{ competition_row.competition_name }}
