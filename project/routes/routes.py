@@ -124,14 +124,17 @@ def competition_page(competition_id):
         return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
     return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
 
+
 # competition delete
 @home.route('/competitions/<int:competition_id>/delete/')
-def delete_registration(competition_id, registration_id):
+def competition_delete(competition_id):
+    form_general_info = CompetitionForm()
     competition_data = CompetitionsDB.query.get(competition_id)
-    registration_data = RegistrationsDB.query.filter_by(competition_id=registration_id).all()
+    registration_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
     number_of_comp_regs = len(list(registration_data))
+    # print(number_of_comp_regs)
+    data = {'active_tab_pass': 'competition_settings'}
     if number_of_comp_regs >0:
-        data = {'active_tab_pass': 'competition_settings'}
         flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.", 'alert-danger')
     else:
         db.session.delete(competition_data)
@@ -142,7 +145,7 @@ def delete_registration(competition_id, registration_id):
             print(e)
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
-    return render_template('competition.html', competition_data=competition_data, data=data)
+    return render_template('competition.html', competition_data=competition_data, data=data, form_general_info=form_general_info)
 
 @home.route('/competition_start/')
 def competition_start():
@@ -242,12 +245,7 @@ def competition_view(competition_id):
     return render_template("competition.html", fight_data=last_created_fight)
 
 
-@home.route('/competition_delete/')
-def competition_delete():
-    db.session.query(CompetitionsDB).delete()
-    db.session.commit()
 
-    return "deleted"
 
 
 @home.route('/ajaxfile', methods=["POST", "GET"])
