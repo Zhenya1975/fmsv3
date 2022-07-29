@@ -158,14 +158,18 @@ def competition_start():
 
 @home.route('/competition_create_new/', methods=["POST", "GET"])
 def competition_create_new():
-    new_competition = CompetitionsDB()
-    db.session.add(new_competition)
-    db.session.commit()
-    form_general_info = CompetitionForm()
-    data = {'active_tab_pass': 'competition_settings'}
-    created_competition_data = CompetitionsDB.query.order_by(desc(CompetitionsDB.competition_id)).first()
-    competition_id = created_competition_data.competition_id
-    return redirect(url_for('home.competition_page', competition_id=competition_id))
+    form = CompetitionForm()
+    if form.validate_on_submit():
+        new_competition = CompetitionsDB(competition_name=form.competition_name_form.data,
+                                         competition_date_start=form.competition_date_start.data,
+                                         competition_date_finish=form.competition_date_finish.data,
+                                         competition_city=form.competition_city.data,
+                                         )
+        db.session.add(new_competition)
+        db.session.commit()
+        created_competition_data = CompetitionsDB.query.order_by(desc(CompetitionsDB.competition_id)).first()
+        competition_id = created_competition_data.competition_id
+        return redirect(url_for('home.competition_page', competition_id=competition_id))
 
 
 
