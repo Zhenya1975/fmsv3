@@ -20,8 +20,6 @@ def my_event(message):
          {'data': 'datadata'})
 
 
-
-
 def fight_create_func(competition_id, round_number, final_status):
     competition_id = competition_id
     round_number = round_number
@@ -92,24 +90,24 @@ def clear_backlog(competition_id):
 
 @home.route('/')
 def home_view():
-    return redirect(url_for('home.competition_start'))
+    return redirect(url_for('home.competitions'))
 
 
 # Competitions list
 @home.route('/competitions')
 def competitions():
     competitions_data = CompetitionsDB.query.all()
-    return render_template('competitions_list.html', competitions_data = competitions_data)
+    return render_template('competitions_list.html', competitions_data=competitions_data)
+
 
 # competition page
 @home.route('/competitions/<int:competition_id>', methods=["POST", "GET"])
 def competition_page(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
     form_general_info = CompetitionForm()
-    tab_name = "competition_general_tab"
     data = {'active_tab_pass': 'competition_general_info'}
     if form_general_info.validate_on_submit():
-        flash('Изменения сохранены')
+        flash('Изменения сохранены', 'alert-success')
         competition_data.competition_name = form_general_info.competition_name_form.data
         competition_data.competition_date_start = form_general_info.competition_date_start.data
         competition_data.competition_date_finish = form_general_info.competition_date_finish.data
@@ -121,8 +119,10 @@ def competition_page(competition_id):
             db.session.rollback()
 
         data = {'active_tab_pass': 'competition_general_info'}
-        return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
-    return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info, data=data)
+        return render_template('competition.html', competition_data=competition_data,
+                               form_general_info=form_general_info, data=data)
+    return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info,
+                           data=data)
 
 
 # competition delete
@@ -134,105 +134,48 @@ def competition_delete(competition_id):
     number_of_comp_regs = len(list(registration_data))
     # print(number_of_comp_regs)
     data = {'active_tab_pass': 'competition_settings'}
-    if number_of_comp_regs >0:
-        flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.", 'alert-danger')
+    if number_of_comp_regs > 0:
+        flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.",
+              'alert-danger')
     else:
         db.session.delete(competition_data)
         try:
             db.session.commit()
             flash(f'Соревнование "{competition_data.competition_name}" удалено', 'alert-success')
+            return redirect(url_for('home.competitions'))
         except Exception as e:
             print(e)
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
-    return render_template('competition.html', competition_data=competition_data, data=data, form_general_info=form_general_info)
+    return render_template('competition.html', competition_data=competition_data, data=data,
+                           form_general_info=form_general_info)
+
 
 @home.route('/competition_start/')
 def competition_start():
     return render_template('competition_start.html')
 
 
-@home.route('/competition_create_new/')
+@home.route('/competition_create_new/', methods=["POST", "GET"])
 def competition_create_new():
-    db.session.query(BacklogDB).delete()
     new_competition = CompetitionsDB()
     db.session.add(new_competition)
     db.session.commit()
+    form_general_info = CompetitionForm()
+    data = {'active_tab_pass': 'competition_settings'}
     created_competition_data = CompetitionsDB.query.order_by(desc(CompetitionsDB.competition_id)).first()
     competition_id = created_competition_data.competition_id
-    # создаем записи регистраций на созданное соревнование
-    participant_data = ParticipantsDB.query.all()
-    for participant in participant_data:
-        new_registration = RegistrationsDB(participant_id=participant.participant_id, competition_id=competition_id,
-                                           activity_status=1)
-        db.session.add(new_registration)
-        try:
-            db.session.commit()
-        except Exception as e:
-            print("Не удалось создать запись в регистрациях", e)
-            db.session.rollback()
+    return redirect(url_for('home.competition_page', competition_id=competition_id))
 
-    # помещаем всех зарегистрированных бойцов в бэклог
-    # participants_data = ParticipantsDB.query.all()
-    regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
-    for registration in regs_data:
-        reg_id = registration.reg_id
-        new_backlog_record = BacklogDB(reg_id=reg_id, competition_id=competition_id, round_number=1)
-        db.session.add(new_backlog_record)
-        try:
-            db.session.commit()
-        except Exception as e:
-            print("Не удалось создать запись в бэклоге", e)
-            db.session.rollback()
 
-    # проверяем ситуацию в бэклоге в текущем и следующем раунде
-    current_backlog_data = BacklogDB.query.filter_by(competition_id=competition_id, round_number=1).all()
-    next_round_backlog_data = BacklogDB.query.filter_by(competition_id=competition_id, round_number=2).all()
 
-    if len(current_backlog_data) == 0 and len(next_round_backlog_data) == 2:
-        current_round_number = 2
+# генерация отображения формы создания соревнования
+@home.route('/new_comp_ajaxfile', methods=["POST", "GET"])
+def new_comp_ajaxfile():
+    if request.method == 'POST':
 
-        final_status = 'continue'
-        fight_create_func(competition_id, current_round_number, final_status)
-        # удаляем из бэклога записи с бойцами
-        delete_backlog_records(competition_id, current_round_number)
-    elif len(current_backlog_data) == 2 and len(next_round_backlog_data) == 0:
-
-        current_round_number = 1
-        final_status = 'continue'
-        fight_create_func(competition_id, current_round_number, final_status)
-        # удаляем из бэклога записи с бойцами
-        delete_backlog_records(competition_id, current_round_number)
-    elif len(current_backlog_data) == 1 and len(next_round_backlog_data) == 1:
-
-        current_round_number = 1
-        final_status = 'continue'
-        next_round_fighter_data = BacklogDB.query.filter_by(competition_id=competition_id,
-                                                            round_number=current_round_number + 1).first()
-        # проверяем на случай если это один и тот же боец
-        current_round_fighter_data = BacklogDB.query.filter_by(competition_id=competition_id,
-                                                               round_number=current_round_number).first()
-        if next_round_fighter_data.fighter_id != current_round_fighter_data.fighter_id:
-            next_round_fighter_data.round_number = current_round_number
-            try:
-                db.session.commit()
-
-            except Exception as e:
-                print("не удалось переписать номер круга в записи бойца из следующего круга", e)
-                db.session.rollback()
-
-        fight_create_func(competition_id, current_round_number, final_status)
-        # удаляем из бэклога записи с бойцами
-        delete_backlog_records(competition_id, current_round_number)
-    else:
-        fight_create_func(competition_id, 1, 'continue')
-        # удаляем из бэклога записи с созданным боем
-        last_created_fight = FightsDB.query.filter_by(competition_id=competition_id).order_by(
-            desc(FightsDB.fight_id)).first()
-        # удаляем записи из бэклога бойцов, которые зашли в бой
-        delete_backlog_records(last_created_fight.competition_id, 1)
-
-    return redirect(url_for('home.competition_view', competition_id=competition_id))
+        form = CompetitionForm()
+        return jsonify({'htmlresponse': render_template('response_competition_create.html', form=form)})
 
 
 @home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
@@ -243,9 +186,6 @@ def competition_view(competition_id):
         desc(FightsDB.fight_id)).first()
 
     return render_template("competition.html", fight_data=last_created_fight)
-
-
-
 
 
 @home.route('/ajaxfile', methods=["POST", "GET"])
