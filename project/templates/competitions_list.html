@@ -90,7 +90,18 @@
 
     <script>
         $(document).ready(function() {
-            $('#competitions_table').DataTable();
+            $('#competitions_table').DataTable(
+            {
+                stateSave: true,
+                "order": [[ 1, "desc" ]],
+                "pagingType": "full_numbers",
+                "language": {
+                    "url": "{{ url_for('static', filename='ru.json') }}"
+                }
+
+            });
+
+
 
             $('.new_comp').click(function(){
                  $.ajax({
