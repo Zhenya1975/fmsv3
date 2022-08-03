@@ -106,6 +106,8 @@ def competition_page(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
     form_general_info = CompetitionForm()
     data = {'active_tab_pass': 'competition_general_info'}
+    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
+    # print(regs)
     if active_tab_name == 1:
         data = {'active_tab_pass': 'competition_general_info'}
     elif active_tab_name == 3:
@@ -123,10 +125,12 @@ def competition_page(competition_id, active_tab_name):
             db.session.rollback()
 
         data = {'active_tab_pass': 'competition_general_info'}
+
+
         return render_template('competition.html', competition_data=competition_data,
-                               form_general_info=form_general_info, data=data)
+                               form_general_info=form_general_info, data=data, regs=regs)
     return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info,
-                           data=data)
+                           data=data, regs=regs)
 
 
 # competition delete
@@ -141,7 +145,8 @@ def competition_delete(competition_id):
     if number_of_comp_regs > 0:
         flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.",
               'alert-danger')
-        return redirect(url_for('home.competition_page', competition_id = competition_id, active_tab_name = 3))
+        regs = RegistrationsDB.query.all()
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=3, regs=regs))
     else:
         db.session.delete(competition_data)
         try:
@@ -174,7 +179,15 @@ def competition_create_new():
         db.session.commit()
         created_competition_data = CompetitionsDB.query.order_by(desc(CompetitionsDB.competition_id)).first()
         competition_id = created_competition_data.competition_id
-        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 1))
+        regs = RegistrationsDB.query.all()
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 1, regs=regs))
+
+# registration list
+@home.route('/competitions/<int:competition_id>/registrations')
+def registration_list(competition_id):
+    competition_data = CompetitionsDB.query.get(competition_id)
+    regs = RegistrationsDB.query.all()
+    return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 2, regs=regs))
 
 
 # генерация отображения формы создания соревнования
