@@ -101,11 +101,15 @@ def competitions():
 
 
 # competition page
-@home.route('/competitions/<int:competition_id>', methods=["POST", "GET"])
-def competition_page(competition_id):
+@home.route('/competitions/<int:competition_id>/<active_tab_name>', methods=["POST", "GET"])
+def competition_page(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
     form_general_info = CompetitionForm()
     data = {'active_tab_pass': 'competition_general_info'}
+    if active_tab_name == 1:
+        data = {'active_tab_pass': 'competition_general_info'}
+    elif active_tab_name == 3:
+        data = {'active_tab_pass': 'competition_settings'}
     if form_general_info.validate_on_submit():
         flash('Изменения сохранены', 'alert-success')
         competition_data.competition_name = form_general_info.competition_name_form.data
@@ -137,6 +141,7 @@ def competition_delete(competition_id):
     if number_of_comp_regs > 0:
         flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.",
               'alert-danger')
+        return redirect(url_for('home.competition_page', competition_id = competition_id, active_tab_name = 3))
     else:
         db.session.delete(competition_data)
         try:
@@ -169,7 +174,7 @@ def competition_create_new():
         db.session.commit()
         created_competition_data = CompetitionsDB.query.order_by(desc(CompetitionsDB.competition_id)).first()
         competition_id = created_competition_data.competition_id
-        return redirect(url_for('home.competition_page', competition_id=competition_id))
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 1))
 
 
 # генерация отображения формы создания соревнования
