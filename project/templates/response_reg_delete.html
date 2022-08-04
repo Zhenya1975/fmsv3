@@ -1,0 +1,8 @@
+<p>Регистрацию можно удалить, если нет связанных поединков.</p>
+<p>Удалить регистрацию?</p>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+    <a href="{{ url_for('home.registration_delete', reg_id = reg_data.reg_id) }}"><button type="button" class="btn btn-danger">Удалить</button></a>
+</div>
+

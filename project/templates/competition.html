@@ -6,6 +6,8 @@
 
 {% block head %}
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
+    <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <style type="text/css">
      a:hover {
       cursor:pointer;
@@ -110,6 +112,7 @@
                                             <th>Весовая категория</th>
                                             <th>Возраст</th>
                                             <th>Возрастная категория</th>
+                                            <th></th>
 
 
                                         </tr>
@@ -135,6 +138,10 @@
                                             </td>
                                             <td>
 {#                                                {{ reg.age_categories.age_category_name }}#}
+                                            </td>
+
+                                            <td>
+                                                <button type="button" class="btn btn-light"><span><i class="fa fa-trash-o delete_reg" data-id={{ reg.reg_id }}></i></span></button>
                                             </td>
 
 
@@ -182,6 +189,24 @@
                       </div>
                 </div>
 
+                <div class="modal fade" id="registration_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                              <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel">Удаление регистрации</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                              </div>
+
+                              <div class="modal-body">
+
+                              </div>
+
+                        </div>
+                  </div>
+            </div>
+
 
 
             </div>
@@ -213,6 +238,22 @@
                     $('.modal-body').html(data);
                     $('.modal-body').append(data.htmlresponse);
                     $('#registration_edit_modal').modal('show');
+                }
+             });
+            });
+
+        $('.delete_reg').click(function(){
+            var reg_id = $(this).data('id');
+
+             $.ajax({
+                 url: '/delete_reg_ajaxfile',
+                 type: 'post',
+                 data: {reg_id:reg_id},
+                 success: function(data){
+
+                    $('.modal-body').html(data);
+                    $('.modal-body').append(data.htmlresponse);
+                    $('#registration_delete_modal').modal('show');
                 }
              });
             });

@@ -206,6 +206,30 @@ def registration_edit(reg_id):
         return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
 
 
+@home.route('/registration_delete/<int:reg_id>/', methods=["POST", "GET"])
+def registration_delete(reg_id):
+    reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
+    reg_id = reg_data.reg_id
+    competition_id = reg_data.competition_id
+    fights_data_red = FightsDB.query.filter_by(red_fighter_id=reg_id).all()
+    fights_data_blue = FightsDB.query.filter_by(blue_fighter_id=reg_id).all()
+    number_of_fights = len(list(fights_data_red)) + len(list(fights_data_blue))
+    # print(number_of_comp_regs)
+    if number_of_fights > 0:
+        flash(f"Количество связанных поединков: {number_of_fights}. Сначала удалите связанные поединки.",
+              'alert-danger')
+    else:
+        db.session.delete(reg_data)
+        try:
+            db.session.commit()
+            flash(f'Регистрация удалена', 'alert-success')
+
+        except Exception as e:
+            print(e)
+            flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
+            db.session.rollback()
+
+    return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
 
 
 
@@ -217,6 +241,13 @@ def new_comp_ajaxfile():
         form = CompetitionForm()
         return jsonify({'htmlresponse': render_template('response_competition_create.html', form=form)})
 
+
+@home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
+def delete_reg_ajaxfile():
+    if request.method == 'POST':
+        reg_id = request.form['reg_id']
+        reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
+        return jsonify({'htmlresponse': render_template('response_reg_delete.html', reg_data=reg_data)})
 
 
 @home.route('/edit_reg_ajaxfile', methods=["POST", "GET"])
