@@ -24,6 +24,7 @@ class CompetitionsDB(db.Model):
 
 class RegistrationsDB(db.Model):
     reg_id = db.Column(db.Integer, primary_key=True)
+    weight_value = db.Column(db.Float)
     participant_id = db.Column(db.Integer, db.ForeignKey('participantsDB.participant_id'))
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'))

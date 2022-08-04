@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB
-from forms.forms import CompetitionForm
+from forms.forms import CompetitionForm, RegistrationeditForm
 from extensions import extensions
-from sqlalchemy import desc
+from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
 
 db = extensions.db
@@ -106,12 +106,17 @@ def competition_page(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
     form_general_info = CompetitionForm()
     data = {'active_tab_pass': 'competition_general_info'}
-    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
-    # print(regs)
-    if active_tab_name == 1:
+    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
+
+    if int(active_tab_name) == 1:
         data = {'active_tab_pass': 'competition_general_info'}
-    elif active_tab_name == 3:
+    elif int(active_tab_name) == 2:
+        data = {'active_tab_pass': 'registrations_tab'}
+    elif int(active_tab_name) == 3:
         data = {'active_tab_pass': 'competition_settings'}
+    else:
+        print("непонятно что передано вместо номера вкладки")
+
     if form_general_info.validate_on_submit():
         flash('Изменения сохранены', 'alert-success')
         competition_data.competition_name = form_general_info.competition_name_form.data
@@ -145,8 +150,8 @@ def competition_delete(competition_id):
     if number_of_comp_regs > 0:
         flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.",
               'alert-danger')
-        regs = RegistrationsDB.query.all()
-        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=3, regs=regs))
+        regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(asc(ParticipantsDB.participant_last_name)).all()
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=3))
     else:
         db.session.delete(competition_data)
         try:
@@ -179,15 +184,30 @@ def competition_create_new():
         db.session.commit()
         created_competition_data = CompetitionsDB.query.order_by(desc(CompetitionsDB.competition_id)).first()
         competition_id = created_competition_data.competition_id
-        regs = RegistrationsDB.query.all()
-        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 1, regs=regs))
+        regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(asc(ParticipantsDB.participant_last_name)).all()
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 1))
 
 # registration list
 @home.route('/competitions/<int:competition_id>/registrations')
 def registration_list(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
-    regs = RegistrationsDB.query.all()
-    return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 2, regs=regs))
+    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).first()
+    return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 2))
+
+
+@home.route('/registration_edit/<int:reg_id>/', methods=["POST", "GET"])
+def registration_edit(reg_id):
+    reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
+    competition_id = reg_data.competition_id
+    form = RegistrationeditForm()
+    if form.validate_on_submit():
+        reg_data.weight_value = form.reg_weight.data
+        db.session.commit()
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
+
+
+
+
 
 
 # генерация отображения формы создания соревнования
@@ -197,6 +217,16 @@ def new_comp_ajaxfile():
         form = CompetitionForm()
         return jsonify({'htmlresponse': render_template('response_competition_create.html', form=form)})
 
+
+
+@home.route('/edit_reg_ajaxfile', methods=["POST", "GET"])
+def edit_reg_ajaxfile():
+    if request.method == 'POST':
+        reg_id = request.form['reg_id']
+        reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
+        # print(reg_data)
+        reg_form = RegistrationeditForm()
+        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data)})
 
 @home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
 def competition_view(competition_id):
