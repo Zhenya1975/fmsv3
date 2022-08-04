@@ -1,6 +1,5 @@
 <form method="POST" action="{{ url_for('home.registration_edit', reg_id = reg_data.reg_id) }}">
     {{ form.csrf_token }}
-    <p>reg_id: {{ reg_data.reg_id }}</p>
 
     <div class="form-group">
             {{ form.reg_weight.label }}

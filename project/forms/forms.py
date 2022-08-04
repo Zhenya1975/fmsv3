@@ -11,6 +11,6 @@ class CompetitionForm(FlaskForm):
     submit = SubmitField('Сохранить')
 
 class RegistrationeditForm(FlaskForm):
-    reg_weight = DecimalField('Вес, кг')
+    reg_weight = DecimalField('Вес, кг', validators=[validators.DataRequired()])
 
     submit = SubmitField('Сохранить')

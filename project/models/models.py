@@ -20,7 +20,7 @@ class CompetitionsDB(db.Model):
     competition_city = db.Column(db.String)
     fights = db.relationship('FightsDB', backref='competition')
     registration_comp = db.relationship('RegistrationsDB', backref='registration_comp')
-
+    weight_cat_comp = db.relationship('RegistrationsDB', backref='weight_cat_comp')
 
 class RegistrationsDB(db.Model):
     reg_id = db.Column(db.Integer, primary_key=True)
@@ -54,6 +54,7 @@ class BacklogDB(db.Model):
 class WeightcategoriesDB(db.Model):
     """Модель для весовых категорий"""
     weight_cat_id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     sort_index = db.Column(db.Integer)
     weight_category_name = db.Column(db.String)
     weight_category_start = db.Column(db.Integer)
