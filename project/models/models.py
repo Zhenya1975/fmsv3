@@ -20,7 +20,7 @@ class CompetitionsDB(db.Model):
     competition_city = db.Column(db.String)
     fights = db.relationship('FightsDB', backref='competition')
     registration_comp = db.relationship('RegistrationsDB', backref='registration_comp')
-    weight_cat_comp = db.relationship('RegistrationsDB', backref='weight_cat_comp')
+
 
 class RegistrationsDB(db.Model):
     reg_id = db.Column(db.Integer, primary_key=True)
