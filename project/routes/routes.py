@@ -88,6 +88,13 @@ def clear_backlog(competition_id):
             db.session.rollback()
 
 
+@home.route('/test_ajaxfile', methods=["POST", "GET"])
+def test_ajaxfile():
+    if request.method == 'POST':
+        data_from_button = request.form['data_from_button']
+        return jsonify({'htmlresponse': render_template('response_test_modal.html', data_from_button=data_from_button)})
+
+
 @home.route('/test')
 def test():
     return render_template('test.html')
