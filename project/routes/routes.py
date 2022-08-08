@@ -99,6 +99,10 @@ def test_ajaxfile():
 def test():
     return render_template('test.html')
 
+@home.route('/test2')
+def test2():
+    return render_template('test_2.html')
+
 @home.route('/')
 def home_view():
     return redirect(url_for('home.competitions'))
