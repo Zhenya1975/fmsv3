@@ -1,11 +1,7 @@
-<form method="POST" action="{{ url_for('home.registration_new', competition_id = competition_id) }}">
+<form method="POST" action="{{ url_for('home.registration_new', competition_id = competition_id, participant_id = participant_data.participant_id) }}">
     {{ form.csrf_token }}
 
-    <select class="selectpicker">
-      <option>Mustard</option>
-      <option>Ketchup</option>
-      <option>Barbecue</option>
-    </select>
+    <h5>{{ participant_data.participant_last_name }} {{ participant_data.participant_first_name }} </h5>
 
     <div class="form-group">
             {{ form.reg_weight.label }}
