@@ -114,6 +114,23 @@ def competitions():
     competitions_data = CompetitionsDB.query.all()
     return render_template('competitions_list.html', competitions_data=competitions_data)
 
+@home.route('/comp2/<int:competition_id>/<active_tab_name>')
+def comp2(competition_id, active_tab_name):
+    competition_data = CompetitionsDB.query.get(competition_id)
+    data = {'active_tab_pass': 'competition_general_info'}
+    if int(active_tab_name) == 1:
+        data = {'active_tab_pass': 'competition_general_info'}
+    elif int(active_tab_name) == 2:
+        data = {'active_tab_pass': 'registrations_tab'}
+    elif int(active_tab_name) == 3:
+        data = {'active_tab_pass': 'competition_settings'}
+    else:
+        print("непонятно что передано вместо номера вкладки")
+
+
+    return render_template('competition_2.html', competition_data=competition_data, data=data)
+
+
 
 # competition page
 @home.route('/competitions/<int:competition_id>/<active_tab_name>', methods=["POST", "GET"])
