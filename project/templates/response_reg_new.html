@@ -1,15 +1,15 @@
-<select class="selectpicker">
+<form method="POST" action="{{ url_for('home.registration_new', competition_id = competition_id) }}">
+    {{ form.csrf_token }}
+
+    <select class="selectpicker">
       <option>Mustard</option>
       <option>Ketchup</option>
       <option>Barbecue</option>
     </select>
 
-<form method="POST" action="{{ url_for('home.registration_edit', reg_id = reg_data.reg_id) }}">
-    {{ form.csrf_token }}
-
     <div class="form-group">
             {{ form.reg_weight.label }}
-            {{ form.reg_weight (class ='form-control', value = reg_data.weight_value)}}
+            {{ form.reg_weight (class ='form-control')}}
         <br>
               {% for error in form.reg_weight.errors %}
                 <span style="color: red;">[{{ error }}]</span>

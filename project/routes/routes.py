@@ -88,6 +88,21 @@ def clear_backlog(competition_id):
             db.session.rollback()
 
 
+@home.route('/test_ajaxfile', methods=["POST", "GET"])
+def test_ajaxfile():
+    if request.method == 'POST':
+        data_from_button = request.form['data_from_button']
+        return jsonify({'htmlresponse': render_template('response_test_modal.html', data_from_button=data_from_button)})
+
+
+@home.route('/test')
+def test():
+    return render_template('test.html')
+
+@home.route('/test2')
+def test2():
+    return render_template('test_2.html')
+
 @home.route('/')
 def home_view():
     return redirect(url_for('home.competitions'))
@@ -106,7 +121,8 @@ def competition_page(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
     form_general_info = CompetitionForm()
     data = {'active_tab_pass': 'competition_general_info'}
-    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
+    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
+        ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
 
     if int(active_tab_name) == 1:
         data = {'active_tab_pass': 'competition_general_info'}
@@ -131,7 +147,6 @@ def competition_page(competition_id, active_tab_name):
 
         data = {'active_tab_pass': 'competition_general_info'}
 
-
         return render_template('competition.html', competition_data=competition_data,
                                form_general_info=form_general_info, data=data, regs=regs)
     return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info,
@@ -150,7 +165,8 @@ def competition_delete(competition_id):
     if number_of_comp_regs > 0:
         flash(f"Количество связанных регистраций: {number_of_comp_regs}. Сначала удалите связанные регистрации.",
               'alert-danger')
-        regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(asc(ParticipantsDB.participant_last_name)).all()
+        regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
+            asc(ParticipantsDB.participant_last_name)).all()
         return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=3))
     else:
         db.session.delete(competition_data)
@@ -184,15 +200,40 @@ def competition_create_new():
         db.session.commit()
         created_competition_data = CompetitionsDB.query.order_by(desc(CompetitionsDB.competition_id)).first()
         competition_id = created_competition_data.competition_id
-        regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(asc(ParticipantsDB.participant_last_name)).all()
-        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 1))
+        regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
+            asc(ParticipantsDB.participant_last_name)).all()
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=1))
+
 
 # registration list
 @home.route('/competitions/<int:competition_id>/registrations')
 def registration_list(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
     regs = RegistrationsDB.query.filter_by(competition_id=competition_id).first()
-    return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name = 2))
+    return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
+
+
+@home.route('/registration_new/<int:competition_id>/', methods=["POST", "GET"])
+def registration_new(competition_id):
+    form = RegistrationeditForm()
+    if form.validate_on_submit():
+        new_reg = RegistrationsDB(
+            weight_value=form.reg_weight.data,
+            competition_id=competition_id,
+            participant_id=1
+        )
+        db.session.add(new_reg)
+        db.session.commit()
+        new_reg_data = RegistrationsDB.query.filter_by(competition_id=competition_id).order_by(RegistrationsDB.reg_id.desc()).first()
+
+        last_name = new_reg_data.registration_participant.participant_last_name
+        first_name = new_reg_data.registration_participant.participant_first_name
+        flash(f"Создана новая регистрация {last_name} {first_name}", 'alert-success')
+
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
+    else:
+        flash(f"Что-то пошло не так с созданием новой регистрации", 'alert-danger')
+        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
 
 
 @home.route('/registration_edit/<int:reg_id>/', methods=["POST", "GET"])
@@ -232,14 +273,23 @@ def registration_delete(reg_id):
     return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
 
 
-
-
 # генерация отображения формы создания соревнования
 @home.route('/new_comp_ajaxfile', methods=["POST", "GET"])
 def new_comp_ajaxfile():
     if request.method == 'POST':
         form = CompetitionForm()
         return jsonify({'htmlresponse': render_template('response_competition_create.html', form=form)})
+
+
+@home.route('/new_reg_ajaxfile', methods=["POST", "GET"])
+def new_reg_ajaxfile():
+    if request.method == 'POST':
+        competition_id = request.form['competition_id']
+        # reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
+        # print(reg_data)
+        reg_form = RegistrationeditForm()
+        return jsonify(
+            {'htmlresponse': render_template('response_reg_new.html', form=reg_form, competition_id=competition_id)})
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
@@ -258,6 +308,7 @@ def edit_reg_ajaxfile():
         # print(reg_data)
         reg_form = RegistrationeditForm()
         return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data)})
+
 
 @home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
 def competition_view(competition_id):
