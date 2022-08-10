@@ -1,11 +1,8 @@
-<select class="selectpicker">
-      <option>Mustard</option>
-      <option>Ketchup</option>
-      <option>Barbecue</option>
-    </select>
 
 <form method="POST" action="{{ url_for('home.registration_edit', reg_id = reg_data.reg_id) }}">
     {{ form.csrf_token }}
+
+    <h5>{{ reg_data.registration_participant.participant_last_name }} {{ reg_data.registration_participant.participant_first_name }} </h5>
 
     <div class="form-group">
             {{ form.reg_weight.label }}

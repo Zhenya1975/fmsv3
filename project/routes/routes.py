@@ -117,6 +117,28 @@ def competitions():
 @home.route('/comp2/<int:competition_id>/<active_tab_name>')
 def comp2(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
+    form_general_info = CompetitionForm()
+    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
+        ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
+
+    participants_data = ParticipantsDB.query.all()
+    # список id участников уже зарегистрированных
+    regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
+    list_of_participants_ids = []
+    for registration in regs_data:
+        participant_id = registration.participant_id
+        list_of_participants_ids.append(participant_id)
+
+    # print(participants_data)
+    # users = db.session.query(ParticipantsDB).filter(ParticipantsDB.participant_id.notin_(list_of_participants_ids))
+    result = db.session.query(ParticipantsDB).filter(ParticipantsDB.participant_id.notin_(list_of_participants_ids))
+    not_registered_participants = []
+    for row in result:
+        not_registered_participants.append(row.participant_id)
+    participants_data_for_selection = db.session.query(ParticipantsDB).filter(ParticipantsDB.participant_id.in_(not_registered_participants))
+
+
+
     data = {'active_tab_pass': 'competition_general_info'}
     if int(active_tab_name) == 1:
         data = {'active_tab_pass': 'competition_general_info'}
@@ -128,8 +150,18 @@ def comp2(competition_id, active_tab_name):
         print("непонятно что передано вместо номера вкладки")
 
 
-    return render_template('competition_2.html', competition_data=competition_data, data=data)
+    return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
+                           =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection)
 
+# new registration form
+# @home.route('/comp2/<int:competition_id>/registrations/new', methods=["POST", "GET"])
+# def registration_new_2(competition_id):
+#     if request.method == 'POST':
+#         selected_fighter = request.form.get('fighter_pick')
+#         new_registration = RegistrationsDB(participant_id=int(selected_fighter), competition_id=competition_id)
+#         db.session.add(new_registration)
+#         db.session.commit()
+#         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
 # competition page
@@ -261,8 +293,8 @@ def registration_edit(reg_id):
     if form.validate_on_submit():
         reg_data.weight_value = form.reg_weight.data
         db.session.commit()
-        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
-
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 @home.route('/registration_delete/<int:reg_id>/', methods=["POST", "GET"])
 def registration_delete(reg_id):
@@ -287,7 +319,7 @@ def registration_delete(reg_id):
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
 
-    return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
 # генерация отображения формы создания соревнования
@@ -301,12 +333,22 @@ def new_comp_ajaxfile():
 @home.route('/new_reg_ajaxfile', methods=["POST", "GET"])
 def new_reg_ajaxfile():
     if request.method == 'POST':
-        competition_id = request.form['competition_id']
-        # reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
+        competition_id = int(request.form['competition_id'])
+        participant_id = int(request.form['participant_id'])
+        new_reg_data = RegistrationsDB(competition_id=competition_id, participant_id=participant_id)
+        db.session.add(new_reg_data)
+        db.session.commit()
+        new_reg_data = RegistrationsDB.query.filter_by(competition_id=competition_id).order_by(
+            RegistrationsDB.reg_id.desc()).first()
+
+        last_name = new_reg_data.registration_participant.participant_last_name
+        # print("Добавился ", last_name)
+        first_name = new_reg_data.registration_participant.participant_first_name
+        flash(f"Создана новая регистрация {last_name} {first_name}", 'alert-success')
         # print(reg_data)
         reg_form = RegistrationeditForm()
         return jsonify(
-            {'htmlresponse': render_template('response_reg_new.html', form=reg_form, competition_id=competition_id)})
+            {'htmlresponse': render_template('response_reg_edit.html', form=reg_form, competition_id=competition_id, reg_data=new_reg_data)})
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
