@@ -230,10 +230,10 @@
                                 <tr>
                                   <th scope="row">{{ loop.index }}</th>
                                   <td>
-{#                                      <a href="{{url_for('weight_category_edit', id = w_cat.weight_cat_id)}}">#}
-                                      {{ w_cat.weight_category_name }}
-{#                                      </a>#}
-                                      </td>
+                                      <a class="edit_weight_cat" data-id={{ w_cat.weight_cat_id }}>
+                                        {{ w_cat.weight_category_name }}
+                                      </a>
+                                  </td>
                                   <td>{{ w_cat.sort_index }}</td>
                                   <td>{{ w_cat.weight_category_start}}</td>
                                   <td>{{ w_cat.weight_category_finish}}</td>
@@ -335,6 +335,24 @@
         </div>
 
         <div class="modal fade" id="create_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                          <div class="modal-header">
+                                <h5 class="modal-title">Весовая категория</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                          </div>
+
+                          <div class="modal-body">
+
+                          </div>
+
+                    </div>
+              </div>
+        </div>
+
+        <div class="modal fade" id="weight_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
               <div class="modal-dialog" role="document">
                     <div class="modal-content">
                           <div class="modal-header">
@@ -468,6 +486,26 @@
                 }
              });
             });
+
+
+
+
+    $('.edit_weight_cat').click(function(){
+            var weight_cat_id = $(this).data('id');
+
+             $.ajax({
+                 url: '/edit_weight_cat_ajaxfile',
+                 type: 'post',
+                 data: {weight_cat_id:weight_cat_id},
+                 success: function(data){
+
+                    $('.modal-body').html(data);
+                    $('.modal-body').append(data.htmlresponse);
+                    $('#weight_cat_edit_modal').modal('show');
+                }
+             });
+            });
+
 
     $('.edit_reg').click(function(){
             var reg_id = $(this).data('id');

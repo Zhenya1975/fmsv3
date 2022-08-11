@@ -123,7 +123,7 @@ def comp2(competition_id, active_tab_name):
     form_general_info = CompetitionForm()
     regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
         ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
-    w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
+    w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
     participants_data = ParticipantsDB.query.all()
     # список id участников уже зарегистрированных
     regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
@@ -309,6 +309,28 @@ def registration_new(competition_id, participant_id):
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
+
+
+
+@home.route('/weight_category_edit/<int:weight_cat_id>/', methods=["POST", "GET"])
+def weight_category_edit(weight_cat_id):
+    weight_category_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
+    form = WeightCategoriesForm()
+    competition_id = weight_category_data.competition_id
+    if form.validate_on_submit():
+        weight_category_data.weight_category_name = form.weight_category_name_form_field.data
+        weight_category_data.sort_index = form.sort_index_form_field.data
+        weight_category_data.weight_category_start = form.weight_from_form_field.data
+        weight_category_data.weight_category_finish = form.weight_to_form_field.data
+
+
+        db.session.commit()
+        flash(f"Изменения сохранены", 'alert-success')
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
+
+
 @home.route('/registration_edit/<int:reg_id>/', methods=["POST", "GET"])
 def registration_edit(reg_id):
     reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
@@ -372,12 +394,25 @@ def registration_delete(reg_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
+
+
+@home.route('/edit_weight_cat_ajaxfile', methods=["POST", "GET"])
+def edit_weight_cat_ajaxfile():
+    if request.method == 'POST':
+        weight_cat_id = int(request.form['weight_cat_id'])
+        form = WeightCategoriesForm()
+        weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
+        return jsonify({'htmlresponse': render_template('response_edit_weight_category.html',
+                                                        weight_cat_data=weight_cat_data, form=form)})
+
+
 @home.route('/create_weight_category_ajaxfile', methods=["POST", "GET"])
 def create_weight_category_ajaxfile():
     if request.method == 'POST':
         competition_id = int(request.form['competition_id'])
         form = WeightCategoriesForm()
-        return jsonify({'htmlresponse': render_template('response_new_weight_category.html', competition_id=competition_id, form=form)})
+        return jsonify({'htmlresponse': render_template('response_new_weight_category.html',
+                                                        competition_id=competition_id, form=form)})
 
 
 # генерация отображения формы создания соревнования
