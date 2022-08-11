@@ -316,6 +316,7 @@ def registration_edit(reg_id):
     if form.validate_on_submit():
         reg_data.weight_value = form.reg_weight.data
         db.session.commit()
+        flash(f"Изменения сохранены", 'alert-success')
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
@@ -426,6 +427,11 @@ def edit_reg_ajaxfile():
         reg_form = RegistrationeditForm()
         return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data)})
 
+
+# Handler for a message received over 'connect' channel
+@socketio.on('connect')
+def test_connect():
+    emit('after connect', {'data': 'Lets dance'})
 
 # @home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
 # def competition_view(competition_id):

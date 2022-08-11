@@ -4,14 +4,52 @@
 
     <h5>{{ reg_data.registration_participant.participant_last_name }} {{ reg_data.registration_participant.participant_first_name }} </h5>
 
-    <div class="form-group">
-            {{ form.reg_weight.label }}
+
+<!--    <div class="form-group">-->
+<!--            {{ form.reg_weight.label }}-->
+<!--            {{ form.reg_weight (class ='form-control', value = reg_data.weight_value)}}-->
+<!--        <br>-->
+<!--              {% for error in form.reg_weight.errors %}-->
+<!--                <span style="color: red;">[{{ error }}]</span>-->
+<!--              {% endfor %}-->
+<!--        </div>-->
+
+
+    <p>Вес и весовая категория</p>
+    <div class="form-row">
+    <div class="col-3">
+
+<!--      <input type="text" class="form-control" placeholder="Вес, кг">-->
+    <div>
+
             {{ form.reg_weight (class ='form-control', value = reg_data.weight_value)}}
         <br>
               {% for error in form.reg_weight.errors %}
                 <span style="color: red;">[{{ error }}]</span>
               {% endfor %}
         </div>
+
+    </div>
+    <div class="col-9">
+
+      <div class="input-group mb-3">
+<!--      <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">-->
+
+        <select class="form-control" id="weight_category_select3">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+          <option>4</option>
+          <option>5</option>
+        </select>
+
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button">Обновить</button>
+          </div>
+    </div>
+
+    </div>
+  </div>
 
 
 
@@ -21,6 +59,22 @@
     </div>
 
 
-
-
 </form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.min.js"></script>
+<script>
+$(document).ready(function(){
+    console.log('прошло');
+    var socket = io.connect();
+       // Мы получили с сервера сообщение по каналу 'after connect'
+        // Получив по каналу собщение мы отображаем его в консоли.
+        socket.on('after connect', function(msg){
+            console.log('After connect', msg.data);
+        });
+
+});
+</script>
