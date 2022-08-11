@@ -365,7 +365,6 @@ def edit_reg_ajaxfile():
     if request.method == 'POST':
         reg_id = request.form['reg_id']
         reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
-        # print(reg_data)
         reg_form = RegistrationeditForm()
         return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data)})
 

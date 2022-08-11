@@ -1,5 +1,5 @@
 
-<form method="POST" action="{{ url_for('home.registration_create_new', competition_id = competition_id) }}">
+<form method="POST" action="{{ url_for('home.registration_edit', reg_id = reg_data.reg_id) }}">
     {{ form.csrf_token }}
 
     <h5>{{ reg_data.registration_participant.participant_last_name }} {{ reg_data.registration_participant.participant_first_name }} </h5>

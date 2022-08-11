@@ -18,11 +18,8 @@
     <title>{{ competition_data.competition_name }}</title>
 </head>
 <body>
-<div class="container-fluid" style="margin-top: 10px">
-    <div class="row">
-        <div class="col">
 
-            <!-- Это начало Nav Bar-->
+<!-- Это начало Nav Bar-->
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <a class="navbar-brand" href="#">Fights Management System</a>
 
@@ -50,6 +47,11 @@
                 </div>
         </nav>
 <!-- Это конец Nav Bar-->
+
+<!--<div class="container-fluid" style="margin-top: 10px">-->
+<div class="container" style="margin-top: 10px">
+    <div class="row">
+        <div class="col">
 
             {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
@@ -242,6 +244,26 @@
                       </div>
         </div>
 
+        <div class="modal fade" id="registration_edit_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                          <div class="modal-header">
+                                <h5 class="modal-title">Регистрация участника соревнований</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                          </div>
+
+
+
+                          <div class="modal-body">
+
+                          </div>
+
+                    </div>
+              </div>
+        </div>
+
 
 
 
@@ -308,6 +330,22 @@
                     $('.modal-body').html(data);
                     $('.modal-body').append(data.htmlresponse);
                     $('#registration_delete_modal').modal('show');
+                }
+             });
+            });
+
+    $('.edit_reg').click(function(){
+            var reg_id = $(this).data('id');
+
+             $.ajax({
+                 url: '/edit_reg_ajaxfile',
+                 type: 'post',
+                 data: {reg_id:reg_id},
+                 success: function(data){
+
+                    $('.modal-body').html(data);
+                    $('.modal-body').append(data.htmlresponse);
+                    $('#registration_edit_modal').modal('show');
                 }
              });
             });
