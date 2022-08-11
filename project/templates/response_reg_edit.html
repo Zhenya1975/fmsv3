@@ -35,7 +35,7 @@
       <div class="input-group mb-3">
 
 
-          <select class="weight_category_select form-control">
+          <select class="weight_category_select form-control" id="weight_cat_select">
               {% for weight_cat in weight_categories_data %}
                 <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
               {% endfor %}
@@ -69,17 +69,23 @@
 <script>
 $(document).ready(function(){
 
+    var selectedCountry = $('#weight_cat_select').children("option:selected").val();
+    console.log("значение селекта: ", selectedCountry);
+
     $("select.weight_category_select").change(function(){
-        var selectedCountry = $(this).children("option:selected").val();
+        selectedCountry = $(this).children("option:selected").val();
+
         console.log("значение селекта: ", selectedCountry);
         // alert("You have selected the country - " + selectedCountry);
     });
 
+    $('.update_weight_cat').click(function(){
 
-    // $("select").change(function(){
-    //     var selected = $('#weight_category_select3').val();
-    //     console.log("значение селекта: ", selected);
-    // });
+        console.log("значение селекта: ", selectedCountry);
+    });
+
+
+
 
 
     var socket = io.connect();
