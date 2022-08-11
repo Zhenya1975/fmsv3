@@ -82,7 +82,7 @@
                 <div class="tab-content" id="tabs">
                     <div class="tab-pane" id="competition_general_info">
                         <div style="margin-top: 10px"> <!-- div формы общие сведения о соревновании -->
-                            <form method="POST" action="{{ url_for('home.competition_page', competition_id = competition_data.competition_id, active_tab_name = 1) }}">
+                            <form method="POST" action="{{ url_for('home.comp2', competition_id=competition_data.competition_id, active_tab_name=1)}}">
                                 {{ form_general_info.csrf_token }}
                                     <div class="form-group">
                                         {{ form_general_info.competition_name_form.label }}
@@ -202,12 +202,60 @@
 
 
                     </div>
+                    </div>
 
                     <div class="tab-pane" id="competition_settings">
+                        <div style="margin-top: 20px">
+
+                            <h5 class="title">Весовые категории</h5>
+
+<!--                            <a href="{{url_for('home.weight_category_new', competition_id=competition_data.competition_id)}}"><button type="button" class="btn btn-outline-primary">Создать</button></a>-->
+
+                            <p></p>
+
+                            <table class="table">
+                              <thead>
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Наименование</th>
+                                  <th scope="col">Cортировка</th>
+                                  <th scope="col">От</th>
+                                  <th scope="col">До</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                               {% for w_cat in w_categories %}
+                                <tr>
+                                  <th scope="row">{{ loop.index }}</th>
+                                  <td>
+{#                                      <a href="{{url_for('weight_category_edit', id = w_cat.weight_cat_id)}}">#}
+                                      {{ w_cat.weight_category_name }}
+{#                                      </a>#}
+                                      </td>
+                                  <td>{{ w_cat.sort_index }}</td>
+                                  <td>{{ w_cat.weight_category_start}}</td>
+                                  <td>{{ w_cat.weight_category_finish}}</td>
+                                </tr>
+                                <tr>
+                               {% endfor %}
+
+                              </tbody>
+                            </table>
+
+
+                            <h5>Удаление соревнования "{{ competition_data.competition_name }}"</h5>
+                            <p></p>
+                            <p>Удаление соревнования возможно, если нет связанных регистраций</p>
+
+                            <a href="{{url_for('home.competition_delete', competition_id=competition_data.competition_id)}}"><button type="button" class="btn btn-danger">Удалить</button></a>
+
+
+
+                        </div>
                     </div>
 
 
-                </div>
+
 
         <div class="modal fade" id="registration_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                       <div class="modal-dialog" role="document">

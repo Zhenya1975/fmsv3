@@ -14,3 +14,11 @@ class RegistrationeditForm(FlaskForm):
     reg_weight = DecimalField('Вес, кг', validators=[validators.DataRequired()])
 
     submit = SubmitField('Сохранить')
+
+
+class WeightCategoriesForm(FlaskForm):
+    sort_index_form_field = IntegerField('Индекс сортировки', validators=[validators.DataRequired()])
+    weight_category_name_form_field = StringField('Наименование категории', validators=[validators.DataRequired()])
+    weight_from_form_field = IntegerField('Вес От', validators=[validators.DataRequired()])
+    weight_to_form_field = IntegerField('Вес До', validators=[validators.DataRequired()])
+    submit = SubmitField('Сохранить')
