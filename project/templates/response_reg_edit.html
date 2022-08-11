@@ -69,19 +69,19 @@
 <script>
 $(document).ready(function(){
 
-    var selectedCountry = $('#weight_cat_select').children("option:selected").val();
-    console.log("значение селекта: ", selectedCountry);
+    var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
+    console.log("значение селекта: ", selectedweightcategory);
 
     $("select.weight_category_select").change(function(){
-        selectedCountry = $(this).children("option:selected").val();
+        selectedweightcategory = $(this).children("option:selected").val();
 
-        console.log("значение селекта: ", selectedCountry);
+        console.log("значение селекта: ", selectedweightcategory);
         // alert("You have selected the country - " + selectedCountry);
     });
 
     $('.update_weight_cat').click(function(){
 
-        console.log("значение селекта: ", selectedCountry);
+        console.log("значение селекта: ", selectedweightcategory);
     });
 
 
