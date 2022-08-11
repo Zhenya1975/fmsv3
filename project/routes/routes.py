@@ -469,7 +469,9 @@ def edit_reg_ajaxfile():
         reg_id = request.form['reg_id']
         reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
         reg_form = RegistrationeditForm()
-        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data)})
+        competition_id = reg_data.competition_id
+        weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
+        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data)})
 
 
 # Handler for a message received over 'connect' channel

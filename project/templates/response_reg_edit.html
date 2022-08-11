@@ -33,18 +33,18 @@
     <div class="col-9">
 
       <div class="input-group mb-3">
-<!--      <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">-->
 
-        <select class="form-control" id="weight_category_select3">
-          <option>1</option>
-          <option>2</option>
-          <option>3</option>
-          <option>4</option>
-          <option>5</option>
+
+          <select class="weight_category_select form-control">
+              {% for weight_cat in weight_categories_data %}
+                <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
+              {% endfor %}
+
         </select>
 
+
         <div class="input-group-append">
-            <button class="btn btn-outline-secondary" type="button">Обновить</button>
+            <button class="btn btn-outline-secondary update_weight_cat" type="button">Обновить</button>
           </div>
     </div>
 
@@ -68,7 +68,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.min.js"></script>
 <script>
 $(document).ready(function(){
-    console.log('прошло');
+
+    $("select.weight_category_select").change(function(){
+        var selectedCountry = $(this).children("option:selected").val();
+        console.log("значение селекта: ", selectedCountry);
+        // alert("You have selected the country - " + selectedCountry);
+    });
+
+
+    // $("select").change(function(){
+    //     var selected = $('#weight_category_select3').val();
+    //     console.log("значение селекта: ", selected);
+    // });
+
+
     var socket = io.connect();
        // Мы получили с сервера сообщение по каналу 'after connect'
         // Получив по каналу собщение мы отображаем его в консоли.
