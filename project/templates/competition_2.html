@@ -260,7 +260,23 @@
                     </div>
 
 
+        <div class="modal fade" id="weight_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                          <div class="modal-header">
+                                                <h5 class="modal-title">Удаление весовой категории</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                          </div>
 
+                                          <div class="modal-body">
+
+                                          </div>
+
+                                </div>
+                      </div>
+        </div>
 
         <div class="modal fade" id="registration_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                       <div class="modal-dialog" role="document">
@@ -369,6 +385,26 @@
         {#console.log('participant_id ', participant_id)#}
 
     });
+
+
+
+    $('.delete_weight_cat').click(function(){
+        var weight_cat_id = $(this).data('id');
+        // console.log('нажата кнопка удаления', reg_id)
+
+         $.ajax({
+             url: '/delete_weight_cat_ajaxfile',
+             type: 'post',
+             data: {weight_cat_id:weight_cat_id},
+             success: function(data){
+
+                $('.modal-body').html(data);
+                $('.modal-body').append(data.htmlresponse);
+                $('#weight_cat_delete_modal').modal('show');
+            }
+         });
+        });
+
 
     $('.delete_reg').click(function(){
             var reg_id = $(this).data('id');
