@@ -158,11 +158,12 @@ def comp2(competition_id, active_tab_name):
 
 # создание весовой категории
 @home.route('/comp2/<int:competition_id>/weight_cat_new', methods=["POST", "GET"])
-def weight_category_new():
+def weight_category_new(competition_id):
     form = WeightCategoriesForm()
     if form.validate_on_submit():
-        flash('Изменения сохранены')
+        flash('Изменения сохранены', 'alert-success')
         new_weight_category = WeightcategoriesDB(sort_index=form.sort_index_form_field.data,
+                                                 competition_id=competition_id,
                                                  weight_category_name=form.weight_category_name_form_field.data,
                                                  weight_category_start=form.weight_from_form_field.data,
                                                  weight_category_finish=form.weight_to_form_field.data)
@@ -172,8 +173,8 @@ def weight_category_new():
         except Exception as e:
             print(e)
             db.session.rollback()
-        return render_template('newweightcategory.html')
-    return render_template('newweightcategory.html', form=form)
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
 # new registration form
@@ -371,6 +372,14 @@ def registration_delete(reg_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
+@home.route('/create_weight_category_ajaxfile', methods=["POST", "GET"])
+def create_weight_category_ajaxfile():
+    if request.method == 'POST':
+        competition_id = int(request.form['competition_id'])
+        form = WeightCategoriesForm()
+        return jsonify({'htmlresponse': render_template('response_new_weight_category.html', competition_id=competition_id, form=form)})
+
+
 # генерация отображения формы создания соревнования
 @home.route('/new_comp_ajaxfile', methods=["POST", "GET"])
 def new_comp_ajaxfile():
@@ -432,6 +441,7 @@ def edit_reg_ajaxfile():
 @socketio.on('connect')
 def test_connect():
     emit('after connect', {'data': 'Lets dance'})
+
 
 # @home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
 # def competition_view(competition_id):

@@ -210,8 +210,8 @@
 
                             <h5 class="title">Весовые категории</h5>
 
-<!--                            <a href="{{url_for('home.weight_category_new', competition_id=competition_data.competition_id)}}"><button type="button" class="btn btn-outline-primary">Создать</button></a>-->
 
+                            <button type="button" class="btn btn-outline-primary create_weight_category" data-id={{ competition_data.competition_id }}>Создать</button>
                             <p></p>
 
                             <table class="table">
@@ -334,6 +334,24 @@
               </div>
         </div>
 
+        <div class="modal fade" id="create_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                          <div class="modal-header">
+                                <h5 class="modal-title">Весовая категория</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                          </div>
+
+                          <div class="modal-body">
+
+                          </div>
+
+                    </div>
+              </div>
+        </div>
+
 
 
 
@@ -373,6 +391,24 @@
 
 
 
+     $('.create_weight_category').click(function(){
+        var competition_id = $(this).data('id');
+
+         $.ajax({
+             url: '/create_weight_category_ajaxfile',
+             type: 'post',
+             data: {competition_id:competition_id},
+             success: function(data){
+
+                $('.modal-body').html(data);
+                $('.modal-body').append(data.htmlresponse);
+                $('#create_weight_category_modal').modal('show');
+            }
+         });
+        });
+
+
+
     $('.select_new_reg').click(function() {
         var participant_id = parseInt($('#select_reg').val());
         var competition_id = parseInt($(this).data('id'));
@@ -393,7 +429,6 @@
            alert("Выберете спортсмена!");
         }
 
-        {#console.log('participant_id ', participant_id)#}
 
     });
 
