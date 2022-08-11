@@ -188,7 +188,8 @@
                                             </td>
 
                                             <td>
-                                                <button type="button" class="btn btn-light"><span><i class="fa fa-trash-o delete_reg" aria-hidden="true" data-id={{ reg.reg_id }}></i></span></button>
+<!--                                                <button type="button" class="btn btn-light"><span><i class="fa fa-trash-o delete_reg" aria-hidden="true" data-id={{ reg.reg_id }}></i></span></button>-->
+                                                <button type="button" class="btn btn-outline-danger delete_reg" data-id={{ reg.reg_id }}>Удалить</button>
                                             </td>
 
 
@@ -221,6 +222,7 @@
                                   <th scope="col">Cортировка</th>
                                   <th scope="col">От</th>
                                   <th scope="col">До</th>
+                                  <th></th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -235,6 +237,9 @@
                                   <td>{{ w_cat.sort_index }}</td>
                                   <td>{{ w_cat.weight_category_start}}</td>
                                   <td>{{ w_cat.weight_category_finish}}</td>
+                                  <td>
+                                    <button type="button" class="btn btn-outline-danger delete_weight_cat" data-id={{ w_cat.weight_cat_id }}>Удалить</button>
+                                  </td>
                                 </tr>
                                 <tr>
                                {% endfor %}

@@ -239,7 +239,7 @@ def competition_delete(competition_id):
               'alert-danger')
         regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
             asc(ParticipantsDB.participant_last_name)).all()
-        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
     else:
         db.session.delete(competition_data)
         try:
@@ -250,8 +250,7 @@ def competition_delete(competition_id):
             print(e)
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
-    return render_template('competition.html', competition_data=competition_data, data=data,
-                           form_general_info=form_general_info)
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
 @home.route('/competition_start/')
@@ -274,7 +273,7 @@ def competition_create_new():
         competition_id = created_competition_data.competition_id
         regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
             asc(ParticipantsDB.participant_last_name)).all()
-        return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=1))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
 
 
 # registration list
