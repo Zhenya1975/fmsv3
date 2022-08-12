@@ -479,6 +479,17 @@ def edit_reg_ajaxfile():
 def test_connect():
     emit('after connect', {'data': 'Lets dance'})
 
+values = {}
+
+@socketio.on('weight_value_changed')
+def weight_value_changed(received_message):
+    values['weight_new_value'] = received_message['weight_new_value']
+    print(values)
+
+    # emit('update_timer_value', timer_message, broadcast=True)
+
+
+
 
 # @home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
 # def competition_view(competition_id):

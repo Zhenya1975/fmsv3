@@ -19,7 +19,7 @@
     <div class="form-row">
     <div class="col-3">
 
-<!--      <input type="text" class="form-control" placeholder="Вес, кг">-->
+      <input type="text" class="form-control" id="myTextBox" placeholder="Вес, кг">
     <div>
 
             {{ form.reg_weight (class ='form-control', value = reg_data.weight_value)}}
@@ -69,8 +69,18 @@
 <script>
 $(document).ready(function(){
 
+
+
+    var socket = io.connect();
     var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
+
+    var weight_value = $('#reg_weight').val();
+    console.log("значение веса: ", weight_value);
     console.log("значение селекта: ", selectedweightcategory);
+
+
+
+
 
     $("select.weight_category_select").change(function(){
         selectedweightcategory = $(this).children("option:selected").val();
@@ -80,6 +90,11 @@ $(document).ready(function(){
     });
 
     $('.update_weight_cat').click(function(){
+        weight_value = $('#reg_weight').val();
+        console.log("значение в инпуте: ", weight_value)
+        socket.emit('weight_value_changed', {'weight_new_value': weight_value});
+        $(".weight_category_select").val(5);
+        selectedweightcategory = 5;
 
         console.log("значение селекта: ", selectedweightcategory);
     });
@@ -88,7 +103,7 @@ $(document).ready(function(){
 
 
 
-    var socket = io.connect();
+
        // Мы получили с сервера сообщение по каналу 'after connect'
         // Получив по каналу собщение мы отображаем его в консоли.
         socket.on('after connect', function(msg){
