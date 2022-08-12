@@ -5,35 +5,19 @@
     <h5>{{ reg_data.registration_participant.participant_last_name }} {{ reg_data.registration_participant.participant_first_name }} </h5>
 
 
-<!--    <div class="form-group">-->
-<!--            {{ form.reg_weight.label }}-->
-<!--            {{ form.reg_weight (class ='form-control', value = reg_data.weight_value)}}-->
-<!--        <br>-->
-<!--              {% for error in form.reg_weight.errors %}-->
-<!--                <span style="color: red;">[{{ error }}]</span>-->
-<!--              {% endfor %}-->
-<!--        </div>-->
 
 
     <p>Вес и весовая категория</p>
     <div class="form-row">
     <div class="col-3">
 
-      <input type="text" class="form-control" id="myTextBox" placeholder="Вес, кг">
-    <div>
+      <input class="form-control weight_value_at_reg" type="text" id="myTextBox" value="13" placeholder="Вес, кг">
 
-            {{ form.reg_weight (class ='form-control', value = reg_data.weight_value)}}
-        <br>
-              {% for error in form.reg_weight.errors %}
-                <span style="color: red;">[{{ error }}]</span>
-              {% endfor %}
-        </div>
 
     </div>
     <div class="col-9">
 
       <div class="input-group mb-3">
-
 
           <select class="weight_category_select form-control" id="weight_cat_select">
               {% for weight_cat in weight_categories_data %}
@@ -70,33 +54,35 @@
 $(document).ready(function(){
 
 
-
     var socket = io.connect();
     var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
 
-    var weight_value = $('#reg_weight').val();
+    var weight_value = $('#myTextBox').val();
     console.log("значение веса: ", weight_value);
     console.log("значение селекта: ", selectedweightcategory);
 
 
-
+    $("input.weight_value_at_reg").change(function (){
+        console.log('что-то изменилось в инпуте')
+        // var new_weight_value = $(this).val();
+        weight_value = $(this).val();
+        console.log('новая переменная ', weight_value)
+    })
 
 
     $("select.weight_category_select").change(function(){
         selectedweightcategory = $(this).children("option:selected").val();
 
-        console.log("значение селекта: ", selectedweightcategory);
+        console.log("значение селекта после обновления селекта: ", selectedweightcategory);
         // alert("You have selected the country - " + selectedCountry);
     });
 
     $('.update_weight_cat').click(function(){
-        weight_value = $('#reg_weight').val();
+        //weight_value = $('#myTextBox').val();
         console.log("значение в инпуте: ", weight_value)
         socket.emit('weight_value_changed', {'weight_new_value': weight_value});
-        $(".weight_category_select").val(5);
-        selectedweightcategory = 5;
 
-        console.log("значение селекта: ", selectedweightcategory);
+        console.log("значение селекта после нажатия на кнопку: ", selectedweightcategory);
     });
 
 

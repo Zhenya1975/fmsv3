@@ -161,6 +161,7 @@ def comp2(competition_id, active_tab_name):
 def weight_category_new(competition_id):
     form = WeightCategoriesForm()
     if form.validate_on_submit():
+        # print('создание весовой категории валидировалось')
         flash('Изменения сохранены', 'alert-success')
         new_weight_category = WeightcategoriesDB(sort_index=form.sort_index_form_field.data,
                                                  competition_id=competition_id,
@@ -174,7 +175,7 @@ def weight_category_new(competition_id):
             print(e)
             db.session.rollback()
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
 # new registration form
@@ -327,7 +328,7 @@ def weight_category_edit(weight_cat_id):
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
 

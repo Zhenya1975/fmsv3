@@ -10,6 +10,8 @@
   </head>
 
     <h1>Hello Plunker!</h1>
+    <input id="myTextBox" type="text"/>
+
     <button type="button" class="btn btn-primary open_modal" data-id=1 >Создать</button>
 
 <!--    <select class="selectpicker">-->
@@ -80,6 +82,10 @@
 
 <script>
     $(document).ready(function() {
+
+         $("#myTextBox").bind("change paste keyup", function() {
+       console.log($(this).val());
+    });
 
 
         $('#id_label_single').select2({
