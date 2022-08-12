@@ -472,7 +472,7 @@ def edit_reg_ajaxfile():
         reg_form = RegistrationeditForm()
         competition_id = reg_data.competition_id
         weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
-        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data)})
+        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data, competition_id=competition_id)})
 
 
 # Handler for a message received over 'connect' channel
@@ -485,7 +485,29 @@ values = {}
 @socketio.on('weight_value_changed')
 def weight_value_changed(received_message):
     values['weight_new_value'] = received_message['weight_new_value']
-    print(values)
+    values['competition_id'] = received_message['competition_id']
+    new_weight_value = values['weight_new_value']
+    new_weight_value = float(new_weight_value)
+    competition_id = values['competition_id']
+    competition_id = int(competition_id)
+    # надо получить данные с актуальных весовых категория
+
+    # print("new_weight_value: ", new_weight_value, type(new_weight_value), "competition_id: ", competition_id, type(competition_id))
+    weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
+
+    availible_weight_cats_ids = []
+    for weight_category in weight_category_data:
+        availible_weight_cats_ids.append(weight_category.weight_cat_id)
+    default_weight_category_id = availible_weight_cats_ids[0]
+    new_weight_category = WeightcategoriesDB.query.filter_by(weight_cat_id=default_weight_category_id).first().weight_category_name
+    # print("default_weight_category: ",new_weight_category)
+    for weight_category in weight_category_data:
+        weight_category_name = weight_category.weight_category_name
+        weight_category_start = weight_category.weight_category_start
+        weight_category_finish = weight_category.weight_category_finish
+        if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
+            new_weight_category = weight_category_name
+    print(new_weight_category)
 
     # emit('update_timer_value', timer_message, broadcast=True)
 

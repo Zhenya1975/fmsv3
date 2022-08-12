@@ -11,7 +11,7 @@
     <div class="form-row">
     <div class="col-3">
 
-      <input class="form-control weight_value_at_reg" type="text" id="myTextBox" value="13" placeholder="Вес, кг">
+      <input class="form-control weight_value_at_reg" type="number" id="myTextBox" value="13" placeholder="Вес, кг">
 
 
     </div>
@@ -52,37 +52,35 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.min.js"></script>
 <script>
 $(document).ready(function(){
-
+    var competition_id = {{ competition_id }}
 
     var socket = io.connect();
     var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
 
     var weight_value = $('#myTextBox').val();
-    console.log("значение веса: ", weight_value);
-    console.log("значение селекта: ", selectedweightcategory);
-
+    // console.log("значение веса: ", weight_value);
+    // console.log("значение селекта: ", selectedweightcategory);
 
     $("input.weight_value_at_reg").change(function (){
         console.log('что-то изменилось в инпуте')
         // var new_weight_value = $(this).val();
         weight_value = $(this).val();
-        console.log('новая переменная ', weight_value)
+        // console.log('новая переменная ', weight_value)
     })
 
 
     $("select.weight_category_select").change(function(){
         selectedweightcategory = $(this).children("option:selected").val();
-
-        console.log("значение селекта после обновления селекта: ", selectedweightcategory);
+        // console.log("значение селекта после обновления селекта: ", selectedweightcategory);
         // alert("You have selected the country - " + selectedCountry);
     });
 
     $('.update_weight_cat').click(function(){
         //weight_value = $('#myTextBox').val();
         console.log("значение в инпуте: ", weight_value)
-        socket.emit('weight_value_changed', {'weight_new_value': weight_value});
+        socket.emit('weight_value_changed', {'weight_new_value': weight_value, 'competition_id':competition_id});
 
-        console.log("значение селекта после нажатия на кнопку: ", selectedweightcategory);
+        console.log("значение селекта после нажатия на кнопку: ", selectedweightcategory, "competition_id: ", competition_id);
     });
 
 
