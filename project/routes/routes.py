@@ -498,21 +498,24 @@ def weight_value_changed(received_message):
     availible_weight_cats_ids = []
     for weight_category in weight_category_data:
         availible_weight_cats_ids.append(weight_category.weight_cat_id)
-    default_weight_category_id = availible_weight_cats_ids[0]
-    new_weight_category = WeightcategoriesDB.query.filter_by(weight_cat_id=default_weight_category_id).first().weight_category_name
+    weight_category_id = availible_weight_cats_ids[0]
+    weight_category_name = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_category_id).first().weight_category_name
     # print("default_weight_category: ",new_weight_category)
+    updated_weight_cat = {}
     for weight_category in weight_category_data:
+        weight_cat_id = weight_category.weight_cat_id
         weight_category_name = weight_category.weight_category_name
         weight_category_start = weight_category.weight_category_start
         weight_category_finish = weight_category.weight_category_finish
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
-            new_weight_category = weight_category_name
-    print(new_weight_category)
-
+            updated_weight_cat['weight_cat_id']  = weight_cat_id
+            updated_weight_cat['weight_category_name'] = weight_category_name
+    print(updated_weight_cat)
+    weight_cat_id = updated_weight_cat['weight_cat_id']
     # emit('update_timer_value', timer_message, broadcast=True)
+    emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
 
-
-
+# emit('after connect', {'data': 'Lets dance'})
 
 # @home.route('/competition/<int:competition_id>', methods=["POST", "GET"])
 # def competition_view(competition_id):
