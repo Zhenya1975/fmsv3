@@ -1,0 +1,7 @@
+<p>Возрастную категорию можно удалить, если нет связанных регистраций.</p>
+<p>Удалить возрастную категорию?</p>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+    <a href="{{ url_for('home.age_cat_delete', age_cat_id = age_cat_data.age_cat_id) }}"><button type="button" class="btn btn-danger">Удалить</button></a>
+</div>

@@ -10,7 +10,7 @@
 
 
    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <style type="text/css">
+    <style>
      a:hover {
       cursor:pointer;
      }
@@ -143,7 +143,7 @@
 
                                 <p></p>
                             <div>
-                                <button type="button" data-id={{ competition_data.competition_id }} class="btn btn-primary select_new_reg">Выбрать</button>
+                                <button class="btn btn-primary select_new_reg" type="button" data-id={{ competition_data.competition_id }} >Выбрать</button>
                             </div>
 
 {#                            </form>#}
@@ -260,6 +260,7 @@
                                       <th scope="col">Индекс сортировки</th>
                                       <th scope="col">От</th>
                                       <th scope="col">До</th>
+                                      <th></th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -275,6 +276,7 @@
                                       <td>{{ age_cat.sort_index }}</td>
                                       <td>{{ age_cat.age_category_start }}</td>
                                       <td>{{ age_cat.age_category_finish }}</td>
+                                        <td> <button type="button" class="btn btn-outline-danger delete_age_cat" data-id={{ age_cat.age_cat_id }}>Удалить</button> </td>
                                     </tr>
                                     <tr>
                                    {% endfor %}
@@ -334,6 +336,25 @@
                           </div>
                         </div>
 
+                        <div class="modal fade" id="weight_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                    <h5 class="modal-title">Удаление весовой категории</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                              </div>
+
+                              <div class="modal-body">
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+
 
                         <div class="modal fade" id="create_age_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
                           <div class="modal-dialog" role="document">
@@ -354,26 +375,28 @@
                         </div>
 
 
+                        <div class="modal fade" id="age_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                    <h5 class="modal-title">Удаление возрастной категории</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                              </div>
+
+                              <div class="modal-body">
+
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
                     </div>
 
 
-        <div class="modal fade" id="weight_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                      <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                          <div class="modal-header">
-                                                <h5 class="modal-title">Удаление весовой категории</h5>
-                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                    <span aria-hidden="true">&times;</span>
-                                                </button>
-                                          </div>
 
-                                          <div class="modal-body">
-
-                                          </div>
-
-                                </div>
-                      </div>
-        </div>
 
         <div class="modal fade" id="registration_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                       <div class="modal-dialog" role="document">
@@ -441,7 +464,7 @@
         </div>
     </div>
 </div>
-
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
@@ -527,6 +550,26 @@
 
 
     });
+
+
+    $('.delete_age_cat').click(function(){
+        var age_cat_id = $(this).data('id');
+        // console.log('нажата кнопка удаления', reg_id)
+
+         $.ajax({
+             url: '/delete_age_cat_ajaxfile',
+             type: 'post',
+             data: {age_cat_id:age_cat_id},
+             success: function(data){
+
+                $('.modal-body').html(data);
+                $('.modal-body').append(data.htmlresponse);
+                $('#age_cat_delete_modal').modal('show');
+            }
+         });
+        });
+
+
 
 
 

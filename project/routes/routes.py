@@ -381,6 +381,33 @@ def registration_edit(reg_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
+
+@home.route('/age_cat_delete/<int:age_cat_id>/', methods=["POST", "GET"])
+def age_cat_delete(age_cat_id):
+
+    age_cat_data = AgecategoriesDB.query.filter_by(age_cat_id=age_cat_id).first()
+    competition_id = age_cat_data.competition_id
+    regs_data = RegistrationsDB.query.filter_by(age_cat_id=age_cat_id).all()
+    number_of_age_cat_regs = len(list(regs_data))
+
+    if number_of_age_cat_regs > 0:
+        flash(f"Количество связанных регистраций: {number_of_age_cat_regs}. Сначала удалите связанные регистрации.",
+              'alert-danger')
+    else:
+        db.session.delete(age_cat_data)
+        try:
+            db.session.commit()
+            flash(f'Возрастная категория удалена', 'alert-success')
+
+        except Exception as e:
+            print(e)
+            flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
+            db.session.rollback()
+
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
+
+
 @home.route('/weight_cat_delete/<int:weight_cat_id>/', methods=["POST", "GET"])
 def weight_cat_delete(weight_cat_id):
     weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
@@ -492,6 +519,15 @@ def new_reg_ajaxfile():
         return jsonify(
             {'htmlresponse': render_template('response_reg_new.html', form=reg_form, competition_id=competition_id,
                                              participant_data=participant_data)})
+
+@home.route('/delete_age_cat_ajaxfile', methods=["POST", "GET"])
+def delete_age_cat_ajaxfile():
+    if request.method == 'POST':
+        age_cat_id = request.form['age_cat_id']
+        age_cat_data = AgecategoriesDB.query.filter_by(age_cat_id=age_cat_id).first()
+        return jsonify(
+            {'htmlresponse': render_template('response_age_cat_delete.html', age_cat_data=age_cat_data)})
+
 
 
 @home.route('/delete_weight_cat_ajaxfile', methods=["POST", "GET"])
