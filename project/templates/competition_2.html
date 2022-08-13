@@ -268,10 +268,9 @@
                                     <tr>
                                       <th scope="row">{{ loop.index }}</th>
                                       <td>
-{#                                          <a href="{{url_for('age_category_edit', id = age_cat.id)}}">#}
-
-                                          {{ age_cat.age_category_name }}
-{#                                          </a>#}
+                                          <a class="edit_age_cat" data-id={{ age_cat.age_cat_id }}>
+                                            {{ age_cat.age_category_name }}
+                                          </a>
                                       </td>
                                       <td>{{ age_cat.sort_index }}</td>
                                       <td>{{ age_cat.age_category_start }}</td>
@@ -392,6 +391,27 @@
                           </div>
                         </div>
 
+                        <div class="modal fade" id="age_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                    <h5 class="modal-title">Возрастная категория</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                              </div>
+
+                              <div class="modal-body">
+
+                              </div>
+
+                            </div>
+                          </div>
+                        </div>
+
+
+
+
 
                     </div>
 
@@ -450,11 +470,6 @@
                     </div>
               </div>
         </div>
-
-
-
-
-
 
 
 
@@ -608,6 +623,23 @@
              });
             });
 
+
+
+    $('.edit_age_cat').click(function(){
+            var age_cat_id = $(this).data('id');
+
+             $.ajax({
+                 url: '/edit_age_cat_ajaxfile',
+                 type: 'post',
+                 data: {age_cat_id:age_cat_id},
+                 success: function(data){
+
+                    $('.modal-body').html(data);
+                    $('.modal-body').append(data.htmlresponse);
+                    $('#age_cat_edit_modal').modal('show');
+                }
+             });
+            });
 
 
 

@@ -337,6 +337,25 @@ def registration_new(competition_id, participant_id):
 
 
 
+@home.route('/age_category_edit/<int:age_cat_id>/', methods=["POST", "GET"])
+def age_category_edit(age_cat_id):
+    age_category_data = AgecategoriesDB.query.filter_by(age_cat_id=age_cat_id).first()
+    form = AgeCategoriesForm()
+    competition_id = age_category_data.competition_id
+    if form.validate_on_submit():
+        age_category_data.age_category_name = form.age_category_name_form_field.data
+        age_category_data.sort_index = form.age_sort_index_form_field.data
+        age_category_data.age_category_start = form.age_from_form_field.data
+        age_category_data.age_category_finish = form.age_to_form_field.data
+
+
+        db.session.commit()
+        flash(f"Изменения сохранены", 'alert-success')
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    else:
+        flash(f"Форма не валидировалась", 'alert-danger')
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
 
 
 @home.route('/weight_category_edit/<int:weight_cat_id>/', methods=["POST", "GET"])
@@ -456,6 +475,19 @@ def registration_delete(reg_id):
             db.session.rollback()
 
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+
+
+
+@home.route('/edit_age_cat_ajaxfile', methods=["POST", "GET"])
+def edit_age_cat_ajaxfile():
+    if request.method == 'POST':
+        age_cat_id = int(request.form['age_cat_id'])
+        form = AgeCategoriesForm()
+        age_category_data = AgecategoriesDB.query.filter_by(age_cat_id=age_cat_id).first()
+        return jsonify({'htmlresponse': render_template('response_edit_age_category.html',
+                                                        age_category_data=age_category_data, form=form)})
+
+
 
 
 
