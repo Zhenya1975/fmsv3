@@ -26,7 +26,7 @@
     <div class="form-row">
     <div class="col-3">
 
-      <input class="form-control weight_value_at_reg" type="number" id="myTextBox" value="13" placeholder="Вес, кг">
+      <input class="form-control weight_value_at_reg" type="number" id="myTextBox" name="weight_input" value="{{ reg_data.weight_value }}" placeholder="Вес, кг">
 
 
     </div>
@@ -34,7 +34,7 @@
 
       <div class="input-group mb-3">
 
-          <select class="weight_category_select form-control" id="weight_cat_select">
+          <select class="weight_category_select form-control" id="weight_cat_select" name="weight_catagory_selector">
               {% for weight_cat in weight_categories_data %}
                 <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
               {% endfor %}

@@ -336,11 +336,18 @@ def weight_category_edit(weight_cat_id):
 def registration_edit(reg_id):
     reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
     competition_id = reg_data.competition_id
-    form = RegistrationeditForm()
-    if form.validate_on_submit():
-        reg_data.weight_value = form.reg_weight.data
+    # form = RegistrationeditForm()
+    # if form.validate_on_submit():
+    if request.method == 'POST':
+        weight_value_from_form = request.form.get('weight_input')
+        weight_cat_select_id = int(request.form.get('weight_catagory_selector'))
+
+        reg_data.weight_value = weight_value_from_form
+        reg_data.weight_cat_id = weight_cat_select_id
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
+        # print("weight_cat_id с формы: ", weight_cat_id)
+        # print("weight_cat_select_id с формы: ", weight_cat_select_id)
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
