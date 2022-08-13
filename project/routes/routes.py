@@ -622,6 +622,7 @@ def weight_value_changed(received_message):
     weight_category_name = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_category_id).first().weight_category_name
     # print("default_weight_category: ",new_weight_category)
     updated_weight_cat = {}
+
     for weight_category in weight_category_data:
         weight_cat_id = weight_category.weight_cat_id
         weight_category_name = weight_category.weight_category_name
@@ -630,7 +631,8 @@ def weight_value_changed(received_message):
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
             updated_weight_cat['weight_cat_id']  = weight_cat_id
             updated_weight_cat['weight_category_name'] = weight_category_name
-
+        else:
+            updated_weight_cat['weight_cat_id'] = weight_category_id
     weight_cat_id = updated_weight_cat['weight_cat_id']
     # emit('update_timer_value', timer_message, broadcast=True)
     emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
