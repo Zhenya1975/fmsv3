@@ -328,6 +328,9 @@ def weight_category_edit(weight_cat_id):
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    else:
+        flash(f"Форма не валидировалась", 'alert-danger')
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
     # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 

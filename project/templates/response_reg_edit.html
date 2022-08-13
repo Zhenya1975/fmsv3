@@ -75,6 +75,7 @@ $(document).ready(function(){
     var weight_value = $('#myTextBox').val();
     // console.log("значение веса: ", weight_value);
     // console.log("значение селекта: ", selectedweightcategory);
+    $(".weight_category_select").val({{ reg_data.weight_cat_id }})
 
     $("input.weight_value_at_reg").change(function (){
         // console.log('что-то изменилось в инпуте')
