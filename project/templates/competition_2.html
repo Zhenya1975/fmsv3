@@ -21,7 +21,7 @@
 
 <!-- Это начало Nav Bar-->
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <a class="navbar-brand" href="#">Fights Management System</a>
+                <a class="navbar-brand" href="#">Fights Competitions Management System</a>
 
 
 <!--                  <div class="collapse navbar-collapse" id="navbarSupportedContent">-->
@@ -247,6 +247,41 @@
                               </tbody>
                             </table>
 
+                        <hr>
+                        <h3 class="title">Возрастные категории</h3>
+
+                        <button type="button" class="btn btn-outline-primary create_age_category" data-id={{ competition_data.competition_id }}>Создать</button>
+                        <p></p>
+                        <table class="table">
+                                  <thead>
+                                    <tr>
+                                      <th scope="col">#</th>
+                                      <th scope="col">Наименование</th>
+                                      <th scope="col">Индекс сортировки</th>
+                                      <th scope="col">От</th>
+                                      <th scope="col">До</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                   {% for age_cat in a_categories %}
+                                    <tr>
+                                      <th scope="row">{{ loop.index }}</th>
+                                      <td>
+{#                                          <a href="{{url_for('age_category_edit', id = age_cat.id)}}">#}
+
+                                          {{ age_cat.age_category_name }}
+{#                                          </a>#}
+                                      </td>
+                                      <td>{{ age_cat.sort_index }}</td>
+                                      <td>{{ age_cat.age_category_start }}</td>
+                                      <td>{{ age_cat.age_category_finish }}</td>
+                                    </tr>
+                                    <tr>
+                                   {% endfor %}
+
+                                  </tbody>
+                                </table>
+
 
 
                             <p></p>
@@ -260,6 +295,65 @@
 
 
                         </div>
+                        <!-- МОДАЛЫ ВНУТРИ ВКЛАДКИ НАСТРОЙКИ-->
+                        <div class="modal fade" id="create_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                      <div class="modal-header">
+                                            <h5 class="modal-title">Весовая категория</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                      </div>
+
+                                      <div class="modal-body">
+
+                                      </div>
+
+                                </div>
+                          </div>
+                        </div>
+
+
+
+                        <div class="modal fade" id="weight_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                      <div class="modal-header">
+                                            <h5 class="modal-title">Весовая категория</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                      </div>
+
+                                      <div class="modal-body">
+
+                                      </div>
+
+                                </div>
+                          </div>
+                        </div>
+
+
+                        <div class="modal fade" id="create_age_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                      <div class="modal-header">
+                                            <h5 class="modal-title">Возрастная категория</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                      </div>
+
+                                      <div class="modal-body">
+
+                                      </div>
+
+                                </div>
+                          </div>
+                        </div>
+
+
                     </div>
 
 
@@ -334,41 +428,7 @@
               </div>
         </div>
 
-        <div class="modal fade" id="create_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                          <div class="modal-header">
-                                <h5 class="modal-title">Весовая категория</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                          </div>
 
-                          <div class="modal-body">
-
-                          </div>
-
-                    </div>
-              </div>
-        </div>
-
-        <div class="modal fade" id="weight_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                          <div class="modal-header">
-                                <h5 class="modal-title">Весовая категория</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                          </div>
-
-                          <div class="modal-body">
-
-                          </div>
-
-                    </div>
-              </div>
-        </div>
 
 
 
@@ -406,6 +466,24 @@
         function activaTab(tab){
           $('.nav-tabs a[href="#' + tab + '"]').tab('show');
         };
+
+
+
+     $('.create_age_category').click(function(){
+        var competition_id = $(this).data('id');
+
+         $.ajax({
+             url: '/create_age_category_ajaxfile',
+             type: 'post',
+             data: {competition_id:competition_id},
+             success: function(data){
+
+                $('.modal-body').html(data);
+                $('.modal-body').append(data.htmlresponse);
+                $('#create_age_category_modal').modal('show');
+            }
+         });
+        });
 
 
 

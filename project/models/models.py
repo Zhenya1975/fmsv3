@@ -28,6 +28,8 @@ class RegistrationsDB(db.Model):
     participant_id = db.Column(db.Integer, db.ForeignKey('participantsDB.participant_id'))
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'))
+    age_value = db.Column(db.Float)
+    age_cat_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))
     activity_status = db.Column(db.Integer, default=1)
     red_fighter = db.relationship('FightsDB', backref='red_fighter', foreign_keys="[FightsDB.red_fighter_id]")
     blue_fighter = db.relationship('FightsDB', backref='blue_fighter', foreign_keys="[FightsDB.blue_fighter_id]")
@@ -61,3 +63,14 @@ class WeightcategoriesDB(db.Model):
     weight_category_finish = db.Column(db.Integer)
     registration = db.relationship('RegistrationsDB', backref='registration')
 
+
+class AgecategoriesDB(db.Model):
+    """Модель для возрастных категорий"""
+    age_cat_id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
+    sort_index = db.Column(db.Integer)
+    age_category_name = db.Column(db.String)
+    age_category_start = db.Column(db.Integer)
+    age_category_finish = db.Column(db.Integer)
+    registration_age_cat = db.relationship('RegistrationsDB', backref='registration_age_cat')
+    # fights = db.relationship('FightsDB', backref = 'age_category_backref')

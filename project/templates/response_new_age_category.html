@@ -1,0 +1,43 @@
+<form method="POST" action="{{ url_for('home.age_category_new', competition_id=competition_id) }}">
+        {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.age_category_name_form_field.label }}
+                {{ form.age_category_name_form_field (class ='form-control', type="text")}}
+            <br>
+                  {% for error in form.age_category_name_form_field.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                  {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.age_sort_index_form_field.label }}
+                {{ form.age_sort_index_form_field (class ='form-control')}}
+            <br>
+                  {% for error in form.age_sort_index_form_field.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                  {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.age_from_form_field.label }}
+                {{ form.age_from_form_field (class ='form-control')}}
+            <br>
+                  {% for error in form.age_from_form_field.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                  {% endfor %}
+            </div>
+
+            <div class="form-group">
+                {{ form.age_to_form_field.label }}
+                {{ form.age_to_form_field (class ='form-control')}}
+            <br>
+                  {% for error in form.age_to_form_field.errors %}
+                    <span style="color: red;">[{{ error }}]</span>
+                  {% endfor %}
+            </div>
+
+
+             {{ form.submit (class ='btn btn-primary')}}
+
+
+</form>

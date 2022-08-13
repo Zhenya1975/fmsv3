@@ -26,3 +26,10 @@ class WeightCategoriesForm(FlaskForm):
     weight_from_form_field = IntegerField('Вес От', validators=[validators.InputRequired()])
     weight_to_form_field = IntegerField('Вес До', validators=[validators.DataRequired()])
     submit = SubmitField('Сохранить')
+
+class AgeCategoriesForm(FlaskForm):
+    age_sort_index_form_field = IntegerField('Индекс сортировки', validators=[validators.DataRequired()])
+    age_category_name_form_field = StringField('Наименование возрастной категории', validators=[validators.DataRequired()])
+    age_from_form_field = IntegerField('Возраст От', validators=[validators.InputRequired()])
+    age_to_form_field = IntegerField('Возраст До', validators=[validators.DataRequired()])
+    submit = SubmitField('Сохранить')

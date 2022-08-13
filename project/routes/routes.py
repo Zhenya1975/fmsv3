@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
-from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB
-from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm
+from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, AgecategoriesDB
+from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
@@ -13,11 +13,11 @@ home = Blueprint('home', __name__, template_folder='templates')
 socketio = extensions.socketio
 
 
-@socketio.event
-def my_event(message):
-    print(message)
-    emit('my_response',
-         {'data': 'datadata'})
+# @socketio.event
+# def my_event(message):
+#     print(message)
+#     emit('my_response',
+#          {'data': 'datadata'})
 
 
 def fight_create_func(competition_id, round_number, final_status):
@@ -124,6 +124,7 @@ def comp2(competition_id, active_tab_name):
     regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
         ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
     w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
+    a_categories = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(AgecategoriesDB.sort_index).all()
     participants_data = ParticipantsDB.query.all()
     # список id участников уже зарегистрированных
     regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
@@ -153,7 +154,32 @@ def comp2(competition_id, active_tab_name):
 
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
-                           w_categories=w_categories)
+                           w_categories=w_categories, a_categories=a_categories)
+
+
+
+# создание возрастной категории
+@home.route('/comp2/<int:competition_id>/age_cat_new', methods=["POST", "GET"])
+def age_category_new(competition_id):
+    form = AgeCategoriesForm()
+    if form.validate_on_submit():
+        # print('создание весовой категории валидировалось')
+        flash('Изменения сохранены', 'alert-success')
+
+
+        new_age_category = AgecategoriesDB(sort_index=form.age_sort_index_form_field.data,
+                                                 competition_id=competition_id,
+                                                 age_category_name=form.age_category_name_form_field.data,
+                                                 age_category_start=form.age_from_form_field.data,
+                                                 age_category_finish=form.age_to_form_field.data)
+        db.session.add(new_age_category)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
 
 
 # создание весовой категории
@@ -417,6 +443,17 @@ def edit_weight_cat_ajaxfile():
                                                         weight_cat_data=weight_cat_data, form=form)})
 
 
+
+
+@home.route('/create_age_category_ajaxfile', methods=["POST", "GET"])
+def create_age_category_ajaxfile():
+    if request.method == 'POST':
+        competition_id = int(request.form['competition_id'])
+        form = AgeCategoriesForm()
+        return jsonify({'htmlresponse': render_template('response_new_age_category.html',
+                                                        competition_id=competition_id, form=form)})
+
+
 @home.route('/create_weight_category_ajaxfile', methods=["POST", "GET"])
 def create_weight_category_ajaxfile():
     if request.method == 'POST':
@@ -520,7 +557,7 @@ def weight_value_changed(received_message):
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
             updated_weight_cat['weight_cat_id']  = weight_cat_id
             updated_weight_cat['weight_category_name'] = weight_category_name
-    print(updated_weight_cat)
+
     weight_cat_id = updated_weight_cat['weight_cat_id']
     # emit('update_timer_value', timer_message, broadcast=True)
     emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
