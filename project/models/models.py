@@ -10,6 +10,9 @@ class ParticipantsDB(db.Model):
     participant_last_name = db.Column(db.String)
     registration_participant = db.relationship('RegistrationsDB', backref='registration_participant')
     fighter_image = db.Column(db.String)
+    birthday = db.Column(db.Date, default=datetime.utcnow)
+    participant_city = db.Column(db.String)
+    active_status = db.Column(db.Integer)
 
 
 class CompetitionsDB(db.Model):

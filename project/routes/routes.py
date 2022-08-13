@@ -117,6 +117,11 @@ def competitions():
     return render_template('competitions_list.html', competitions_data=competitions_data)
 
 
+@home.route('/participants')
+def participants():
+    participants_data = ParticipantsDB.query.all()
+    return render_template('participants_list.html', participants_data=participants_data)
+
 @home.route('/comp2/<int:competition_id>/<active_tab_name>')
 def comp2(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)

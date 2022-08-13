@@ -19,36 +19,42 @@
 </div>
 
 
-
-
-
+    <p></p>
     <p>Вес и весовая категория</p>
     <div class="form-row">
-    <div class="col-3">
+        <div class="col-3">
 
-      <input class="form-control weight_value_at_reg" type="number" id="myTextBox" name="weight_input" value="{{ reg_data.weight_value }}" placeholder="Вес, кг">
-
-
-    </div>
-    <div class="col-9">
-
-      <div class="input-group mb-3">
-
-          <select class="weight_category_select form-control" id="weight_cat_select" name="weight_catagory_selector">
-              {% for weight_cat in weight_categories_data %}
-                <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
-              {% endfor %}
-
-        </select>
+          <input class="form-control weight_value_at_reg" type="number" id="myTextBox" name="weight_input" value="{{ reg_data.weight_value }}" placeholder="Вес, кг">
 
 
-        <div class="input-group-append">
-            <button class="btn btn-outline-secondary update_weight_cat" type="button">Обновить</button>
-          </div>
-    </div>
+        </div>
+        <div class="col-9">
 
-    </div>
+          <div class="input-group mb-3">
+
+              <select class="weight_category_select form-control" id="weight_cat_select" name="weight_catagory_selector">
+                  {% for weight_cat in weight_categories_data %}
+                    <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
+                  {% endfor %}
+
+            </select>
+
+
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary update_weight_cat" type="button">Обновить</button>
+              </div>
+        </div>
+
+        </div>
   </div>
+    <hr>
+    <div class="row">
+        <p>Дата рождения: </p>
+        <div class="col-3">
+
+
+        </div>
+    </div>
 
 
 
