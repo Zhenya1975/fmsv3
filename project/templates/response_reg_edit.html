@@ -57,7 +57,7 @@
                         <input type="date" class="form-control competition_date" id="comp_date" name="comp_data_input" value="{{ reg_data.registration_comp.competition_date_start }}">
                     </div>
             </div>
-            <p>Полных лет: 13</p>
+            <p>Полных лет: {{ age_eyars }}</p>
 
             <div class="form-row">
                     <div class="col-3">
@@ -118,7 +118,9 @@ $(document).ready(function(){
     // console.log("значение веса: ", weight_value);
     // console.log("значение селекта: ", selectedweightcategory);
     $(".weight_category_select").val({{ reg_data.weight_cat_id }})
+    $(".age_category_select").val({{ reg_data.age_cat_id }})
 
+    var participant_id = {{ reg_data.registration_participant.participant_id }}
     // Значение из селекта возрастной категории
     var selectedagecategory = $('#age_cat_select').children("option:selected").val();
 
@@ -127,6 +129,12 @@ $(document).ready(function(){
 
     // при загрузке страницы получаем с сервера значения полных лет на дату соревнования
 
+    $("input.competition_date").change(function (){
+        // console.log('что-то изменилось в инпуте')
+        // var new_weight_value = $(this).val();
+        competition_date_value = $(this).val();
+        // console.log('новая переменная ', competition_date_value)
+    })
 
     $("input.weight_value_at_reg").change(function (){
         // console.log('что-то изменилось в инпуте')
@@ -135,12 +143,26 @@ $(document).ready(function(){
         // console.log('новая переменная ', weight_value)
     })
 
+    $("select.age_category_select").change(function(){
+        selectedagecategory = $(this).children("option:selected").val();
+        // console.log("значение селекта после обновления селекта: ", selectedagecategory);
+    });
 
     $("select.weight_category_select").change(function(){
         selectedweightcategory = $(this).children("option:selected").val();
         // console.log("значение селекта после обновления селекта: ", selectedweightcategory);
         // alert("You have selected the country - " + selectedCountry);
     });
+
+
+    $('.update_age_cat').click(function(){
+        //weight_value = $('#myTextBox').val();
+        // console.log("значение в инпуте: ", weight_value)
+
+        socket.emit('age_value_changed', {'competition_date_value': competition_date_value, 'competition_id':competition_id, 'participant_id':participant_id});
+
+    });
+
 
     $('.update_weight_cat').click(function(){
         //weight_value = $('#myTextBox').val();
@@ -160,6 +182,13 @@ $(document).ready(function(){
         socket.on('after connect', function(msg){
             console.log('After connect', msg.data);
         });
+
+        socket.on('update_age_category_select_value', function (msg){
+            var select_updated_id = parseInt(msg.age_cat_id)
+            // console.log('id селекта возрастной категории ', select_updated_id)
+            $(".age_category_select").val(select_updated_id)
+        })
+
 
         socket.on('update_weight_category_select_value', function (msg){
             var select_updated_id = parseInt(msg.data)

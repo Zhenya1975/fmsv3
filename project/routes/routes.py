@@ -4,7 +4,7 @@ from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesF
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
-import datetime
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import math
 
@@ -605,11 +605,8 @@ def edit_reg_ajaxfile():
         date_diff = (competition_date - birthday_date).total_seconds()
         age_years_float = date_diff/(60*60*24*365.25)
         age_eyars = math.floor(age_years_float)
-        print(age_eyars, type(age_eyars))
 
-
-
-        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data, age_catagories_data=age_catagories_data, competition_id=competition_id)})
+        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data, age_catagories_data=age_catagories_data, competition_id=competition_id, age_eyars=age_eyars)})
 
 
 # Handler for a message received over 'connect' channel
@@ -618,6 +615,52 @@ def test_connect():
     emit('after connect', {'data': 'Lets dance'})
 
 values = {}
+
+
+@socketio.on('age_value_changed')
+def age_value_changed(received_message):
+    values['competition_date_value'] = received_message['competition_date_value']
+    values['competition_id'] = received_message['competition_id']
+    values['participant_id'] = received_message['participant_id']
+    participant_id = values['participant_id']
+    competition_date_value = values['competition_date_value']
+    competition_id = values['competition_id']
+    competition_id = int(competition_id)
+    competition_date_value = datetime.strptime(competition_date_value, '%Y-%m-%d').date()
+    participant_data = ParticipantsDB.query.get(participant_id)
+    birthday_date = participant_data.birthday
+    date_diff = (competition_date_value - birthday_date).total_seconds()
+    age_years_float = date_diff / (60 * 60 * 24 * 365.25)
+    age_eyars = math.floor(age_years_float)
+
+    age_category_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).all()
+
+    availible_age_cats_ids = []
+    for age_category in age_category_data:
+        availible_age_cats_ids.append(age_category.age_cat_id)
+    age_category_id = availible_age_cats_ids[0]
+    weight_category_name = AgecategoriesDB.query.filter_by(age_cat_id=age_category_id).first().age_category_name
+
+    updated_age_cat = {}
+
+    for age_category in age_category_data:
+        age_cat_id = age_category.age_cat_id
+        age_category_name = age_category.age_category_name
+        age_category_start = age_category.age_category_start
+        age_category_finish = age_category.age_category_finish
+        if age_eyars >= age_category_start and age_eyars < age_category_finish:
+            updated_age_cat['age_cat_id']  = age_cat_id
+            updated_age_cat['age_category_name'] = age_category_name
+        else:
+            updated_age_cat['age_cat_id'] = age_category_id
+    age_cat_id = updated_age_cat['age_cat_id']
+
+    emit('update_age_category_select_value', {'age_cat_id': age_cat_id}, broadcast=True)
+
+
+
+
+
 
 @socketio.on('weight_value_changed')
 def weight_value_changed(received_message):
