@@ -26,11 +26,10 @@
 
           <input class="form-control weight_value_at_reg" type="number" id="myTextBox" name="weight_input" value="{{ reg_data.weight_value }}" placeholder="Вес, кг">
 
-
         </div>
         <div class="col-9">
 
-          <div class="input-group mb-3">
+          <div class="input-group">
 
               <select class="weight_category_select form-control" id="weight_cat_select" name="weight_catagory_selector">
                   {% for weight_cat in weight_categories_data %}
@@ -49,6 +48,45 @@
   </div>
     <hr>
     <h5>Возраст и возрастная категория</h5>
+    <div class="form-row">
+        <div class="col">
+            <p>Дата рождения: {{ reg_data.registration_participant.birthday.strftime('%d.%m.%Y') }}</p>
+            <div class="form-group row required">
+                    <label for="comp_date" class="col-sm-5 col-form-label">Дата соревнования:</label>
+                    <div class="col-sm-7">
+                        <input type="date" class="form-control competition_date" id="comp_date" name="comp_data_input" value="{{ reg_data.registration_comp.competition_date_start }}">
+                    </div>
+            </div>
+            <p>Полных лет: 13</p>
+
+            <div class="form-row">
+                    <div class="col-3">
+                      <p>Возрастная категория</p>
+                    </div>
+                    <div class="col-9">
+
+                      <div class="input-group">
+
+                          <select class="age_category_select form-control" id="age_cat_select" name="age_catagory_selector">
+                              <option>1</option>
+                              <option>2</option>
+
+                        </select>
+
+
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary update_age_cat" type="button">Обновить</button>
+                          </div>
+                    </div>
+
+                    </div>
+              </div>
+
+
+
+
+        </div>
+    </div>
 
 
 
