@@ -57,7 +57,13 @@
                         <input type="date" class="form-control competition_date" id="comp_date" name="comp_data_input" value="{{ reg_data.registration_comp.competition_date_start }}">
                     </div>
             </div>
-            <p>Полных лет: {{ age_eyars }}</p>
+            <div class="form-group row required">
+                    <label for="age_input" class="col-sm-5 col-form-label">Полных лет: </label>
+                    <div class="col-sm-7">
+                        <input type="text" class="form-control-plaintext age_input" id="age_input" name="age_input" value="{{ age_eyars }}">
+                    </div>
+            </div>
+{#            <p>Полных лет: {{ age_eyars }}</p>#}
 
             <div class="form-row">
                     <div class="col-3">
@@ -186,14 +192,20 @@ $(document).ready(function(){
         socket.on('update_age_category_select_value', function (msg){
             var select_updated_id = parseInt(msg.age_cat_id)
             // console.log('id селекта возрастной категории ', select_updated_id)
+            var age_years = parseInt(msg.age_years)
             $(".age_category_select").val(select_updated_id)
+            $(".age_input").val(age_years)
+
+
         })
 
 
         socket.on('update_weight_category_select_value', function (msg){
             var select_updated_id = parseInt(msg.data)
+            var age_eyars = parseInt(msg.age_eyars)
             // console.log(msg.data)
             $(".weight_category_select").val(select_updated_id)
+
 
                 // document.getElementById('timer_slave').innerHTML = timer_display(msg.timer_sent)
             })

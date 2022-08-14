@@ -631,7 +631,7 @@ def age_value_changed(received_message):
     birthday_date = participant_data.birthday
     date_diff = (competition_date_value - birthday_date).total_seconds()
     age_years_float = date_diff / (60 * 60 * 24 * 365.25)
-    age_eyars = math.floor(age_years_float)
+    age_years = math.floor(age_years_float)
 
     age_category_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).all()
 
@@ -648,14 +648,14 @@ def age_value_changed(received_message):
         age_category_name = age_category.age_category_name
         age_category_start = age_category.age_category_start
         age_category_finish = age_category.age_category_finish
-        if age_eyars >= age_category_start and age_eyars < age_category_finish:
+        if age_years >= age_category_start and age_years < age_category_finish:
             updated_age_cat['age_cat_id']  = age_cat_id
             updated_age_cat['age_category_name'] = age_category_name
         else:
             updated_age_cat['age_cat_id'] = age_category_id
     age_cat_id = updated_age_cat['age_cat_id']
 
-    emit('update_age_category_select_value', {'age_cat_id': age_cat_id}, broadcast=True)
+    emit('update_age_category_select_value', {'age_cat_id': age_cat_id, 'age_years':age_years}, broadcast=True)
 
 
 
