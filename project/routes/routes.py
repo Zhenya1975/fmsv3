@@ -4,6 +4,9 @@ from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesF
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
+import datetime
+from dateutil.relativedelta import relativedelta
+import math
 
 db = extensions.db
 # db.create_all()
@@ -592,7 +595,21 @@ def edit_reg_ajaxfile():
         reg_form = RegistrationeditForm()
         competition_id = reg_data.competition_id
         weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
-        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data, competition_id=competition_id)})
+        age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(AgecategoriesDB.sort_index).all()
+
+        # считаем количество полных лет на дату соревнования
+        # дата соревнования
+        competition_date = reg_data.registration_comp.competition_date_start
+        # дата рождения бойца
+        birthday_date = reg_data.registration_participant.birthday
+        date_diff = (competition_date - birthday_date).total_seconds()
+        age_years_float = date_diff/(60*60*24*365.25)
+        age_eyars = math.floor(age_years_float)
+        print(age_eyars, type(age_eyars))
+
+
+
+        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data, age_catagories_data=age_catagories_data, competition_id=competition_id)})
 
 
 # Handler for a message received over 'connect' channel

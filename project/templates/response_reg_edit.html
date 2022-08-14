@@ -68,8 +68,11 @@
                       <div class="input-group">
 
                           <select class="age_category_select form-control" id="age_cat_select" name="age_catagory_selector">
-                              <option>1</option>
-                              <option>2</option>
+
+                              {% for age_cat in age_catagories_data %}
+                                <option value={{ age_cat.age_cat_id }}>{{ age_cat.age_category_name }}</option>
+                              {% endfor %}
+
 
                         </select>
 
@@ -115,6 +118,15 @@ $(document).ready(function(){
     // console.log("значение веса: ", weight_value);
     // console.log("значение селекта: ", selectedweightcategory);
     $(".weight_category_select").val({{ reg_data.weight_cat_id }})
+
+    // Значение из селекта возрастной категории
+    var selectedagecategory = $('#age_cat_select').children("option:selected").val();
+
+    // Значение даты соревнования
+    var competition_date_value = $('#comp_date').val();
+
+    // при загрузке страницы получаем с сервера значения полных лет на дату соревнования
+
 
     $("input.weight_value_at_reg").change(function (){
         // console.log('что-то изменилось в инпуте')
