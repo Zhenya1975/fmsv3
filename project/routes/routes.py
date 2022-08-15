@@ -125,6 +125,24 @@ def participants():
     participants_data = ParticipantsDB.query.all()
     return render_template('participants_list.html', participants_data=participants_data)
 
+
+
+@home.route('/participant/<int:participant_id>/<active_tab_name>')
+def participant(participant_id, active_tab_name):
+
+  data = {'active_tab_pass': 'participant_general_info'}
+  if int(active_tab_name) == 1:
+      data = {'active_tab_pass': 'participant_general_info'}
+  elif int(active_tab_name) == 2:
+      data = {'active_tab_pass': 'participant_history_tab'}
+
+  else:
+      print("непонятно что передано вместо номера вкладки")
+  participant_data = ParticipantsDB.query.get(participant_id)
+  
+  return render_template('participant.html', participant_data=participant_data, data=data)
+
+
 @home.route('/comp2/<int:competition_id>/<active_tab_name>')
 def comp2(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
@@ -133,7 +151,7 @@ def comp2(competition_id, active_tab_name):
         ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
     w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
     a_categories = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(AgecategoriesDB.sort_index).all()
-    participants_data = ParticipantsDB.query.all()
+    
     # список id участников уже зарегистрированных
     regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
     list_of_participants_ids = []

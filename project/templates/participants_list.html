@@ -53,9 +53,9 @@
                 <tr>
 {#                    <td>{{ loop.index }}</td>#}
                     <td>
-{#                        <a href="{{url_for('home.comp2', competition_id=competition_row.competition_id, active_tab_name=1)}}">#}
+                        <a href="{{url_for('home.participant', participant_id = participant.participant_id, active_tab_name=1)}}">
                               {{ participant.participant_last_name }} {{ participant.participant_first_name }}
-{#                        </a>#}
+                        </a>
                     </td>
                     <td>{{ participant.birthday.strftime('%d.%m.%Y')}}</td>
                     <td></td>
