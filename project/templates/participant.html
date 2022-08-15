@@ -80,7 +80,7 @@
                 <div class="tab-pane" id="participant_general_info">
                     <div style="margin-top: 10px">    
 
-                      <form method="POST" action="{{ url_for('home.participant', participant_id = participant_data.participant_id, active_tab_name=1)}}">
+                      <form method="POST" action="{{ url_for('home.participant_general_info_edit', participant_id = participant_data.participant_id, active_tab_name=1)}}">
                                 {{ participant_form.csrf_token }}
                                     <div class="row" style="margin-bottom: 20px; margin-top: 30px;">  <!-- ряд, в котором будут лежать фотка и поля формы --> 
                                      

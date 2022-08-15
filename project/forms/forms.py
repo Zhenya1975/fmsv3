@@ -39,4 +39,5 @@ class ParticipantForm(FlaskForm):
    participant_last_name_form = StringField('Фамилия', validators=[validators.DataRequired()]) 
    birthday_form = DateField('Дата рождения', format = '%Y-%m-%d',validators=[validators.DataRequired()]) 
    avatar_google_code = StringField('Код ссылки для аватарки') 
+   participant_city = StringField('Город') 
    submit = SubmitField('Сохранить')

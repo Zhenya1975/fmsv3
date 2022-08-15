@@ -145,6 +145,26 @@ def participant(participant_id, active_tab_name):
   return render_template('participant.html', participant_data=participant_data, data=data, participant_form=participant_form)
 
 
+
+@home.route('/participant_general_info_edit/<int:participant_id>/', methods=["POST", "GET"])
+def participant_general_info_edit(participant_id):
+  participant_data = ParticipantsDB.query.get(participant_id)
+  participant_general_info_form = ParticipantForm()
+  if participant_general_info_form.validate_on_submit():
+    flash('Изменения сохранены', 'alert-success')
+    participant_data.participant_first_name = participant_general_info_form.participant_name_form.data
+    participant_data.participant_last_name = participant_general_info_form.participant_last_name_form.data
+    participant_data.fighter_image = participant_general_info_form.avatar_google_code.data
+    participant_data.birthday = participant_general_info_form.birthday_form.data
+    participant_data.participant_city = participant_general_info_form.participant_city.data
+    db.session.commit()
+    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+  else:
+    flash('Форма не валидировалась', 'alert-danger')
+    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+
+    
+
 @home.route('/edit_comp_general/<int:competition_id>/', methods=["POST", "GET"])
 def edit_comp_general(competition_id):
   competition_data=CompetitionsDB.query.get(competition_id)
@@ -161,6 +181,7 @@ def edit_comp_general(competition_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
   else:
     flash('Форма не валидировалась', 'alert-danger')
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
     
 
 
