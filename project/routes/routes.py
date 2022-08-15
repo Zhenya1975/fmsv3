@@ -459,9 +459,15 @@ def registration_edit(reg_id):
     if request.method == 'POST':
         weight_value_from_form = request.form.get('weight_input')
         weight_cat_select_id = int(request.form.get('weight_catagory_selector'))
-
+        age_value = int(request.form.get('age_input'))
+        age_cat_id = int(request.form.get('age_catagory_selector'))
+      
         reg_data.weight_value = weight_value_from_form
         reg_data.weight_cat_id = weight_cat_select_id
+        reg_data.age_value = age_value
+        reg_data.age_cat_id = age_cat_id
+      
+      
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
         # print("weight_cat_id с формы: ", weight_cat_id)
@@ -750,11 +756,14 @@ def weight_value_changed(received_message):
         weight_category_name = weight_category.weight_category_name
         weight_category_start = weight_category.weight_category_start
         weight_category_finish = weight_category.weight_category_finish
+        print("new_weight_value: ", new_weight_value, "weight_category_start: ", weight_category_start, "weight_category_finish: ", weight_category_finish)
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
-            updated_weight_cat['weight_cat_id']  = weight_cat_id
-            updated_weight_cat['weight_category_name'] = weight_category_name
+          updated_weight_cat['weight_cat_id']  = weight_cat_id
+          updated_weight_cat['weight_category_name'] = weight_category_name
+          
         else:
-            updated_weight_cat['weight_cat_id'] = weight_category_id
+  
+          updated_weight_cat['weight_cat_id'] = weight_category_id
     weight_cat_id = updated_weight_cat['weight_cat_id']
     # emit('update_timer_value', timer_message, broadcast=True)
     emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
