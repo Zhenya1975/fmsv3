@@ -382,6 +382,30 @@ def registration_list(competition_id):
     return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
 
 
+@home.route('/participant_new', methods=["POST", "GET"])
+def participant_new():
+  if request.method == 'POST':
+    
+    new_participant = ParticipantsDB(
+      participant_first_name = request.form['first_name'],
+      participant_last_name = request.form['last_name']
+    )
+    
+    db.session.add(new_participant)
+    db.session.commit()
+
+    new_participant_data = ParticipantsDB.query.order_by(ParticipantsDB.participant_id.desc()).first()
+    print(new_participant_data)
+    participant_id = new_participant_data.participant_id
+    
+
+    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+  else:
+    flash(f"Что-то пошло не так с созданием нового спортсмена", 'alert-danger')
+    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+
+
+
 @home.route('/registration_new/<int:competition_id>/<int:participant_id>', methods=["POST", "GET"])
 def registration_new(competition_id, participant_id):
     form = RegistrationeditForm()
@@ -604,6 +628,14 @@ def new_comp_ajaxfile():
     if request.method == 'POST':
         form = CompetitionForm()
         return jsonify({'htmlresponse': render_template('response_competition_create.html', form=form)})
+
+
+@home.route('/new_participant_ajaxfile', methods=["POST", "GET"])
+def new_participant_ajaxfile():
+    if request.method == 'POST':
+        
+        return jsonify({'htmlresponse': render_template('response_participant_create.html')})
+
 
 
 @home.route('/new_reg_ajaxfile', methods=["POST", "GET"])
