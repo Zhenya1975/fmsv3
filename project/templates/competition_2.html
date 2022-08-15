@@ -85,7 +85,7 @@
                 <div class="tab-content" id="tabs">
                     <div class="tab-pane" id="competition_general_info">
                         <div style="margin-top: 10px"> <!-- div формы общие сведения о соревновании -->
-                            <form method="POST" action="{{ url_for('home.comp2', competition_id=competition_data.competition_id, active_tab_name=1)}}">
+                            <form method="POST" action="{{ url_for('home.edit_comp_general', competition_id=competition_data.competition_id)}}">
                                 {{ form_general_info.csrf_token }}
                                     <div class="form-group">
                                         {{ form_general_info.competition_name_form.label }}

@@ -4,4 +4,5 @@
 #flask db init
 #flask db migrate -m 'init'
 #flask db upgrade
+# cd project
 gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 --reload -b 0.0.0.0:8050 app:app

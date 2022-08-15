@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, AgecategoriesDB
-from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm
+from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
@@ -139,8 +139,31 @@ def participant(participant_id, active_tab_name):
   else:
       print("непонятно что передано вместо номера вкладки")
   participant_data = ParticipantsDB.query.get(participant_id)
+
+  participant_form = ParticipantForm()
   
-  return render_template('participant.html', participant_data=participant_data, data=data)
+  return render_template('participant.html', participant_data=participant_data, data=data, participant_form=participant_form)
+
+
+@home.route('/edit_comp_general/<int:competition_id>/', methods=["POST", "GET"])
+def edit_comp_general(competition_id):
+  competition_data=CompetitionsDB.query.get(competition_id)
+  form = CompetitionForm()
+  if form.validate_on_submit():
+    flash('Изменения сохранены', 'alert-success')
+    competition_data.competition_name = form.competition_name_form.data
+    competition_data.competition_date_start = form.competition_date_start.data
+    competition_data.competition_date_finish = form.competition_date_finish.data
+    competition_data.competition_city = form.competition_city.data
+  
+
+    db.session.commit()
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
+  else:
+    flash('Форма не валидировалась', 'alert-danger')
+    
+
+
 
 
 @home.route('/comp2/<int:competition_id>/<active_tab_name>')
