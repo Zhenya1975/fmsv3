@@ -166,7 +166,7 @@ def participant_general_info_edit(participant_id):
     participant_data.birthday = participant_general_info_form.birthday_form.data
     participant_data.participant_city = participant_general_info_form.participant_city.data
     participant_data.active_status = participant_general_info_form.active_status.data
-    print("статус: ", participant_general_info_form.active_status.data)
+    
     db.session.commit()
     return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
   else:
@@ -783,13 +783,14 @@ def age_value_changed(received_message):
         age_category_start = age_category.age_category_start
         age_category_finish = age_category.age_category_finish
         if age_years >= age_category_start and age_years < age_category_finish:
-            updated_age_cat['age_cat_id']  = age_cat_id
-            updated_age_cat['age_category_name'] = age_category_name
-        else:
-            updated_age_cat['age_cat_id'] = age_category_id
-    age_cat_id = updated_age_cat['age_cat_id']
+          updated_age_cat['age_cat_id']  = age_cat_id
+          updated_age_cat['age_category_name'] = age_category_name
+          emit('update_age_category_select_value', {'age_cat_id': age_cat_id, 'age_years':age_years}, broadcast=True)
+    #     else:
+    #         updated_age_cat['age_cat_id'] = age_category_id
+    # age_cat_id = updated_age_cat['age_cat_id']
 
-    emit('update_age_category_select_value', {'age_cat_id': age_cat_id, 'age_years':age_years}, broadcast=True)
+    
 
 
 
@@ -822,17 +823,18 @@ def weight_value_changed(received_message):
         weight_category_name = weight_category.weight_category_name
         weight_category_start = weight_category.weight_category_start
         weight_category_finish = weight_category.weight_category_finish
-        print("new_weight_value: ", new_weight_value, "weight_category_start: ", weight_category_start, "weight_category_finish: ", weight_category_finish)
+        # print("new_weight_value: ", new_weight_value, "weight_category_start: ", weight_category_start, "weight_category_finish: ", weight_category_finish)
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
+          print('weight_cat_id: ', weight_cat_id)
           updated_weight_cat['weight_cat_id']  = weight_cat_id
           updated_weight_cat['weight_category_name'] = weight_category_name
-          
-        else:
+          emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
+    #     else:
   
-          updated_weight_cat['weight_cat_id'] = weight_category_id
-    weight_cat_id = updated_weight_cat['weight_cat_id']
+    #       updated_weight_cat['weight_cat_id'] = weight_category_id
+    # weight_cat_id = updated_weight_cat['weight_cat_id']
     # emit('update_timer_value', timer_message, broadcast=True)
-    emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
+    
 
 # emit('after connect', {'data': 'Lets dance'})
 
