@@ -144,8 +144,13 @@ def participant(participant_id, active_tab_name):
   participant_data = ParticipantsDB.query.get(participant_id)
 
   participant_form = ParticipantForm()
+  active_status = participant_data.active_status
+  if active_status == True:
+    active_status = 1
+  else:
+    active_status = 0
   
-  return render_template('participant.html', participant_data=participant_data, data=data, participant_form=participant_form)
+  return render_template('participant.html', participant_data=participant_data, data=data, participant_form=participant_form, active_status=active_status)
 
 
 

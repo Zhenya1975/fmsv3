@@ -135,8 +135,8 @@
 
 
                                             <p></p>
-                                           <div class="form-check">
-                                                   {{ participant_form.active_status(value=participant_data.active_status) }}
+                                           <div class="form-check" id="activecheck" data-id={{ participant_data.active_status }}>
+                                                   {{ participant_form.active_status }}
                                                     {{ participant_form.active_status.label }}
                                            </div>
 
@@ -211,7 +211,15 @@
     $(document).ready(function(){
       var socket = io.connect();
       var active_tab = data_dict['active_tab_pass'];
-      console.log("Загрузилось")
+      var activestatus = {{active_status}}
+      // console.log("activestatus: ", activestatus)
+      if (activestatus==0){
+        $('#active_status').prop('checked', false);
+      }
+      else {
+        $('#active_status').prop('checked', true);
+      }
+
       activaTab(active_tab);
         console.log('active_tab: ', active_tab)
         function activaTab(tab){
