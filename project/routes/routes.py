@@ -385,17 +385,19 @@ def registration_list(competition_id):
 @home.route('/participant_new', methods=["POST", "GET"])
 def participant_new():
   if request.method == 'POST':
+    participant_first_name = request.form.get('first_name')
+    participant_last_name = request.form.get('last_name')
     
-    new_participant = ParticipantsDB(
-      participant_first_name = request.form['first_name'],
-      participant_last_name = request.form['last_name']
-    )
+    new_participant = ParticipantsDB(participant_first_name=participant_first_name, participant_last_name=participant_last_name)
     
     db.session.add(new_participant)
-    db.session.commit()
+    try:
+      db.session.commit()
+    except Exception as e:
+      print("Исключение: ", e)
 
     new_participant_data = ParticipantsDB.query.order_by(ParticipantsDB.participant_id.desc()).first()
-    print(new_participant_data)
+    # print(new_participant_data)
     participant_id = new_participant_data.participant_id
     
 
