@@ -86,7 +86,13 @@
                                              </div> 
                                              <div class="form-group"> 
                                                  {{ participant_form.birthday_form.label }} 
-                                                 {{ participant_form.birthday_form (class ='form-control', type="date", value = participant_data.birthday)}} 
+                                               {% if participant_data.birthday is none %}   
+                                                      {{ participant_form.birthday_form (class ='form-control', type="date")}} 
+                                                  {% else %}
+                                                      {{ participant_form.birthday_form (class ='form-control', type="date", value = participant_data.birthday)}} 
+                                                  {%endif %}
+                                                                                              
+                                               
                                              <br> 
                                                    {% for error in participant_form.birthday_form.errors %} 
                                                      <span style="color: red;">[{{ error }}]</span> 
@@ -94,7 +100,17 @@
                                              </div> 
                                              <div class="form-group"> 
                                                  {{ participant_form.avatar_google_code.label }} 
-                                                 {{ participant_form.avatar_google_code (class ='form-control', value = participant_data.fighter_image)}} 
+
+                                               {% if participant_data.fighter_image is none %}   
+                                                      {{ participant_form.avatar_google_code (class ='form-control')}} 
+                                                  {% else %}
+                                                      {{ participant_form.avatar_google_code (class ='form-control', value = participant_data.fighter_image)}} 
+                                                  {%endif %}
+
+
+                                               
+                                               
+                                               
                                              <br> 
                                                    {% for error in participant_form.avatar_google_code.errors %} 
                                                      <span style="color: red;">[{{ error }}]</span> 
