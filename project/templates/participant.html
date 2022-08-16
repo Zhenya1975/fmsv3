@@ -54,6 +54,7 @@
           <ul class="nav nav-tabs">
                     <li class="nav-item"><a class="nav-link" href="#participant_general_info" data-toggle="tab">Общая информация</a></li>
                     <li class="nav-item"><a class="nav-link" href="#participant_history_tab" data-toggle="tab">История</a></li>
+            <li class="nav-item"><a class="nav-link" href="#participant_settings_tab" data-toggle="tab">Настройки</a></li>
               
           </ul>
           <div class="tab-content" id="tabs">
@@ -132,6 +133,18 @@
                 <div class="tab-pane" id="participant_history_tab">
                       <div style="margin-top: 10px">    
                       test2
+                      
+                      </div>
+                  </div>
+
+                  <div class="tab-pane" id="participant_settings_tab">
+                      <div style="margin-top: 10px">    
+                      <hr>
+                            <h5>Удаление карточки спортсмена "{{ participant_data.participant_first_name }} {{ participant_data.participant_last_name }}"</h5>
+                            <p></p>
+                            <p>Удаление карточки спортсмена возможно, если нет связанных регистраций</p>
+
+                            <a href="{{url_for('home.participant_delete', participant_id=participant_data.participant_id)}}"><button type="button" class="btn btn-danger">Удалить</button></a>
                       
                       </div>
                   </div>

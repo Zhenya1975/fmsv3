@@ -135,7 +135,10 @@ def participant(participant_id, active_tab_name):
       data = {'active_tab_pass': 'participant_general_info'}
   elif int(active_tab_name) == 2:
       data = {'active_tab_pass': 'participant_history_tab'}
+  elif int(active_tab_name) == 3:
+      data = {'active_tab_pass': 'participant_settings_tab'}
 
+  
   else:
       print("непонятно что передано вместо номера вкладки")
   participant_data = ParticipantsDB.query.get(participant_id)
@@ -322,6 +325,26 @@ def weight_category_new(competition_id):
 #     return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info,
 #                            data=data, regs=regs)
 
+      
+@home.route('/participantdelete/<int:participant_id>/delete/')
+def participant_delete(participant_id):
+  participant_data = ParticipantsDB.query.get(participant_id)
+  registration_data = RegistrationsDB.query.filter_by(participant_id=participant_id).all()
+  number_of_participant_regs = len(list(registration_data))
+  if number_of_participant_regs > 0:
+    flash(f"Количество связанных регистраций: {number_of_participant_regs}. Сначала удалите связанные регистрации.", 'alert-danger')
+    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=3))
+  else:
+    db.session.delete(participant_data)
+    try:
+        db.session.commit()
+        flash(f'Карточка спортсмена {participant_data.participant_first_name} {participant_data.participant_last_name} удалено', 'alert-success')
+        return redirect(url_for('home.participants'))
+    except Exception as e:
+        print(e)
+        flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
+        db.session.rollback()
+    
 
 # competition delete
 @home.route('/competitions/<int:competition_id>/delete/')
