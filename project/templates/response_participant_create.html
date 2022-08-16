@@ -1,15 +1,27 @@
 <form method="POST" action="{{ url_for('home.participant_new') }}">
+  {{ form.csrf_token }}
   <div class="form-group">
-    <label for="first_name">Имя</label>
-    <input type="text" class="form-control" id="first_name" name="first_name">
-    
-  </div>
-  <div class="form-group">
-    <label for="last_name">Фамилия</label>
-    <input type="text" class="form-control" id="last_name" name="last_name">
+      {{ form.participant_name_form.label }}
+      {{ form.participant_name_form (class ='form-control', type="text")}}
+  <br>
+        {% for error in form.participant_name_form.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
   </div>
 
-  <button type="submit" class="btn btn-primary">Создать</button>
+<div class="form-group">
+      {{ form.participant_last_name_form.label }}
+      {{ form.participant_last_name_form (class ='form-control', type="text")}}
+  <br>
+        {% for error in form.participant_last_name_form.errors %}
+          <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+  </div>
+  
+  <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+        <button type="submit" class="btn btn-primary">Создать</button>
+    </div>
 
 
 </form>

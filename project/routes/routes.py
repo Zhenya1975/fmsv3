@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, AgecategoriesDB
-from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm
+from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, ParticipantNewForm
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
@@ -384,9 +384,10 @@ def registration_list(competition_id):
 
 @home.route('/participant_new', methods=["POST", "GET"])
 def participant_new():
-  if request.method == 'POST':
-    participant_first_name = request.form.get('first_name')
-    participant_last_name = request.form.get('last_name')
+  form = ParticipantNewForm()
+  if form.validate_on_submit():
+    participant_first_name = form.participant_name_form.data
+    participant_last_name = form.participant_last_name_form.data
     
     new_participant = ParticipantsDB(participant_first_name=participant_first_name, participant_last_name=participant_last_name)
     
@@ -635,8 +636,9 @@ def new_comp_ajaxfile():
 @home.route('/new_participant_ajaxfile', methods=["POST", "GET"])
 def new_participant_ajaxfile():
     if request.method == 'POST':
+      form = ParticipantNewForm()
         
-        return jsonify({'htmlresponse': render_template('response_participant_create.html')})
+      return jsonify({'htmlresponse': render_template('response_participant_create.html', form=form)})
 
 
 
