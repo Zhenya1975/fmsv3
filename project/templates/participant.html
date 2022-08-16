@@ -108,15 +108,45 @@
                                                       {{ participant_form.avatar_google_code (class ='form-control', value = participant_data.fighter_image)}} 
                                                   {%endif %}
 
-
-                                               
-                                               
                                                
                                              <br> 
                                                    {% for error in participant_form.avatar_google_code.errors %} 
                                                      <span style="color: red;">[{{ error }}]</span> 
                                                    {% endfor %} 
                                              </div> 
+
+
+
+                                           <div class="form-group"> 
+                                                 {{ participant_form.participant_city.label }} 
+
+                                               {% if participant_data.participant_city is none %}   
+                                                      {{ participant_form.participant_city (class ='form-control')}} 
+                                                  {% else %}
+                                                      {{ participant_form.participant_city (class ='form-control', value = participant_data.participant_city)}} 
+                                                  {%endif %}
+
+                                               
+                                             <br> 
+                                                   {% for error in participant_form.participant_city.errors %} 
+                                                     <span style="color: red;">[{{ error }}]</span> 
+                                                   {% endfor %} 
+                                             </div> 
+
+
+                                            <p></p>
+                                           <div class="form-check">
+                                                   {{ participant_form.active_status(value=participant_data.active_status) }}
+                                                    {{ participant_form.active_status.label }}
+                                           </div>
+
+
+                                           
+                                          
+                                            
+                                           <p></p>
+
+
               
                                              {{ participant_form.submit (class ='btn btn-primary')}}
             

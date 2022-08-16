@@ -160,6 +160,8 @@ def participant_general_info_edit(participant_id):
     participant_data.fighter_image = participant_general_info_form.avatar_google_code.data
     participant_data.birthday = participant_general_info_form.birthday_form.data
     participant_data.participant_city = participant_general_info_form.participant_city.data
+    participant_data.active_status = participant_general_info_form.active_status.data
+    print("статус: ", participant_general_info_form.active_status.data)
     db.session.commit()
     return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
   else:

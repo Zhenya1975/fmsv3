@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import Form, TextAreaField, validators, StringField, SubmitField, IntegerField, DateField, RadioField, \
-    DecimalField, DecimalRangeField
+    DecimalField, BooleanField
 from wtforms.validators import InputRequired
 from sqlalchemy import desc, asc
 
@@ -40,6 +40,7 @@ class ParticipantForm(FlaskForm):
    birthday_form = DateField('Дата рождения', format = '%Y-%m-%d',validators=[validators.DataRequired()]) 
    avatar_google_code = StringField('Код ссылки для аватарки') 
    participant_city = StringField('Город') 
+   active_status = BooleanField('Активен')
    submit = SubmitField('Сохранить')
 
 class ParticipantNewForm(FlaskForm): 

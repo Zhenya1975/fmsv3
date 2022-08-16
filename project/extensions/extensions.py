@@ -12,7 +12,7 @@ naming_convention = {
 }
 db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 
-migrate = Migrate()
+migrate = Migrate(compare_type=True)
 
 # socketio = SocketIO(logger=True, engineio_logger=True)
 socketio = SocketIO()

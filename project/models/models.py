@@ -12,7 +12,7 @@ class ParticipantsDB(db.Model):
     fighter_image = db.Column(db.String)
     birthday = db.Column(db.Date, default=datetime.utcnow)
     participant_city = db.Column(db.String)
-    active_status = db.Column(db.Integer)
+    active_status = db.Column(db.Boolean, default=False)
 
 
 class CompetitionsDB(db.Model):
