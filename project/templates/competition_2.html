@@ -190,6 +190,42 @@
 
                     <div class="tab-pane" id="competition_settings">
                         <div style="margin-top: 20px">
+                          <div id="weight_cat_empty">
+                             <table class="table">
+                              <thead>
+                                <tr>
+                                  <th scope="col">#</th>
+                                  <th scope="col">Наименование</th>
+                                
+                                  <th scope="col">От</th>
+                                  <th scope="col">До</th>
+                                  <th></th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                           
+                                <tr>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td></td>
+                                  <td>
+                                    <button type="button" class="btn btn-outline-primary add_weight_category" data-id={{ competition_data.competition_id }}>Добавить</button>
+                                  </td>
+                                </tr>
+                                <tr>
+                              
+
+                              </tbody>
+                            </table>
+                          </div>
+
+
+
+
+
+
+                          
 
                             <h5 class="title">Весовые категории</h5>
 
@@ -280,6 +316,30 @@
 
                         </div>
                         <!-- МОДАЛЫ ВНУТРИ ВКЛАДКИ НАСТРОЙКИ-->
+                      <div class="modal fade" id="add_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                      <div class="modal-header">
+                                            <h5 class="modal-title">Весовая категория</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                      </div>
+
+                                      <div class="modal-body">
+
+                                      </div>
+
+                                </div>
+                          </div>
+                        </div>
+
+
+
+
+
+
+                      
                         <div class="modal fade" id="create_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                                 <div class="modal-content">
@@ -488,7 +548,7 @@
           $('.nav-tabs a[href="#' + tab + '"]').tab('show');
         };
 
-
+      
 
      $('.create_age_category').click(function(){
         var competition_id = $(this).data('id');
@@ -507,6 +567,21 @@
         });
 
 
+      $('.add_weight_category').click(function(){
+        var competition_id = $(this).data('id');
+
+         $.ajax({
+             url: '/add_weight_category_ajaxfile',
+             type: 'post',
+             data: {competition_id:competition_id},
+             success: function(data){
+
+                $('.modal-body').html(data);
+                $('.modal-body').append(data.htmlresponse);
+                $('#add_weight_category_modal').modal('show');
+            }
+         });
+        });
 
      $('.create_weight_category').click(function(){
         var competition_id = $(this).data('id');

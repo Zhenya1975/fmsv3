@@ -262,6 +262,23 @@ def age_category_new(competition_id):
 
 
 
+# добавление весовой категории из пустой
+@home.route('/comp2/<int:competition_id>/weight_cat_add', methods=["POST", "GET"])
+def add_empty_weight_category_new(competition_id):
+  if request.method == 'POST':
+    weight_value_from_form = 0
+    weight_value_to_form = int(request.form.get('to'))
+    if weight_value_to_form > 0:
+      flash('Изменения сохранены', 'alert-success')
+      return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    else:
+      flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
+      return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+      
+    
+    return "опсс"
+
+
 # создание весовой категории
 @home.route('/comp2/<int:competition_id>/weight_cat_new', methods=["POST", "GET"])
 def weight_category_new(competition_id):
@@ -637,6 +654,9 @@ def edit_weight_cat_ajaxfile():
 
 
 
+
+
+
 @home.route('/create_age_category_ajaxfile', methods=["POST", "GET"])
 def create_age_category_ajaxfile():
     if request.method == 'POST':
@@ -644,6 +664,16 @@ def create_age_category_ajaxfile():
         form = AgeCategoriesForm()
         return jsonify({'htmlresponse': render_template('response_new_age_category.html',
                                                         competition_id=competition_id, form=form)})
+
+
+@home.route('/add_weight_category_ajaxfile', methods=["POST", "GET"])
+def add_weight_category_ajaxfile():
+  if request.method == 'POST':
+    competition_id = int(request.form['competition_id'])
+    
+    return jsonify({'htmlresponse': render_template('response_add_weight_category.html',
+                                                    competition_id=competition_id)})
+
 
 
 @home.route('/create_weight_category_ajaxfile', methods=["POST", "GET"])
