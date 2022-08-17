@@ -691,6 +691,16 @@ def create_age_category_ajaxfile():
                                                         competition_id=competition_id, form=form)})
 
 
+@home.route('/add_weight_category_with_data_ajaxfile', methods=["POST", "GET"])
+def add_weight_category_with_data_ajaxfile():
+  if request.method == 'POST':
+    competition_id = int(request.form['competition_id'])
+    
+    return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html',
+                                                    competition_id=competition_id)})
+
+
+
 @home.route('/add_weight_category_ajaxfile', methods=["POST", "GET"])
 def add_weight_category_ajaxfile():
   if request.method == 'POST':
