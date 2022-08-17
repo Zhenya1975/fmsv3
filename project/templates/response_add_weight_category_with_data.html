@@ -1,0 +1,24 @@
+<form method="POST" action="{{ url_for('home.add_weight_category_with_data', competition_id=competition_id, weight_cat_id=weight_cat_id) }}">
+
+  <div class='row'>
+    <div class="col">
+      <div class="form-group">
+        <label for="from">Вес от, кг</label>
+        <input type="number" class="form-control" id="from" name="from" value={{ weight_category_data.weight_category_finish }}>
+      </div>
+
+    </div>
+    <div class="col">
+       <div class="form-group">
+      <label for="to">Вес до, кг</label>
+        <input type="number" class="form-control" id="to" name="to">
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+  </div>
+
+
+</form>

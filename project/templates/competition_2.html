@@ -220,7 +220,7 @@
                                   
                                   
                                   <td>
-                                    <button type="button" class="btn btn-outline-primary btn-sm add_weight_category_with_data" data-id={{ competition_data.competition_id }}>Добавить</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm add_weight_category_with_data" data-id={{ w_cat.weight_cat_id }}>Добавить</button>
                                     
                                     <button type="button" class="btn btn-outline-danger btn-sm delete_weight_cat" data-id={{ w_cat.weight_cat_id }}>Удалить</button>
                                   </td>
@@ -571,12 +571,12 @@
   
 
       $('.add_weight_category_with_data').click(function(){
-        var competition_id = $(this).data('id');
+        var weight_cat_id = $(this).data('id');
 
          $.ajax({
              url: '/add_weight_category_with_data_ajaxfile',
              type: 'post',
-             data: {competition_id:competition_id},
+             data: {weight_cat_id:weight_cat_id},
              success: function(data){
 
                 $('.modal-body').html(data);

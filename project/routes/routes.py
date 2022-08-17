@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
-from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, AgecategoriesDB
-from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, ParticipantNewForm
+from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, \
+    AgecategoriesDB
+from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
+    ParticipantNewForm
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
@@ -126,75 +128,68 @@ def participants():
     return render_template('participants_list.html', participants_data=participants_data)
 
 
-
 @home.route('/participant/<int:participant_id>/<active_tab_name>')
 def participant(participant_id, active_tab_name):
+    data = {'active_tab_pass': 'participant_general_info'}
+    if int(active_tab_name) == 1:
+        data = {'active_tab_pass': 'participant_general_info'}
+    elif int(active_tab_name) == 2:
+        data = {'active_tab_pass': 'participant_history_tab'}
+    elif int(active_tab_name) == 3:
+        data = {'active_tab_pass': 'participant_settings_tab'}
 
-  data = {'active_tab_pass': 'participant_general_info'}
-  if int(active_tab_name) == 1:
-      data = {'active_tab_pass': 'participant_general_info'}
-  elif int(active_tab_name) == 2:
-      data = {'active_tab_pass': 'participant_history_tab'}
-  elif int(active_tab_name) == 3:
-      data = {'active_tab_pass': 'participant_settings_tab'}
 
-  
-  else:
-      print("непонятно что передано вместо номера вкладки")
-  participant_data = ParticipantsDB.query.get(participant_id)
+    else:
+        print("непонятно что передано вместо номера вкладки")
+    participant_data = ParticipantsDB.query.get(participant_id)
 
-  participant_form = ParticipantForm()
-  active_status = participant_data.active_status
-  if active_status == True:
-    active_status = 1
-  else:
-    active_status = 0
-  
-  return render_template('participant.html', participant_data=participant_data, data=data, participant_form=participant_form, active_status=active_status)
+    participant_form = ParticipantForm()
+    active_status = participant_data.active_status
+    if active_status == True:
+        active_status = 1
+    else:
+        active_status = 0
 
+    return render_template('participant.html', participant_data=participant_data, data=data,
+                           participant_form=participant_form, active_status=active_status)
 
 
 @home.route('/participant_general_info_edit/<int:participant_id>/', methods=["POST", "GET"])
 def participant_general_info_edit(participant_id):
-  participant_data = ParticipantsDB.query.get(participant_id)
-  participant_general_info_form = ParticipantForm()
-  if participant_general_info_form.validate_on_submit():
-    flash('Изменения сохранены', 'alert-success')
-    participant_data.participant_first_name = participant_general_info_form.participant_name_form.data
-    participant_data.participant_last_name = participant_general_info_form.participant_last_name_form.data
-    participant_data.fighter_image = participant_general_info_form.avatar_google_code.data
-    participant_data.birthday = participant_general_info_form.birthday_form.data
-    participant_data.participant_city = participant_general_info_form.participant_city.data
-    participant_data.active_status = participant_general_info_form.active_status.data
-    
-    db.session.commit()
-    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
-  else:
-    flash('Форма не валидировалась', 'alert-danger')
-    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+    participant_data = ParticipantsDB.query.get(participant_id)
+    participant_general_info_form = ParticipantForm()
+    if participant_general_info_form.validate_on_submit():
+        flash('Изменения сохранены', 'alert-success')
+        participant_data.participant_first_name = participant_general_info_form.participant_name_form.data
+        participant_data.participant_last_name = participant_general_info_form.participant_last_name_form.data
+        participant_data.fighter_image = participant_general_info_form.avatar_google_code.data
+        participant_data.birthday = participant_general_info_form.birthday_form.data
+        participant_data.participant_city = participant_general_info_form.participant_city.data
+        participant_data.active_status = participant_general_info_form.active_status.data
 
-    
+        db.session.commit()
+        return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+    else:
+        flash('Форма не валидировалась', 'alert-danger')
+        return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+
 
 @home.route('/edit_comp_general/<int:competition_id>/', methods=["POST", "GET"])
 def edit_comp_general(competition_id):
-  competition_data=CompetitionsDB.query.get(competition_id)
-  form = CompetitionForm()
-  if form.validate_on_submit():
-    flash('Изменения сохранены', 'alert-success')
-    competition_data.competition_name = form.competition_name_form.data
-    competition_data.competition_date_start = form.competition_date_start.data
-    competition_data.competition_date_finish = form.competition_date_finish.data
-    competition_data.competition_city = form.competition_city.data
-  
+    competition_data = CompetitionsDB.query.get(competition_id)
+    form = CompetitionForm()
+    if form.validate_on_submit():
+        flash('Изменения сохранены', 'alert-success')
+        competition_data.competition_name = form.competition_name_form.data
+        competition_data.competition_date_start = form.competition_date_start.data
+        competition_data.competition_date_finish = form.competition_date_finish.data
+        competition_data.competition_city = form.competition_city.data
 
-    db.session.commit()
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
-  else:
-    flash('Форма не валидировалась', 'alert-danger')
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
-    
-
-
+        db.session.commit()
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
+    else:
+        flash('Форма не валидировалась', 'alert-danger')
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
 
 
 @home.route('/comp2/<int:competition_id>/<active_tab_name>')
@@ -203,9 +198,11 @@ def comp2(competition_id, active_tab_name):
     form_general_info = CompetitionForm()
     regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
         ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
-    w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
-    a_categories = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(AgecategoriesDB.sort_index).all()
-    
+    w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        WeightcategoriesDB.sort_index).all()
+    a_categories = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        AgecategoriesDB.sort_index).all()
+
     # список id участников уже зарегистрированных
     regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
     list_of_participants_ids = []
@@ -233,12 +230,12 @@ def comp2(competition_id, active_tab_name):
         print("непонятно что передано вместо номера вкладки")
 
     # определяем количество строк весовых категорий
-    number_of_weight_categories = len(list(w_categories))  
+    number_of_weight_categories = len(list(w_categories))
     # print(number_of_weight_categories)  
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
-                           w_categories=w_categories, a_categories=a_categories, number_of_weight_categories=number_of_weight_categories)
-
+                           w_categories=w_categories, a_categories=a_categories,
+                           number_of_weight_categories=number_of_weight_categories)
 
 
 # создание возрастной категории
@@ -249,12 +246,11 @@ def age_category_new(competition_id):
         # print('создание весовой категории валидировалось')
         flash('Изменения сохранены', 'alert-success')
 
-
         new_age_category = AgecategoriesDB(sort_index=form.age_sort_index_form_field.data,
-                                                 competition_id=competition_id,
-                                                 age_category_name=form.age_category_name_form_field.data,
-                                                 age_category_start=form.age_from_form_field.data,
-                                                 age_category_finish=form.age_to_form_field.data)
+                                           competition_id=competition_id,
+                                           age_category_name=form.age_category_name_form_field.data,
+                                           age_category_start=form.age_from_form_field.data,
+                                           age_category_finish=form.age_to_form_field.data)
         db.session.add(new_age_category)
         try:
             db.session.commit()
@@ -265,43 +261,120 @@ def age_category_new(competition_id):
 
 
 
+
+# добавление весовой категории из непустой
+@home.route('/comp2/<int:competition_id>/<int:weight_cat_id>/weight_cat_add_row', methods=["POST", "GET"])
+def add_weight_category_with_data(competition_id, weight_cat_id):
+    if request.method == 'POST':
+        current_weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
+        current_weight_category_data_from_value = current_weight_category_data.weight_category_start
+        current_weight_category_data_to_value = current_weight_category_data.weight_category_finish
+        form_from_value = int(request.form.get('from'))
+        form_to_value = int(request.form.get('to'))
+        # получаем запись, которая является следующей к создаваемой
+        current_sort_index = current_weight_category_data.sort_index
+        # print("current_sort_index: ", current_sort_index)
+        # next_weight_cat_data = WeightcategoriesDB.query().order_by(WeightcategoriesDB.sort_index.asc()).filter(WeightcategoriesDB.sort_index > current_sort_index).first()
+        next_weight_cat_data = db.session.query(WeightcategoriesDB).order_by(WeightcategoriesDB.sort_index.asc()).filter(WeightcategoriesDB.sort_index > current_sort_index).first()
+        # print("next_weight_cat_data: ", next_weight_cat_data)
+        # если следующая запись есть, то  контрольный параметр заводим проверку
+        control_check = 0
+        if next_weight_cat_data:
+            next_weight_cat_from_value = next_weight_cat_data.weight_category_start
+            next_weight_cat_to_value = next_weight_cat_data.weight_category_finish
+            next_weight_cat_sort_index_value = next_weight_cat_data.sort_index
+            if form_from_value > current_weight_category_data_from_value and form_to_value > form_from_value and form_to_value < next_weight_cat_to_value:
+                # print("есть следующая запись и условия выполнены")
+                control_check = 1
+                current_weight_category_data.weight_category_finish = form_from_value
+                next_weight_cat_data.weight_category_start = form_to_value
+                weight_category_name = f"От {form_from_value} до {form_to_value} кг"
+                sort_index = (next_weight_cat_sort_index_value - current_sort_index)/2
+                sort_index = int(round(sort_index, 0))
+                new_weight_category = WeightcategoriesDB(competition_id=competition_id, weight_category_name=weight_category_name, sort_index = sort_index, weight_category_start = form_from_value, weight_category_finish=form_to_value)
+                db.session.add(new_weight_category)
+                try:
+                    flash('Изменения сохранены', 'alert-success')
+                    db.session.commit()
+                    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
+                except Exception as e:
+                    print(e)
+                    db.session.rollback()
+
+            else:
+                # print("Есть следующая запись, но условия не выполнены")
+                control_check = 0
+                flash('Изменения не сохранены. Проверьте значения', 'alert-danger')
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
+
+        else:
+            if form_from_value > current_weight_category_data_from_value and form_to_value > form_from_value:
+                # print("следующей записи нет и условия выполнены")
+                control_check = 1
+
+
+
+
+
+
+            else:
+                # print("следующей записи нет и условия НЕ выполнены")
+                control_check = 0
+
+
+
+
+            # try:
+            #     db.session.commit()
+            # except Exception as e:
+            #     print(e)
+            #     db.session.rollback()
+        # print("control_check: ", control_check)
+        return "ops"
+
+
 # добавление весовой категории из пустой
 @home.route('/comp2/<int:competition_id>/weight_cat_add', methods=["POST", "GET"])
 def add_empty_weight_category_new(competition_id):
-  if request.method == 'POST':
-    weight_value_from_form = 0
-    weight_value_to_form = int(request.form.get('to'))
-    if weight_value_to_form > 0:
-      flash('Изменения сохранены', 'alert-success')
-      sort_index = 10000
-      weight_category_name = f"До {weight_value_to_form} кг"
-      first_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id, weight_category_name=weight_category_name, weight_category_start=0, weight_category_finish=weight_value_to_form)
-      db.session.add(first_weight_category)
-      try:
-          db.session.commit()
-      except Exception as e:
-          print(e)
-          db.session.rollback()
-      # добавляем вторую категорию
-      weight_category_name = f"Свыше {weight_value_to_form} кг"
-      sort_index = 100000
-      last_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id, weight_category_name=weight_category_name, weight_category_start=weight_value_to_form, weight_category_finish=1000000)
-      db.session.add(last_weight_category)
-      try:
-          db.session.commit()
-      except Exception as e:
-          print(e)
-          db.session.rollback()
+    if request.method == 'POST':
+        weight_value_from_form = 0
+        weight_value_to_form = int(request.form.get('to'))
+        if weight_value_to_form > 0:
+            flash('Изменения сохранены', 'alert-success')
+            sort_index = 10000
+            weight_category_name = f"До {weight_value_to_form} кг"
+            first_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id,
+                                                       weight_category_name=weight_category_name,
+                                                       weight_category_start=0,
+                                                       weight_category_finish=weight_value_to_form)
+            db.session.add(first_weight_category)
+            try:
+                db.session.commit()
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+            # добавляем вторую категорию
+            weight_category_name = f"Свыше {weight_value_to_form} кг"
+            sort_index = 100000
+            last_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id,
+                                                      weight_category_name=weight_category_name,
+                                                      weight_category_start=weight_value_to_form,
+                                                      weight_category_finish=1000000)
+            db.session.add(last_weight_category)
+            try:
+                db.session.commit()
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        else:
+            flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
+            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
-      
-      return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-    else:
-      flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-      return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-      
-    
-    return "опсс"
 
 
 # создание весовой категории
@@ -374,26 +447,29 @@ def weight_category_new(competition_id):
 #     return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info,
 #                            data=data, regs=regs)
 
-      
+
 @home.route('/participantdelete/<int:participant_id>/delete/')
 def participant_delete(participant_id):
-  participant_data = ParticipantsDB.query.get(participant_id)
-  registration_data = RegistrationsDB.query.filter_by(participant_id=participant_id).all()
-  number_of_participant_regs = len(list(registration_data))
-  if number_of_participant_regs > 0:
-    flash(f"Количество связанных регистраций: {number_of_participant_regs}. Сначала удалите связанные регистрации.", 'alert-danger')
-    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=3))
-  else:
-    db.session.delete(participant_data)
-    try:
-        db.session.commit()
-        flash(f'Карточка спортсмена {participant_data.participant_first_name} {participant_data.participant_last_name} удалено', 'alert-success')
-        return redirect(url_for('home.participants'))
-    except Exception as e:
-        print(e)
-        flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
-        db.session.rollback()
-    
+    participant_data = ParticipantsDB.query.get(participant_id)
+    registration_data = RegistrationsDB.query.filter_by(participant_id=participant_id).all()
+    number_of_participant_regs = len(list(registration_data))
+    if number_of_participant_regs > 0:
+        flash(f"Количество связанных регистраций: {number_of_participant_regs}. Сначала удалите связанные регистрации.",
+              'alert-danger')
+        return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=3))
+    else:
+        db.session.delete(participant_data)
+        try:
+            db.session.commit()
+            flash(
+                f'Карточка спортсмена {participant_data.participant_first_name} {participant_data.participant_last_name} удалено',
+                'alert-success')
+            return redirect(url_for('home.participants'))
+        except Exception as e:
+            print(e)
+            flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
+            db.session.rollback()
+
 
 # competition delete
 @home.route('/competitions/<int:competition_id>/delete/')
@@ -454,31 +530,30 @@ def registration_list(competition_id):
     return redirect(url_for('home.competition_page', competition_id=competition_id, active_tab_name=2))
 
 
-@home.route('/participant_new', methods=["POST", "GET"])
-def participant_new():
-  form = ParticipantNewForm()
-  if form.validate_on_submit():
-    participant_first_name = form.participant_name_form.data
-    participant_last_name = form.participant_last_name_form.data
-    
-    new_participant = ParticipantsDB(participant_first_name=participant_first_name, participant_last_name=participant_last_name)
-    
-    db.session.add(new_participant)
-    try:
-      db.session.commit()
-    except Exception as e:
-      print("Исключение: ", e)
-
-    new_participant_data = ParticipantsDB.query.order_by(ParticipantsDB.participant_id.desc()).first()
-    # print(new_participant_data)
-    participant_id = new_participant_data.participant_id
-    
-
-    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
-  else:
-    flash(f"Что-то пошло не так с созданием нового спортсмена", 'alert-danger')
-    return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
-
+# @home.route('/participant_new', methods=["POST", "GET"])
+# def participant_new():
+#   form = ParticipantNewForm()
+#   if form.validate_on_submit():
+#     participant_first_name = form.participant_name_form.data
+#     participant_last_name = form.participant_last_name_form.data
+#
+#     new_participant = ParticipantsDB(participant_first_name=participant_first_name, participant_last_name=participant_last_name)
+#
+#     db.session.add(new_participant)
+#     try:
+#       db.session.commit()
+#     except Exception as e:
+#       print("Исключение: ", e)
+#
+#     new_participant_data = ParticipantsDB.query.order_by(ParticipantsDB.participant_id.desc()).first()
+#     # print(new_participant_data)
+#     participant_id = new_participant_data.participant_id
+#
+#
+#     return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
+#   else:
+#     flash(f"Что-то пошло не так с созданием нового спортсмена", 'alert-danger')
+#     return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
 
 
 @home.route('/registration_new/<int:competition_id>/<int:participant_id>', methods=["POST", "GET"])
@@ -505,7 +580,6 @@ def registration_new(competition_id, participant_id):
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
-
 @home.route('/age_category_edit/<int:age_cat_id>/', methods=["POST", "GET"])
 def age_category_edit(age_cat_id):
     age_category_data = AgecategoriesDB.query.filter_by(age_cat_id=age_cat_id).first()
@@ -517,14 +591,12 @@ def age_category_edit(age_cat_id):
         age_category_data.age_category_start = form.age_from_form_field.data
         age_category_data.age_category_finish = form.age_to_form_field.data
 
-
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
     else:
         flash(f"Форма не валидировалась", 'alert-danger')
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
 
 
 @home.route('/weight_category_edit/<int:weight_cat_id>/', methods=["POST", "GET"])
@@ -538,7 +610,6 @@ def weight_category_edit(weight_cat_id):
         weight_category_data.weight_category_start = form.weight_from_form_field.data
         weight_category_data.weight_category_finish = form.weight_to_form_field.data
 
-
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
@@ -546,7 +617,6 @@ def weight_category_edit(weight_cat_id):
         flash(f"Форма не валидировалась", 'alert-danger')
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
     # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
 
 
 @home.route('/registration_edit/<int:reg_id>/', methods=["POST", "GET"])
@@ -560,13 +630,12 @@ def registration_edit(reg_id):
         weight_cat_select_id = int(request.form.get('weight_catagory_selector'))
         age_value = int(request.form.get('age_input'))
         age_cat_id = int(request.form.get('age_catagory_selector'))
-      
+
         reg_data.weight_value = weight_value_from_form
         reg_data.weight_cat_id = weight_cat_select_id
         reg_data.age_value = age_value
         reg_data.age_cat_id = age_cat_id
-      
-      
+
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
         # print("weight_cat_id с формы: ", weight_cat_id)
@@ -575,10 +644,8 @@ def registration_edit(reg_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
-
 @home.route('/age_cat_delete/<int:age_cat_id>/', methods=["POST", "GET"])
 def age_cat_delete(age_cat_id):
-
     age_cat_data = AgecategoriesDB.query.filter_by(age_cat_id=age_cat_id).first()
     competition_id = age_cat_data.competition_id
     regs_data = RegistrationsDB.query.filter_by(age_cat_id=age_cat_id).all()
@@ -599,7 +666,6 @@ def age_cat_delete(age_cat_id):
             db.session.rollback()
 
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
 
 
 @home.route('/weight_cat_delete/<int:weight_cat_id>/', methods=["POST", "GET"])
@@ -652,7 +718,6 @@ def registration_delete(reg_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
-
 @home.route('/edit_age_cat_ajaxfile', methods=["POST", "GET"])
 def edit_age_cat_ajaxfile():
     if request.method == 'POST':
@@ -663,10 +728,6 @@ def edit_age_cat_ajaxfile():
                                                         age_category_data=age_category_data, form=form)})
 
 
-
-
-
-
 @home.route('/edit_weight_cat_ajaxfile', methods=["POST", "GET"])
 def edit_weight_cat_ajaxfile():
     if request.method == 'POST':
@@ -675,11 +736,6 @@ def edit_weight_cat_ajaxfile():
         weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
         return jsonify({'htmlresponse': render_template('response_edit_weight_category.html',
                                                         weight_cat_data=weight_cat_data, form=form)})
-
-
-
-
-
 
 
 @home.route('/create_age_category_ajaxfile', methods=["POST", "GET"])
@@ -693,22 +749,22 @@ def create_age_category_ajaxfile():
 
 @home.route('/add_weight_category_with_data_ajaxfile', methods=["POST", "GET"])
 def add_weight_category_with_data_ajaxfile():
-  if request.method == 'POST':
-    competition_id = int(request.form['competition_id'])
-    
-    return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html',
-                                                    competition_id=competition_id)})
+    if request.method == 'POST':
+        weight_cat_id = int(request.form['weight_cat_id'])
+        weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
+        competition_id = weight_category_data.competition_id
 
+        return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id,
+                                                        weight_category_data=weight_category_data)})
 
 
 @home.route('/add_weight_category_ajaxfile', methods=["POST", "GET"])
 def add_weight_category_ajaxfile():
-  if request.method == 'POST':
-    competition_id = int(request.form['competition_id'])
-    
-    return jsonify({'htmlresponse': render_template('response_add_weight_category.html',
-                                                    competition_id=competition_id)})
+    if request.method == 'POST':
+        competition_id = int(request.form['competition_id'])
 
+        return jsonify({'htmlresponse': render_template('response_add_weight_category.html',
+                                                        competition_id=competition_id)})
 
 
 @home.route('/create_weight_category_ajaxfile', methods=["POST", "GET"])
@@ -731,10 +787,9 @@ def new_comp_ajaxfile():
 @home.route('/new_participant_ajaxfile', methods=["POST", "GET"])
 def new_participant_ajaxfile():
     if request.method == 'POST':
-      form = ParticipantNewForm()
-        
-      return jsonify({'htmlresponse': render_template('response_participant_create.html', form=form)})
+        form = ParticipantNewForm()
 
+        return jsonify({'htmlresponse': render_template('response_participant_create.html', form=form)})
 
 
 @home.route('/new_reg_ajaxfile', methods=["POST", "GET"])
@@ -759,6 +814,7 @@ def new_reg_ajaxfile():
             {'htmlresponse': render_template('response_reg_new.html', form=reg_form, competition_id=competition_id,
                                              participant_data=participant_data)})
 
+
 @home.route('/delete_age_cat_ajaxfile', methods=["POST", "GET"])
 def delete_age_cat_ajaxfile():
     if request.method == 'POST':
@@ -766,7 +822,6 @@ def delete_age_cat_ajaxfile():
         age_cat_data = AgecategoriesDB.query.filter_by(age_cat_id=age_cat_id).first()
         return jsonify(
             {'htmlresponse': render_template('response_age_cat_delete.html', age_cat_data=age_cat_data)})
-
 
 
 @home.route('/delete_weight_cat_ajaxfile', methods=["POST", "GET"])
@@ -793,8 +848,10 @@ def edit_reg_ajaxfile():
         reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
         reg_form = RegistrationeditForm()
         competition_id = reg_data.competition_id
-        weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index).all()
-        age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(AgecategoriesDB.sort_index).all()
+        weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+            WeightcategoriesDB.sort_index).all()
+        age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+            AgecategoriesDB.sort_index).all()
 
         # считаем количество полных лет на дату соревнования
         # дата соревнования
@@ -802,16 +859,20 @@ def edit_reg_ajaxfile():
         # дата рождения бойца
         birthday_date = reg_data.registration_participant.birthday
         date_diff = (competition_date - birthday_date).total_seconds()
-        age_years_float = date_diff/(60*60*24*365.25)
+        age_years_float = date_diff / (60 * 60 * 24 * 365.25)
         age_eyars = math.floor(age_years_float)
 
-        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data, weight_categories_data=weight_categories_data, age_catagories_data=age_catagories_data, competition_id=competition_id, age_eyars=age_eyars)})
+        return jsonify({'htmlresponse': render_template('response_reg_edit.html', form=reg_form, reg_data=reg_data,
+                                                        weight_categories_data=weight_categories_data,
+                                                        age_catagories_data=age_catagories_data,
+                                                        competition_id=competition_id, age_eyars=age_eyars)})
 
 
 # Handler for a message received over 'connect' channel
 @socketio.on('connect')
 def test_connect():
     emit('after connect', {'data': 'Lets dance'})
+
 
 values = {}
 
@@ -848,18 +909,12 @@ def age_value_changed(received_message):
         age_category_start = age_category.age_category_start
         age_category_finish = age_category.age_category_finish
         if age_years >= age_category_start and age_years < age_category_finish:
-          updated_age_cat['age_cat_id']  = age_cat_id
-          updated_age_cat['age_category_name'] = age_category_name
-          emit('update_age_category_select_value', {'age_cat_id': age_cat_id, 'age_years':age_years}, broadcast=True)
+            updated_age_cat['age_cat_id'] = age_cat_id
+            updated_age_cat['age_category_name'] = age_category_name
+            emit('update_age_category_select_value', {'age_cat_id': age_cat_id, 'age_years': age_years}, broadcast=True)
     #     else:
     #         updated_age_cat['age_cat_id'] = age_category_id
     # age_cat_id = updated_age_cat['age_cat_id']
-
-    
-
-
-
-
 
 
 @socketio.on('weight_value_changed')
@@ -879,7 +934,8 @@ def weight_value_changed(received_message):
     for weight_category in weight_category_data:
         availible_weight_cats_ids.append(weight_category.weight_cat_id)
     weight_category_id = availible_weight_cats_ids[0]
-    weight_category_name = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_category_id).first().weight_category_name
+    weight_category_name = WeightcategoriesDB.query.filter_by(
+        weight_cat_id=weight_category_id).first().weight_category_name
     # print("default_weight_category: ",new_weight_category)
     updated_weight_cat = {}
 
@@ -890,16 +946,16 @@ def weight_value_changed(received_message):
         weight_category_finish = weight_category.weight_category_finish
         # print("new_weight_value: ", new_weight_value, "weight_category_start: ", weight_category_start, "weight_category_finish: ", weight_category_finish)
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
-          print('weight_cat_id: ', weight_cat_id)
-          updated_weight_cat['weight_cat_id']  = weight_cat_id
-          updated_weight_cat['weight_category_name'] = weight_category_name
-          emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
+            print('weight_cat_id: ', weight_cat_id)
+            updated_weight_cat['weight_cat_id'] = weight_cat_id
+            updated_weight_cat['weight_category_name'] = weight_category_name
+            emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
     #     else:
-  
+
     #       updated_weight_cat['weight_cat_id'] = weight_category_id
     # weight_cat_id = updated_weight_cat['weight_cat_id']
     # emit('update_timer_value', timer_message, broadcast=True)
-    
+
 
 # emit('after connect', {'data': 'Lets dance'})
 
