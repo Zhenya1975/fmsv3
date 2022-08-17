@@ -222,11 +222,6 @@
 
 
 
-
-
-
-                          
-
                             <h5 class="title">Весовые категории</h5>
 
 
@@ -534,6 +529,13 @@
 <script>
     data_dict = {{ data | tojson }}
     $(document).ready(function(){
+        var number_of_weight_categories = {{number_of_weight_categories}}
+        console.log("number_of_weight_categories: ", number_of_weight_categories)              
+        $('#weight_cat_empty').hide();
+        if (number_of_weight_categories==0) {
+          $('#weight_cat_empty').show();
+        }              
+        
         var socket = io.connect();
        // Мы получили с сервера сообщение по каналу 'after connect'
         // Получив по каналу собщение мы отображаем его в консоли.

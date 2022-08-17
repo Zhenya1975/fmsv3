@@ -232,9 +232,12 @@ def comp2(competition_id, active_tab_name):
     else:
         print("непонятно что передано вместо номера вкладки")
 
+    # определяем количество строк весовых категорий
+    number_of_weight_categories = len(list(w_categories))  
+    # print(number_of_weight_categories)  
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
-                           w_categories=w_categories, a_categories=a_categories)
+                           w_categories=w_categories, a_categories=a_categories, number_of_weight_categories=number_of_weight_categories)
 
 
 
@@ -270,6 +273,28 @@ def add_empty_weight_category_new(competition_id):
     weight_value_to_form = int(request.form.get('to'))
     if weight_value_to_form > 0:
       flash('Изменения сохранены', 'alert-success')
+      sort_index = 10000
+      weight_category_name = f"До {weight_value_to_form} кг"
+      first_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id, weight_category_name=weight_category_name, weight_category_start=0, weight_category_finish=weight_value_to_form)
+      db.session.add(first_weight_category)
+      try:
+          db.session.commit()
+      except Exception as e:
+          print(e)
+          db.session.rollback()
+      # добавляем вторую категорию
+      weight_category_name = f"Свыше {weight_value_to_form} кг"
+      sort_index = 100000
+      last_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id, weight_category_name=weight_category_name, weight_category_start=weight_value_to_form, weight_category_finish=1000000)
+      db.session.add(last_weight_category)
+      try:
+          db.session.commit()
+      except Exception as e:
+          print(e)
+          db.session.rollback()
+
+
+      
       return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
     else:
       flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
