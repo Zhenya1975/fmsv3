@@ -192,47 +192,20 @@
                         <div style="margin-top: 20px">
                           <div id="weight_cat_empty">
                             <h5 class="title">Весовые категории</h5>
-                             <table class="table">
-                              <thead>
-                                <tr>
-                                  <th scope="col">#</th>
-                                  <th scope="col">Наименование</th>
-                                
-                                  <th scope="col">От</th>
-                                  <th scope="col">До</th>
-                                  <th></th>
-                                </tr>
-                              </thead>
-                              <tbody>
+                            <p></p>
+                            <button type="button" class="btn btn-outline-primary add_weight_category" data-id={{ competition_data.competition_id }}>Добавить</button>
+                             
                            
-                                <tr>
-                                  <td></td>
-                                  <td></td>
-                                  <td></td>
-                                  <td></td>
-                                  <td>
-                                    <button type="button" class="btn btn-outline-primary add_weight_category" data-id={{ competition_data.competition_id }}>Добавить</button>
-                                  </td>
-                                </tr>
-                                <tr>
-                              
-
-                              </tbody>
-                            </table>
                           </div>
 
 
                           <div id="weight_cat_with_data">
                             
                          
-
+                          <h4 class="title">Весовые категории</h4>
                             <table class="table">
                               <thead>
-                                <tr>
-                                  
-                                  <th scope="col">Весовые категории</th>
-                                  <th></th>
-                                </tr>
+                                
                               </thead>
                               <tbody>
                                {% for w_cat in w_categories %}
