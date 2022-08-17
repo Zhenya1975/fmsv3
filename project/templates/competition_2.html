@@ -191,6 +191,7 @@
                     <div class="tab-pane" id="competition_settings">
                         <div style="margin-top: 20px">
                           <div id="weight_cat_empty">
+                            <h5 class="title">Весовые категории</h5>
                              <table class="table">
                               <thead>
                                 <tr>
@@ -221,38 +222,34 @@
                           </div>
 
 
-
-                            <h5 class="title">Весовые категории</h5>
-
-
-                            <button type="button" class="btn btn-outline-primary create_weight_category" data-id={{ competition_data.competition_id }}>Создать</button>
-                            <p></p>
+                          <div id="weight_cat_with_data">
+                            
+                         
 
                             <table class="table">
                               <thead>
                                 <tr>
-                                  <th scope="col">#</th>
-                                  <th scope="col">Наименование</th>
-                                  <th scope="col">Cортировка</th>
-                                  <th scope="col">От</th>
-                                  <th scope="col">До</th>
+                                  
+                                  <th scope="col">Весовые категории</th>
                                   <th></th>
                                 </tr>
                               </thead>
                               <tbody>
                                {% for w_cat in w_categories %}
                                 <tr>
-                                  <th scope="row">{{ loop.index }}</th>
+                                  
                                   <td>
                                       <a class="edit_weight_cat" data-id={{ w_cat.weight_cat_id }}>
                                         {{ w_cat.weight_category_name }}
                                       </a>
                                   </td>
-                                  <td>{{ w_cat.sort_index }}</td>
-                                  <td>{{ w_cat.weight_category_start}}</td>
-                                  <td>{{ w_cat.weight_category_finish}}</td>
+                      
+                                  
+                                  
                                   <td>
-                                    <button type="button" class="btn btn-outline-danger delete_weight_cat" data-id={{ w_cat.weight_cat_id }}>Удалить</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm add_weight_category_with_data" data-id={{ competition_data.competition_id }}>Добавить</button>
+                                    
+                                    <button type="button" class="btn btn-outline-danger btn-sm delete_weight_cat" data-id={{ w_cat.weight_cat_id }}>Удалить</button>
                                   </td>
                                 </tr>
                                 <tr>
@@ -260,6 +257,7 @@
 
                               </tbody>
                             </table>
+                          </div>  
 
                         <hr>
                         <h3 class="title">Возрастные категории</h3>
@@ -532,9 +530,16 @@
         var number_of_weight_categories = {{number_of_weight_categories}}
         console.log("number_of_weight_categories: ", number_of_weight_categories)              
         $('#weight_cat_empty').hide();
+        $('#weight_cat_with_data').hide();
+  
         if (number_of_weight_categories==0) {
           $('#weight_cat_empty').show();
-        }              
+          $('#weight_cat_with_data').hide();
+        }
+          else {
+            $('#weight_cat_empty').hide();
+          $('#weight_cat_with_data').show();
+          }
         
         var socket = io.connect();
        // Мы получили с сервера сообщение по каналу 'after connect'
