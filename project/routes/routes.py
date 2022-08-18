@@ -753,6 +753,11 @@ def add_weight_category_with_data_ajaxfile():
         weight_cat_id = int(request.form['weight_cat_id'])
         weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
         competition_id = weight_category_data.competition_id
+        # данные в модельном окне надо заполнять в зависимости от того где именно мы добавляем весовую категорию
+        # если это все строки кроме последней, то тогда в поле От подставляется значение текущего веса До
+        # если же это последняя строка, то тогда нужно в поле От подставить значение От в предыдущем, поле До 
+        # оставить пустым.
+        # значит нам надо определить в какой именно строке мы находимся
 
         return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                         weight_category_data=weight_category_data)})
