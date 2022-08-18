@@ -260,78 +260,51 @@ def age_category_new(competition_id):
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
-
-
 # добавление весовой категории из непустой
-@home.route('/comp2/<int:competition_id>/<int:weight_cat_id>/weight_cat_add_row', methods=["POST", "GET"])
-def add_weight_category_with_data(competition_id, weight_cat_id):
+@home.route('/comp2/<int:competition_id>/<int:weight_cat_id>/<int:status_of_last_record>/weight_cat_add_data_row',
+            methods=["POST", "GET"])
+def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_record):
     if request.method == 'POST':
+        weight_value_from_form = int(request.form.get('from'))
+        weight_value_to_form = int(request.form.get('to'))
+
         current_weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
-        current_weight_category_data_from_value = current_weight_category_data.weight_category_start
-        current_weight_category_data_to_value = current_weight_category_data.weight_category_finish
-        form_from_value = int(request.form.get('from'))
-        form_to_value = int(request.form.get('to'))
-        # получаем запись, которая является следующей к создаваемой
-        current_sort_index = current_weight_category_data.sort_index
-        # print("current_sort_index: ", current_sort_index)
-        # next_weight_cat_data = WeightcategoriesDB.query().order_by(WeightcategoriesDB.sort_index.asc()).filter(WeightcategoriesDB.sort_index > current_sort_index).first()
-        next_weight_cat_data = db.session.query(WeightcategoriesDB).order_by(WeightcategoriesDB.sort_index.asc()).filter(WeightcategoriesDB.sort_index > current_sort_index).first()
-        # print("next_weight_cat_data: ", next_weight_cat_data)
-        # если следующая запись есть, то  контрольный параметр заводим проверку
-        control_check = 0
-        if next_weight_cat_data:
-            next_weight_cat_from_value = next_weight_cat_data.weight_category_start
-            next_weight_cat_to_value = next_weight_cat_data.weight_category_finish
-            next_weight_cat_sort_index_value = next_weight_cat_data.sort_index
-            if form_from_value > current_weight_category_data_from_value and form_to_value > form_from_value and form_to_value < next_weight_cat_to_value:
-                # print("есть следующая запись и условия выполнены")
-                control_check = 1
-                current_weight_category_data.weight_category_finish = form_from_value
-                next_weight_cat_data.weight_category_start = form_to_value
-                weight_category_name = f"От {form_from_value} до {form_to_value} кг"
-                sort_index = (next_weight_cat_sort_index_value - current_sort_index)/2
-                sort_index = int(round(sort_index, 0))
-                new_weight_category = WeightcategoriesDB(competition_id=competition_id, weight_category_name=weight_category_name, sort_index = sort_index, weight_category_start = form_from_value, weight_category_finish=form_to_value)
-                db.session.add(new_weight_category)
-                try:
-                    flash('Изменения сохранены', 'alert-success')
-                    db.session.commit()
-                    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        current_weight_category_from_value = current_weight_category_data.weight_category_start
+        current_weight_category_to_value = current_weight_category_data.weight_category_finish
+        current_weight_category_sort_index = current_weight_category_data.sort_index
 
-                except Exception as e:
-                    print(e)
-                    db.session.rollback()
+        # определяем какая будет следующая запись
+        if status_of_last_record == 1:
+            # если текущая запись - последняя
+            print(
+                "weight_value_from_form: ", weight_value_from_form,
+                "weight_value_to_form: ", weight_value_to_form,
+                "current_weight_category_from_value: ", current_weight_category_from_value
+            )
+            if weight_value_to_form > weight_value_from_form >= current_weight_category_from_value:
+                # создаем новую весовую категорию
+                sort_index = current_weight_category_sort_index + 10000
+                weight_category_start = weight_value_from_form
+                weight_category_finish = 1000000
+                weight_category_name = f"Свыше {weight_value_to_form} кг"
+                last_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id,
+                                                          weight_category_name=weight_category_name,
+                                                          weight_category_start=weight_category_start,
+                                                          weight_category_finish=weight_category_finish)
+                db.session.add(last_weight_category)
 
+                # редактируем текущую категорию
+                current_weight_category_data.weight_category_start = weight_value_from_form
+                current_weight_category_data.weight_category_finish = weight_value_to_form
+                current_weight_category_data.weight_category_name = f"От {weight_value_from_form} до {weight_value_to_form} кг"
+
+                db.session.commit()
+                flash('Изменения сохранены', 'alert-success')
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
             else:
-                # print("Есть следующая запись, но условия не выполнены")
-                control_check = 0
-                flash('Изменения не сохранены. Проверьте значения', 'alert-danger')
+                flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
                 return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
-
-        else:
-            if form_from_value > current_weight_category_data_from_value and form_to_value > form_from_value:
-                # print("следующей записи нет и условия выполнены")
-                control_check = 1
-
-
-
-
-
-
-            else:
-                # print("следующей записи нет и условия НЕ выполнены")
-                control_check = 0
-
-
-
-
-            # try:
-            #     db.session.commit()
-            # except Exception as e:
-            #     print(e)
-            #     db.session.rollback()
-        # print("control_check: ", control_check)
         return "ops"
 
 
@@ -343,6 +316,8 @@ def add_empty_weight_category_new(competition_id):
         weight_value_to_form = int(request.form.get('to'))
         if weight_value_to_form > 0:
             flash('Изменения сохранены', 'alert-success')
+
+            # Создаем первую категорию
             sort_index = 10000
             weight_category_name = f"До {weight_value_to_form} кг"
             first_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id,
@@ -375,8 +350,6 @@ def add_empty_weight_category_new(competition_id):
             return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
-
-
 # создание весовой категории
 @home.route('/comp2/<int:competition_id>/weight_cat_new', methods=["POST", "GET"])
 def weight_category_new(competition_id):
@@ -397,55 +370,6 @@ def weight_category_new(competition_id):
             db.session.rollback()
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
     # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
-
-# new registration form
-# @home.route('/comp2/<int:competition_id>/registrations/new', methods=["POST", "GET"])
-# def registration_new_2(competition_id):
-#     if request.method == 'POST':
-#         selected_fighter = request.form.get('fighter_pick')
-#         new_registration = RegistrationsDB(participant_id=int(selected_fighter), competition_id=competition_id)
-#         db.session.add(new_registration)
-#         db.session.commit()
-#         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
-
-
-# competition page
-# @home.route('/competitions/<int:competition_id>/<active_tab_name>', methods=["POST", "GET"])
-# def competition_page(competition_id, active_tab_name):
-#     competition_data = CompetitionsDB.query.get(competition_id)
-#     form_general_info = CompetitionForm()
-#     data = {'active_tab_pass': 'competition_general_info'}
-#     regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
-#         ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
-#
-#     if int(active_tab_name) == 1:
-#         data = {'active_tab_pass': 'competition_general_info'}
-#     elif int(active_tab_name) == 2:
-#         data = {'active_tab_pass': 'registrations_tab'}
-#     elif int(active_tab_name) == 3:
-#         data = {'active_tab_pass': 'competition_settings'}
-#     else:
-#         print("непонятно что передано вместо номера вкладки")
-#
-#     if form_general_info.validate_on_submit():
-#         flash('Изменения сохранены', 'alert-success')
-#         competition_data.competition_name = form_general_info.competition_name_form.data
-#         competition_data.competition_date_start = form_general_info.competition_date_start.data
-#         competition_data.competition_date_finish = form_general_info.competition_date_finish.data
-#         competition_data.competition_city = form_general_info.competition_city.data
-#         try:
-#             db.session.commit()
-#         except Exception as e:
-#             print(e)
-#             db.session.rollback()
-#
-#         data = {'active_tab_pass': 'competition_general_info'}
-#
-#         return render_template('competition.html', competition_data=competition_data,
-#                                form_general_info=form_general_info, data=data, regs=regs)
-#     return render_template('competition.html', competition_data=competition_data, form_general_info=form_general_info,
-#                            data=data, regs=regs)
 
 
 @home.route('/participantdelete/<int:participant_id>/delete/')
@@ -752,15 +676,34 @@ def add_weight_category_with_data_ajaxfile():
     if request.method == 'POST':
         weight_cat_id = int(request.form['weight_cat_id'])
         weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
+        weight_category_data_weight_cat_id = weight_category_data.weight_cat_id
         competition_id = weight_category_data.competition_id
         # данные в модельном окне надо заполнять в зависимости от того где именно мы добавляем весовую категорию
         # если это все строки кроме последней, то тогда в поле От подставляется значение текущего веса До
         # если же это последняя строка, то тогда нужно в поле От подставить значение От в предыдущем, поле До 
         # оставить пустым.
         # значит нам надо определить в какой именно строке мы находимся
+        # last_created_fight = FightsDB.query.filter_by(competition_id=competition_id).order_by(
+        # #         desc(FightsDB.fight_id)).first()
+        last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+            desc(WeightcategoriesDB.sort_index)).first()
+        last_weight_category_data_weight_cat_id = last_weight_category_data.weight_cat_id
 
-        return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id,
-                                                        weight_category_data=weight_category_data)})
+        # проверяем если id текущей категории равен id последней категории
+        # print("weight_category_data_weight_cat_id: ", weight_category_data_weight_cat_id, "last_weight_category_data_weight_cat_id: ", last_weight_category_data_weight_cat_id)
+        if weight_category_data_weight_cat_id == last_weight_category_data_weight_cat_id:
+            value_from = weight_category_data.weight_category_start
+            status_of_last_record = 1
+            """status_of_last_record = 1 - значит запись о весовой категории последняя"""
+        else:
+            value_from = weight_category_data.weight_category_finish
+            status_of_last_record = 0
+
+        return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html',
+                                                        competition_id=competition_id, weight_cat_id=weight_cat_id,
+                                                        weight_category_data=weight_category_data,
+                                                        value_from=value_from,
+                                                        status_of_last_record=status_of_last_record)})
 
 
 @home.route('/add_weight_category_ajaxfile', methods=["POST", "GET"])
