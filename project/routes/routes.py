@@ -305,6 +305,14 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
                 flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
                 return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
+        else:
+          next_weight_category_data = db.session.query(WeightcategoriesDB).order_by(WeightcategoriesDB.sort_index.asc()).filter(WeightcategoriesDB.sort_index > current_weight_category_sort_index).first()
+          print("start_weight_of_next: ", next_weight_category_data.weight_category_start)
+          # текущая запись не последняя
+          # if weight_value_to_form > weight_value_from_form >= current_weight_category_from_value:
+            # определяем следующую весовую категорию
+            
+              
         return "ops"
 
 
@@ -677,6 +685,8 @@ def add_weight_category_with_data_ajaxfile():
         weight_cat_id = int(request.form['weight_cat_id'])
         weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
         weight_category_data_weight_cat_id = weight_category_data.weight_cat_id
+        weight_category_data_from = weight_category_data.weight_category_start
+        print("weight_category_data_from: ", weight_category_data_from)
         competition_id = weight_category_data.competition_id
         # данные в модельном окне надо заполнять в зависимости от того где именно мы добавляем весовую категорию
         # если это все строки кроме последней, то тогда в поле От подставляется значение текущего веса До
@@ -698,7 +708,7 @@ def add_weight_category_with_data_ajaxfile():
         else:
             value_from = weight_category_data.weight_category_finish
             status_of_last_record = 0
-
+        print("status_of_last_record: ", status_of_last_record, "value_from: ", value_from)
         return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html',
                                                         competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                         weight_category_data=weight_category_data,
