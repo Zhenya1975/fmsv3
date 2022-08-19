@@ -273,44 +273,7 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
         current_weight_category_to_value = current_weight_category_data.weight_category_finish
         current_weight_category_sort_index = current_weight_category_data.sort_index
 
-        # определяем какая будет следующая запись
-        if status_of_last_record == 1:
-            # если текущая запись - последняя
-            print(
-                "weight_value_from_form: ", weight_value_from_form,
-                "weight_value_to_form: ", weight_value_to_form,
-                "current_weight_category_from_value: ", current_weight_category_from_value
-            )
-            if weight_value_to_form > weight_value_from_form >= current_weight_category_from_value:
-                # создаем новую весовую категорию
-                sort_index = current_weight_category_sort_index + 10000
-                weight_category_start = weight_value_from_form
-                weight_category_finish = 1000000
-                weight_category_name = f"Свыше {weight_value_to_form} кг"
-                last_weight_category = WeightcategoriesDB(sort_index=sort_index, competition_id=competition_id,
-                                                          weight_category_name=weight_category_name,
-                                                          weight_category_start=weight_category_start,
-                                                          weight_category_finish=weight_category_finish)
-                db.session.add(last_weight_category)
-
-                # редактируем текущую категорию
-                current_weight_category_data.weight_category_start = weight_value_from_form
-                current_weight_category_data.weight_category_finish = weight_value_to_form
-                current_weight_category_data.weight_category_name = f"От {weight_value_from_form} до {weight_value_to_form} кг"
-
-                db.session.commit()
-                flash('Изменения сохранены', 'alert-success')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-            else:
-                flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
-        else:
-          next_weight_category_data = db.session.query(WeightcategoriesDB).order_by(WeightcategoriesDB.sort_index.asc()).filter(WeightcategoriesDB.sort_index > current_weight_category_sort_index).first()
-          print("start_weight_of_next: ", next_weight_category_data.weight_category_start)
-          # текущая запись не последняя
-          # if weight_value_to_form > weight_value_from_form >= current_weight_category_from_value:
-            # определяем следующую весовую категорию
+        
             
               
         return "ops"
