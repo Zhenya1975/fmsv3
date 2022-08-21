@@ -701,9 +701,62 @@ def age_cat_delete(age_cat_id):
 @home.route('/weight_cat_delete/<int:weight_cat_id>/', methods=["POST", "GET"])
 def weight_cat_delete(weight_cat_id):
     weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
+    current_weight_category_sort_index = weight_cat_data.sort_index
+    current_weight_category_id = weight_cat_data.weight_cat_id
+    competition_id = weight_cat_data.competition_id
+    all_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
+    number_of_weight_categories = len(list(all_weight_category_data))
+    # определяем первую категорию
+
+    first_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        asc(WeightcategoriesDB.sort_index)).first()
+    first_weight_category_id = first_weight_category_data.weight_cat_id
+
+    last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        desc(WeightcategoriesDB.sort_index)).first()
+    last_weight_category_id = first_weight_category_data.weight_cat_id
+
+
+
     competition_id = weight_cat_data.competition_id
     regs_data = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
     number_of_weight_cat_regs = len(list(regs_data))
+    # предыдущая категория
+    prev_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
+        WeightcategoriesDB.sort_index.desc()).filter(
+        WeightcategoriesDB.sort_index < current_weight_category_sort_index).first()
+
+    # следующая категория
+    next_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
+        WeightcategoriesDB.sort_index.asc()).filter(
+        WeightcategoriesDB.sort_index > current_weight_category_sort_index).first()
+
+    # ВАРИАНТ 1: категория является первой
+    if current_weight_category_id == first_weight_category_id:
+        # нужно проверить какое количество категорий.
+        # две или три
+        if number_of_weight_categories == 2:
+            # нужно проверить есть ли в последней категории регистрации. И если есть, то тогда отменить удаление
+            # потому что удалять надо обе сразу
+            # количество регистраций в текущей категории
+            print("две категории ")
+
+
+            # next_weight_category_data.weight_category_name = f"Свыше {weight_value_to_form} кг"
+
+
+
+    if next_weight_category_data:
+        print("next_weight_category_data.weight_category_name: ", next_weight_category_data.weight_category_name)
+
+    if prev_weight_category_data:
+        # проверяем является ли предыдущая категория первой
+
+        print(prev_weight_category_data.weight_category_name)
+    else:
+        print("нет предыдущей")
+
+
 
     if number_of_weight_cat_regs > 0:
         flash(f"Количество связанных регистраций: {number_of_weight_cat_regs}. Сначала удалите связанные регистрации.",
