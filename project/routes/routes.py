@@ -803,17 +803,16 @@ def add_weight_category_with_data_ajaxfile():
             last_weight_category_data_from_value = last_weight_category_data.weight_category_start
             last_weight_category_data_to_value = last_weight_category_data.weight_category_finish
             last_weight_category_data_weight_cat_id = last_weight_category_data.weight_cat_id
-            print("last_weight_category_data_from_value: ", last_weight_category_data_from_value,
-                  "last_weight_category_data_to_value: ", last_weight_category_data_to_value)
 
-            print("current_weight_category_to_value: ", current_weight_category_to_value)
+
+
 
             if next_weight_category_data_weight_cat_id == last_weight_category_data_weight_cat_id:
-                print("следующая категория существует и она - последняя")
+
                 value_from = current_weight_category_to_value
                 status_of_last_record = 1
             else:
-                print("следующая категория существует - и она НЕ последняя")
+                # print("следующая категория существует - и она НЕ последняя")
                 value_from = current_weight_category_to_value
                 status_of_last_record = 2
         else:
@@ -899,8 +898,20 @@ def delete_weight_cat_ajaxfile():
     if request.method == 'POST':
         weight_cat_id = request.form['weight_cat_id']
         weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
-        return jsonify(
-            {'htmlresponse': render_template('response_weight_cat_delete.html', weight_cat_data=weight_cat_data)})
+        # считаем количество регистраций
+        weight_cat_id = weight_cat_data.weight_cat_id
+        regs = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
+        if regs:
+            number_of_regs = len(list(regs))
+            return jsonify(
+                {'htmlresponse': render_template('response_weight_cat_delete_warning.html', weight_cat_data=weight_cat_data,
+                                                 number_of_regs=number_of_regs)})
+        else:
+            number_of_regs = 0
+            return jsonify(
+                {'htmlresponse': render_template('response_weight_cat_delete.html', weight_cat_data=weight_cat_data, number_of_regs=number_of_regs)})
+
+
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
