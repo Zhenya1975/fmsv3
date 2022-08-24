@@ -3,6 +3,7 @@ from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, R
     AgecategoriesDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
+from functions import check_delete_weight_category
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
@@ -948,21 +949,25 @@ def delete_age_cat_ajaxfile():
 
 @home.route('/delete_weight_cat_ajaxfile', methods=["POST", "GET"])
 def delete_weight_cat_ajaxfile():
-    if request.method == 'POST':
-        weight_cat_id = request.form['weight_cat_id']
-        weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
-        # считаем количество регистраций
-        weight_cat_id = weight_cat_data.weight_cat_id
-        regs = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
-        if regs:
-            number_of_regs = len(list(regs))
-            return jsonify(
-                {'htmlresponse': render_template('response_weight_cat_delete_warning.html', weight_cat_data=weight_cat_data,
-                                                 number_of_regs=number_of_regs)})
-        else:
-            number_of_regs = 0
-            return jsonify(
-                {'htmlresponse': render_template('response_weight_cat_delete.html', weight_cat_data=weight_cat_data, number_of_regs=number_of_regs)})
+  """в рауте delete_weight_cat_ajaxfile - нужно проверять что именно мы пытаемся удалить и дальше уже включать нужный сценарий удаления. Отправляем weight_cat_id в функцию check_delete_weight_category.
+В ответ получаем: Сколько всего категорий, Какое положение у текущей категории - первое, второе, предпоследнее, последнее, какая категория предыдущая - первая или больше первой. Какая категория следующая-
+последняя или предпоследняя. Проверяем есть ли связанные категории в текущей и в соседях. Если там данные есть, то пишем названия категорий, в которых нудно сначала убрать регистрации и в моделе не даем кнопку Удалить"""
+  if request.method == 'POST':
+    weight_cat_id = request.form['weight_cat_id']
+    check_delete_weight_category.check_delete_weight_category(weight_cat_id)
+    weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
+    # считаем количество регистраций
+    weight_cat_id = weight_cat_data.weight_cat_id
+    regs = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
+    if regs:
+        number_of_regs = len(list(regs))
+        return jsonify(
+            {'htmlresponse': render_template('response_weight_cat_delete_warning.html', weight_cat_data=weight_cat_data,
+                                             number_of_regs=number_of_regs)})
+    else:
+        number_of_regs = 0
+        return jsonify(
+            {'htmlresponse': render_template('response_weight_cat_delete.html', weight_cat_data=weight_cat_data, number_of_regs=number_of_regs)})
 
 
 
