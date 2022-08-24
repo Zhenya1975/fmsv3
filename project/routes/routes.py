@@ -959,7 +959,7 @@ def delete_weight_cat_ajaxfile():
     text_regs = ", ".join(text_regs_list)
     if delete_confirmation == 0:
       return jsonify(
-            {'htmlresponse': render_template('response_weight_cat_delete_restricted.html', text_regs=text_regs)})
+            {'htmlresponse': render_template('response_weight_cat_delete_restricted.html', text_regs=text_regs, text_regs_list=text_regs_list)})
       
     weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
     # считаем количество регистраций

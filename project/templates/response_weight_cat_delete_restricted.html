@@ -1,5 +1,13 @@
 <p>Сначала удалите связанные регистрации.</p>
-<p>{{text_regs}}</p>
+
+{% for text in  text_regs_list%}
+    <ul>
+        <li>
+            {{ text }}
+        </li>
+    </ul>
+{% endfor %}
+
 
 <div class="modal-footer">
     <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
