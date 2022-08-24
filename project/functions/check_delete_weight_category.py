@@ -26,14 +26,15 @@ def check_delete_weight_category(weight_cat_id):
         regs_qty = regs_qty + len(list(registrations_data))
         number_of_registrations_dict[weight_cat_name] = regs_qty
         number_of_registrations = number_of_registrations + regs_qty
-        text_regs_list = []
-        for (key, value) in number_of_registrations_dict.items():
-          text_var = ""
-          if value != 0:
-            text_var = f"{key}: {value}"
-            text_regs_list.append(text_var)
-        delete_confirmation = 0
-        return(delete_confirmation, text_regs_list)
+      text_regs_list = []
+      print("number_of_registrations_dict: ", number_of_registrations_dict)
+      for (key, value) in number_of_registrations_dict.items():
+        text_var = ""
+        if value != 0:
+          text_var = f"{key}: кол-во регистраций - {value}"
+          text_regs_list.append(text_var)
+      delete_confirmation = 0
+      return(delete_confirmation, text_regs_list)
     
       
   else:
