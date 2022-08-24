@@ -954,7 +954,13 @@ def delete_weight_cat_ajaxfile():
 последняя или предпоследняя. Проверяем есть ли связанные категории в текущей и в соседях. Если там данные есть, то пишем названия категорий, в которых нудно сначала убрать регистрации и в моделе не даем кнопку Удалить"""
   if request.method == 'POST':
     weight_cat_id = request.form['weight_cat_id']
-    check_delete_weight_category.check_delete_weight_category(weight_cat_id)
+    delete_confirmation = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[0]
+    text_regs_list = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[1]
+    text_regs = ", ".join(text_regs_list)
+    if delete_confirmation == 0:
+      return jsonify(
+            {'htmlresponse': render_template('response_weight_cat_delete_restricted.html', text_regs=text_regs)})
+      
     weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
     # считаем количество регистраций
     weight_cat_id = weight_cat_data.weight_cat_id
