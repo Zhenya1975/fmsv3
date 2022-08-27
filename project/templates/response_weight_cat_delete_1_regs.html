@@ -1,0 +1,7 @@
+<p>Удалить весовую категорию "{{weight_cat_name}}"?</p>
+
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+    <a href="{{ url_for('home.weight_1_cat_delete', competition_id = competition_id, weight_cat_id=weight_cat_id) }}"><button type="button" class="btn btn-danger">Удалить</button></a>
+</div>
