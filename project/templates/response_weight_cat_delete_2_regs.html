@@ -1,0 +1,13 @@
+<p>Удалить весовые категории?</p>
+{% for text in  text_regs_list%}
+    <ul>
+        <li>
+            {{ text }}
+        </li>
+    </ul>
+{% endfor %}
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+    <a href="{{ url_for('home.weight_2_cat_delete', competition_id = competition_id) }}"><button type="button" class="btn btn-danger">Удалить</button></a>
+</div>

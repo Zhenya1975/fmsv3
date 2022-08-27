@@ -301,7 +301,8 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
                 current_weight_category_data.weight_category_finish = weight_value_from_form
                 current_weight_category_data.weight_category_name = f"От {current_weight_category_from_value} до {weight_value_from_form} кг"
                 # создаем новую весовую категорию
-                sort_index = (next_weight_category_data_sort_index - current_weight_category_sort_index) / 2 + current_weight_category_sort_index
+                sort_index = (
+                                     next_weight_category_data_sort_index - current_weight_category_sort_index) / 2 + current_weight_category_sort_index
                 new_weight_category_sort_index = int(round(sort_index, 0))
                 new_weight_category_start = weight_value_from_form
                 new_weight_category_finish = weight_value_to_form
@@ -341,7 +342,8 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
                 current_weight_category_data.weight_category_name = f"От {current_weight_category_from_value} до {weight_value_from_form} кг"
 
                 # создаем новую весовую категорию
-                sort_index = (next_weight_category_data_sort_index - current_weight_category_sort_index) / 2 + current_weight_category_sort_index
+                sort_index = (
+                                     next_weight_category_data_sort_index - current_weight_category_sort_index) / 2 + current_weight_category_sort_index
                 new_weight_category_sort_index = int(round(sort_index, 0))
                 new_weight_category_start = weight_value_from_form
                 new_weight_category_finish = weight_value_to_form
@@ -402,17 +404,6 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
         else:
             flash('Изменения не сохранены. Что-то пошло не так', 'alert-danger')
             return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
-
-
-
-
-
-
-
-
-
-
 
 
 # добавление весовой категории из пустой
@@ -699,6 +690,24 @@ def age_cat_delete(age_cat_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
+@home.route('/weight_2_cat_delete/<int:competition_id>/', methods=["POST", "GET"])
+def weight_2_cat_delete(competition_id):
+    """удаление двух первых весовых категорий"""
+    weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
+    for weight_cat_data in weight_categories_data:
+        db.session.delete(weight_cat_data)
+    try:
+        db.session.commit()
+        flash(f'Весовые категории удалены', 'alert-success')
+
+    except Exception as e:
+        print(e)
+        flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
+        db.session.rollback()
+
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
+
 @home.route('/weight_cat_delete/<int:weight_cat_id>/', methods=["POST", "GET"])
 def weight_cat_delete(weight_cat_id):
     weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
@@ -716,8 +725,6 @@ def weight_cat_delete(weight_cat_id):
     last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         desc(WeightcategoriesDB.sort_index)).first()
     last_weight_category_id = first_weight_category_data.weight_cat_id
-
-
 
     competition_id = weight_cat_data.competition_id
     regs_data = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
@@ -742,10 +749,7 @@ def weight_cat_delete(weight_cat_id):
             # количество регистраций в текущей категории
             print("две категории ")
 
-
             # next_weight_category_data.weight_category_name = f"Свыше {weight_value_to_form} кг"
-
-
 
     if next_weight_category_data:
         print("next_weight_category_data.weight_category_name: ", next_weight_category_data.weight_category_name)
@@ -756,8 +760,6 @@ def weight_cat_delete(weight_cat_id):
         print(prev_weight_category_data.weight_category_name)
     else:
         print("нет предыдущей")
-
-
 
     if number_of_weight_cat_regs > 0:
         flash(f"Количество связанных регистраций: {number_of_weight_cat_regs}. Сначала удалите связанные регистрации.",
@@ -858,9 +860,6 @@ def add_weight_category_with_data_ajaxfile():
             last_weight_category_data_to_value = last_weight_category_data.weight_category_finish
             last_weight_category_data_weight_cat_id = last_weight_category_data.weight_cat_id
 
-
-
-
             if next_weight_category_data_weight_cat_id == last_weight_category_data_weight_cat_id:
 
                 value_from = current_weight_category_to_value
@@ -949,33 +948,44 @@ def delete_age_cat_ajaxfile():
 
 @home.route('/delete_weight_cat_ajaxfile', methods=["POST", "GET"])
 def delete_weight_cat_ajaxfile():
-  """в рауте delete_weight_cat_ajaxfile - нужно проверять что именно мы пытаемся удалить и дальше уже включать нужный сценарий удаления. Отправляем weight_cat_id в функцию check_delete_weight_category.
+    """в рауте delete_weight_cat_ajaxfile - нужно проверять что именно мы пытаемся удалить и дальше уже включать нужный сценарий удаления. Отправляем weight_cat_id в функцию check_delete_weight_category.
 В ответ получаем: Сколько всего категорий, Какое положение у текущей категории - первое, второе, предпоследнее, последнее, какая категория предыдущая - первая или больше первой. Какая категория следующая-
 последняя или предпоследняя. Проверяем есть ли связанные категории в текущей и в соседях. Если там данные есть, то пишем названия категорий, в которых нудно сначала убрать регистрации и в моделе не даем кнопку Удалить"""
-  if request.method == 'POST':
-    weight_cat_id = request.form['weight_cat_id']
-    delete_confirmation = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[0]
-    text_regs_list = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[1]
-    text_regs = ", ".join(text_regs_list)
-    if delete_confirmation == 0:
-      return jsonify(
-            {'htmlresponse': render_template('response_weight_cat_delete_restricted.html', text_regs=text_regs, text_regs_list=text_regs_list)})
-      
-    weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
-    # считаем количество регистраций
-    weight_cat_id = weight_cat_data.weight_cat_id
-    regs = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
-    if regs:
-        number_of_regs = len(list(regs))
-        return jsonify(
-            {'htmlresponse': render_template('response_weight_cat_delete_warning.html', weight_cat_data=weight_cat_data,
-                                             number_of_regs=number_of_regs)})
-    else:
-        number_of_regs = 0
-        return jsonify(
-            {'htmlresponse': render_template('response_weight_cat_delete.html', weight_cat_data=weight_cat_data, number_of_regs=number_of_regs)})
+    if request.method == 'POST':
+        weight_cat_id = request.form['weight_cat_id']
+        weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
+        competition_id = weight_cat_data.competition_id
+        delete_confirmation = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[0]
+        text_regs_list = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[1]
+        number_of_weight_categories = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[2]
+        # text_regs = ", ".join(text_regs_list)
 
+        # Если категорий - 2 и удалять их нельзя
+        if delete_confirmation == 0 and number_of_weight_categories == 2:
+            return jsonify(
+                {'htmlresponse': render_template('response_weight_cat_delete_restricted.html',
+                                                 text_regs_list=text_regs_list)})
+        # Если категорий - 2 и удалять их можно
+        elif delete_confirmation == 1 and number_of_weight_categories == 2:
+            return jsonify(
+                {'htmlresponse': render_template('response_weight_cat_delete_2_regs.html',
+                                                 text_regs_list=text_regs_list, competition_id=competition_id)})
 
+        weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
+        # считаем количество регистраций
+        weight_cat_id = weight_cat_data.weight_cat_id
+        regs = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
+        if regs:
+            number_of_regs = len(list(regs))
+            return jsonify(
+                {'htmlresponse': render_template('response_weight_cat_delete_warning.html',
+                                                 weight_cat_data=weight_cat_data,
+                                                 number_of_regs=number_of_regs)})
+        else:
+            number_of_regs = 0
+            return jsonify(
+                {'htmlresponse': render_template('response_weight_cat_delete.html', weight_cat_data=weight_cat_data,
+                                                 number_of_regs=number_of_regs)})
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
