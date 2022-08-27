@@ -580,26 +580,51 @@ def registration_list(competition_id):
 
 @home.route('/registration_new/<int:competition_id>/<int:participant_id>', methods=["POST", "GET"])
 def registration_new(competition_id, participant_id):
-    form = RegistrationeditForm()
-    if form.validate_on_submit():
+    if request.method == 'POST':
+        weight_value_from_form = request.form.get('weight_input')
+        try:
+            weight_cat_select_id = int(request.form.get('weight_catagory_selector'))
+        except:
+            weight_cat_select_id=0
+        # Если поле с весовой категорией приехало пустым, то делаем расчет и записываем
+        if weight_cat_select_id == 0:
+            weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
+            updated_weight_cat = {}
+            for weight_category in weight_category_data:
+                weight_cat_id = weight_category.weight_cat_id
+                weight_category_name = weight_category.weight_category_name
+                weight_category_start = weight_category.weight_category_start
+                weight_category_finish = weight_category.weight_category_finish
+                if weight_category_start <= int(weight_value_from_form) <= weight_category_finish:
+                    updated_weight_cat['weight_cat_id'] = weight_cat_id
+                    updated_weight_cat['weight_category_name'] = weight_category_name
+            weight_cat_select_id = updated_weight_cat['weight_cat_id']
+
+        age_value = int(request.form.get('age_input'))
+        age_cat_select_id = int(request.form.get('age_catagory_selector'))
         new_reg = RegistrationsDB(
-            weight_value=form.reg_weight.data,
+            weight_value=weight_value_from_form,
             competition_id=competition_id,
-            participant_id=participant_id
+            participant_id=participant_id,
+            weight_cat_id=weight_cat_select_id,
+            age_value=age_value,
+            age_cat_id=age_cat_select_id,
+            activity_status=1
         )
+
         db.session.add(new_reg)
         db.session.commit()
-        new_reg_data = RegistrationsDB.query.filter_by(competition_id=competition_id).order_by(
-            RegistrationsDB.reg_id.desc()).first()
+        try:
+            db.session.commit()
+            flash(f"Изменения сохранены", 'alert-success')
 
-        last_name = new_reg_data.registration_participant.participant_last_name
-        first_name = new_reg_data.registration_participant.participant_first_name
-        flash(f"Создана новая регистрация {last_name} {first_name}", 'alert-success')
+        except Exception as e:
+            print(e)
+            flash(f'Изменения не сохранены. Ошибка: {e}', 'alert-danger')
+            db.session.rollback()
 
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
-    else:
-        flash(f"Что-то пошло не так с созданием новой регистрации", 'alert-danger')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
 
 
 @home.route('/age_category_edit/<int:age_cat_id>/', methods=["POST", "GET"])
@@ -690,8 +715,6 @@ def age_cat_delete(age_cat_id):
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
 
-
-
 @home.route('/weight_1_cat_delete/<int:competition_id>/<int:weight_cat_id>', methods=["POST", "GET"])
 def weight_1_cat_delete(competition_id, weight_cat_id):
     """Удаление одной весовой категории"""
@@ -706,7 +729,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
     next_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
         WeightcategoriesDB.sort_index.asc()).filter(
         WeightcategoriesDB.sort_index > current_weight_cat_sort_index).first()
-    next_weight_category_weight_category_finish =  next_weight_category_data.weight_category_finish
+    next_weight_category_weight_category_finish = next_weight_category_data.weight_category_finish
 
     if current_weight_cat_id == first_weight_category_id:
         # редактируем вторую категорию
@@ -724,11 +747,6 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
             db.session.rollback()
 
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
-
-
-
-
 
 
 @home.route('/weight_2_cat_delete/<int:competition_id>/', methods=["POST", "GET"])
@@ -966,6 +984,11 @@ def new_reg_ajaxfile():
         # new_reg_data = RegistrationsDB.query.filter_by(competition_id=competition_id).order_by(RegistrationsDB.reg_id.desc()).first()
 
         participant_data = ParticipantsDB.query.filter_by(participant_id=participant_id).first()
+        competition_data = CompetitionsDB.query.get(competition_id)
+        weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+            WeightcategoriesDB.sort_index).all()
+        age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+            AgecategoriesDB.sort_index).all()
         last_name = participant_data.participant_last_name
 
         # print("Добавился ", last_name)
@@ -973,9 +996,35 @@ def new_reg_ajaxfile():
         # flash(f"Создана новая регистрация {last_name} {first_name}", 'alert-success')
         # print(reg_data)
         reg_form = RegistrationeditForm()
+        competition_date = competition_data.competition_date_start
+        # дата рождения бойца
+        birthday_date = participant_data.birthday
+        date_diff = (competition_date - birthday_date).total_seconds()
+        age_years_float = date_diff / (60 * 60 * 24 * 365.25)
+        age_years = math.floor(age_years_float)
+        # определение возрастной категории
+        age_category_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).all()
+        default_age_cat = {}
+        for age_category in age_category_data:
+            age_cat_id = age_category.age_cat_id
+            age_category_name = age_category.age_category_name
+            age_category_start = age_category.age_category_start
+            age_category_finish = age_category.age_category_finish
+            if age_years >= age_category_start and age_years < age_category_finish:
+                default_age_cat['age_cat_id'] = age_cat_id
+                default_age_cat['age_category_name'] = age_category_name
+
         return jsonify(
-            {'htmlresponse': render_template('response_reg_new.html', form=reg_form, competition_id=competition_id,
-                                             participant_data=participant_data)})
+            {'htmlresponse': render_template('response_reg_new_2.html',
+                                             form=reg_form,
+                                             competition_id=competition_id,
+                                             participant_data=participant_data,
+                                             competition_data=competition_data,
+                                             age_years=age_years,
+                                             default_age_cat_id=default_age_cat['age_cat_id'],
+                                             weight_categories_data=weight_categories_data,
+                                             age_catagories_data=age_catagories_data,
+                                             )})
 
 
 @home.route('/delete_age_cat_ajaxfile', methods=["POST", "GET"])
@@ -1019,9 +1068,8 @@ def delete_weight_cat_ajaxfile():
             weight_cat_name = text_regs_list[0]
             return jsonify(
                 {'htmlresponse': render_template('response_weight_cat_delete_1_regs.html',
-                                                 weight_cat_name=weight_cat_name, competition_id=competition_id, weight_cat_id=weight_cat_id)})
-
-
+                                                 weight_cat_name=weight_cat_name, competition_id=competition_id,
+                                                 weight_cat_id=weight_cat_id)})
 
         weight_cat_data = WeightcategoriesDB.query.filter_by(weight_cat_id=weight_cat_id).first()
         # считаем количество регистраций
@@ -1153,7 +1201,7 @@ def weight_value_changed(received_message):
         weight_category_finish = weight_category.weight_category_finish
         # print("new_weight_value: ", new_weight_value, "weight_category_start: ", weight_category_start, "weight_category_finish: ", weight_category_finish)
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
-            print('weight_cat_id: ', weight_cat_id)
+
             updated_weight_cat['weight_cat_id'] = weight_cat_id
             updated_weight_cat['weight_category_name'] = weight_category_name
             emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)

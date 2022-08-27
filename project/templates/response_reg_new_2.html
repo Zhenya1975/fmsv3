@@ -1,15 +1,22 @@
+<style>
+    .error{
+        outline: 1px solid red;
+    }
+</style>
 
-<form method="POST" action="{{ url_for('home.registration_edit', reg_id = reg_data.reg_id) }}">
+
+
+<form method="POST" action="{{ url_for('home.registration_new', competition_id = competition_id, participant_id = participant_data.participant_id) }}">
     {{ form.csrf_token }}
 
 <div class="row">
     <div class="col d-flex justify-content-start">
             <div class="row">
                 <div class="col">
-                    <img src= {{ reg_data.registration_participant.fighter_image }} class="float-left" alt="Responsive image" width="100" height="100">
+                    <img src= {{ participant_data.fighter_image }} class="float-left" alt="Responsive image" width="100" height="100">
                 </div>
                 <div class="col">
-                    <h5>{{ reg_data.registration_participant.participant_last_name }} {{ reg_data.registration_participant.participant_first_name }} </h5>
+                    <h5>{{ participant_data.participant_last_name }} {{ participant_data.participant_first_name }} </h5>
                 </div>
 
 
@@ -24,7 +31,7 @@
     <div class="form-row">
         <div class="col-3">
 
-          <input class="form-control weight_value_at_reg" type="number" id="myTextBox" name="weight_input" value="{{ reg_data.weight_value }}" placeholder="Вес, кг" required>
+          <input class="form-control weight_value_at_reg" type="number" id="weight_input" name="weight_input" placeholder="Вес, кг" required min="0">
 
         </div>
         <div class="col-9">
@@ -32,6 +39,7 @@
           <div class="input-group">
 
               <select class="weight_category_select form-control" id="weight_cat_select" name="weight_catagory_selector">
+                  <option value=0 selected disabled>Весовая категория</option>
                   {% for weight_cat in weight_categories_data %}
                     <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
                   {% endfor %}
@@ -50,17 +58,17 @@
     <h5>Возраст и возрастная категория</h5>
     <div class="form-row">
         <div class="col">
-            <p>Дата рождения: {{ reg_data.registration_participant.birthday.strftime('%d.%m.%Y') }}</p>
+            <p>Дата рождения: {{ participant_data.birthday.strftime('%d.%m.%Y') }}</p>
             <div class="form-group row required">
                     <label for="comp_date" class="col-sm-5 col-form-label">Дата соревнования:</label>
                     <div class="col-sm-7">
-                        <input type="date" class="form-control competition_date" id="comp_date" name="comp_data_input" value="{{ reg_data.registration_comp.competition_date_start }}" required min="0">
+                        <input type="date" class="form-control competition_date" id="comp_date" name="comp_data_input" value="{{ competition_data.competition_date_start }}" required>
                     </div>
             </div>
             <div class="form-group row required">
                     <label for="age_input" class="col-sm-5 col-form-label">Полных лет: </label>
                     <div class="col-sm-7">
-                        <input type="text" class="form-control-plaintext age_input" id="age_input" name="age_input" value="{{ age_eyars }}">
+                        <input type="text" class="form-control-plaintext age_input" id="age_input" name="age_input" value="{{ age_years }}">
                     </div>
             </div>
 {#            <p>Полных лет: {{ age_eyars }}</p>#}
@@ -114,19 +122,22 @@
 <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.min.js"></script>
 <script>
+
 $(document).ready(function(){
     var competition_id = {{ competition_id }}
 
     var socket = io.connect();
     var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
 
-    var weight_value = $('#myTextBox').val();
-    // console.log("значение веса: ", weight_value);
-    // console.log("значение селекта: ", selectedweightcategory);
-    $(".weight_category_select").val({{ reg_data.weight_cat_id }})
-    $(".age_category_select").val({{ reg_data.age_cat_id }})
 
-    var participant_id = {{ reg_data.registration_participant.participant_id }}
+
+    var weight_value = $('input.weight_value_at_reg').val();
+    console.log("weight_value ", weight_value)
+
+
+    $(".age_category_select").val({{ default_age_cat_id }})
+
+    var participant_id = {{ participant_data.participant_id }}
     // Значение из селекта возрастной категории
     var selectedagecategory = $('#age_cat_select').children("option:selected").val();
 
@@ -136,45 +147,27 @@ $(document).ready(function(){
     // при загрузке страницы получаем с сервера значения полных лет на дату соревнования
 
     $("input.competition_date").change(function (){
-        // console.log('что-то изменилось в инпуте')
-        // var new_weight_value = $(this).val();
         competition_date_value = $(this).val();
-        // console.log('новая переменная ', competition_date_value)
     })
 
     $("input.weight_value_at_reg").change(function (){
-        // console.log('что-то изменилось в инпуте')
-        // var new_weight_value = $(this).val();
         weight_value = $(this).val();
-        // console.log('новая переменная ', weight_value)
     })
 
     $("select.age_category_select").change(function(){
         selectedagecategory = $(this).children("option:selected").val();
-        // console.log("значение селекта после обновления селекта: ", selectedagecategory);
     });
 
     $("select.weight_category_select").change(function(){
         selectedweightcategory = $(this).children("option:selected").val();
-        // console.log("значение селекта после обновления селекта: ", selectedweightcategory);
-        // alert("You have selected the country - " + selectedCountry);
     });
-
 
     $('.update_age_cat').click(function(){
-        //weight_value = $('#myTextBox').val();
-        // console.log("значение в инпуте: ", weight_value)
-
         socket.emit('age_value_changed', {'competition_date_value': competition_date_value, 'competition_id':competition_id, 'participant_id':participant_id});
-
     });
 
-
     $('.update_weight_cat').click(function(){
-        //weight_value = $('#myTextBox').val();
-        // console.log("значение в инпуте: ", weight_value)
         socket.emit('weight_value_changed', {'weight_new_value': weight_value, 'competition_id':competition_id});
-
         // console.log("значение селекта после нажатия на кнопку: ", selectedweightcategory, "competition_id: ", competition_id);
     });
 
@@ -183,32 +176,32 @@ $(document).ready(function(){
 
 
 
-       // Мы получили с сервера сообщение по каналу 'after connect'
-        // Получив по каналу собщение мы отображаем его в консоли.
-        socket.on('after connect', function(msg){
-            console.log('After connect', msg.data);
-        });
+   // Мы получили с сервера сообщение по каналу 'after connect'
+    // Получив по каналу собщение мы отображаем его в консоли.
+    socket.on('after connect', function(msg){
+        console.log('After connect', msg.data);
+    });
 
-        socket.on('update_age_category_select_value', function (msg){
-            var select_updated_id = parseInt(msg.age_cat_id)
-            // console.log('id селекта возрастной категории ', select_updated_id)
-            var age_years = parseInt(msg.age_years)
-            $(".age_category_select").val(select_updated_id)
-            $(".age_input").val(age_years)
+    socket.on('update_age_category_select_value', function (msg){
+        var select_updated_id = parseInt(msg.age_cat_id)
+        // console.log('id селекта возрастной категории ', select_updated_id)
+        var age_years = parseInt(msg.age_years)
+        $(".age_category_select").val(select_updated_id)
+        $(".age_input").val(age_years)
 
 
+    })
+
+
+    socket.on('update_weight_category_select_value', function (msg){
+        var select_updated_id = parseInt(msg.data)
+        var age_eyars = parseInt(msg.age_eyars)
+        // console.log(msg.data)
+        $(".weight_category_select").val(select_updated_id)
+
+
+            // document.getElementById('timer_slave').innerHTML = timer_display(msg.timer_sent)
         })
-
-
-        socket.on('update_weight_category_select_value', function (msg){
-            var select_updated_id = parseInt(msg.data)
-            var age_eyars = parseInt(msg.age_eyars)
-            // console.log(msg.data)
-            $(".weight_category_select").val(select_updated_id)
-
-
-                // document.getElementById('timer_slave').innerHTML = timer_display(msg.timer_sent)
-            })
 
 });
 </script>
