@@ -727,18 +727,36 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
     current_weight_cat_id = int(weight_cat_id)
     current_weight_cat_data = WeightcategoriesDB.query.get(current_weight_cat_id)
     current_weight_cat_sort_index = current_weight_cat_data.sort_index
+
+    # следующая весовая категория
+    try:
+        next_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
+            WeightcategoriesDB.sort_index.asc()).filter(
+            WeightcategoriesDB.sort_index > current_weight_cat_sort_index).first()
+        next_weight_category_weight_category_finish = next_weight_category_data.weight_category_finish
+    except:
+        pass
+
     # вторая весовая категория
-    next_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
-        WeightcategoriesDB.sort_index.asc()).filter(
-        WeightcategoriesDB.sort_index > current_weight_cat_sort_index).first()
-    next_weight_category_weight_category_finish = next_weight_category_data.weight_category_finish
     second_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
         WeightcategoriesDB.sort_index.asc()).filter(
         WeightcategoriesDB.sort_index > first_weight_category_sort_index).first()
     second_weight_category_id = second_weight_category_data.weight_cat_id
+
+    # последняя весовая категория
     last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         desc(WeightcategoriesDB.sort_index)).first()
+    last_weight_category_id = last_weight_category_data.weight_cat_id
     last_weight_category_start = last_weight_category_data.weight_category_start
+    last_weight_category_sort_index = last_weight_category_data.sort_index
+
+    # предпоследняя весовая категория
+    before_last_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
+        WeightcategoriesDB.sort_index.desc()).filter(
+        WeightcategoriesDB.sort_index < last_weight_category_sort_index).first()
+    before_last_weight_category_finish = before_last_weight_category_data.weight_category_finish
+    before_last_weight_category_start = before_last_weight_category_data.weight_category_start
+
 
     if current_weight_cat_id == first_weight_category_id:
         # редактируем вторую категорию
@@ -754,6 +772,17 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
 
         # Удаляем текущую категорию
         db.session.delete(current_weight_cat_data)
+
+    elif current_weight_cat_id == last_weight_category_id:
+        # редактируем предыдущую категорию
+        before_last_weight_category_data.weight_category_name = f"Свыше {before_last_weight_category_start} кг"
+        before_last_weight_category_data.weight_category_finish = 1000000
+        # Удаляем текущую категорию
+        db.session.delete(current_weight_cat_data)
+
+
+
+
     else:
         "Удаление пошло не по плану"
 
