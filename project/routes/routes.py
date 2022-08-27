@@ -722,6 +722,8 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
     first_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         asc(WeightcategoriesDB.sort_index)).first()
     first_weight_category_id = first_weight_category_data.weight_cat_id
+    first_weight_category_sort_index = first_weight_category_data.sort_index
+    first_weight_category_finish = first_weight_category_data.weight_category_finish
     current_weight_cat_id = int(weight_cat_id)
     current_weight_cat_data = WeightcategoriesDB.query.get(current_weight_cat_id)
     current_weight_cat_sort_index = current_weight_cat_data.sort_index
@@ -730,6 +732,13 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         WeightcategoriesDB.sort_index.asc()).filter(
         WeightcategoriesDB.sort_index > current_weight_cat_sort_index).first()
     next_weight_category_weight_category_finish = next_weight_category_data.weight_category_finish
+    second_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
+        WeightcategoriesDB.sort_index.asc()).filter(
+        WeightcategoriesDB.sort_index > first_weight_category_sort_index).first()
+    second_weight_category_id = second_weight_category_data.weight_cat_id
+    last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        desc(WeightcategoriesDB.sort_index)).first()
+    last_weight_category_start = last_weight_category_data.weight_category_start
 
     if current_weight_cat_id == first_weight_category_id:
         # редактируем вторую категорию
@@ -737,14 +746,25 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         next_weight_category_data.weight_category_start = 0
         # удаляем текущую категорию
         db.session.delete(current_weight_cat_data)
-        try:
-            db.session.commit()
-            flash(f'Весовая категория удалена', 'alert-success')
 
-        except Exception as e:
-            print(e)
-            flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
-            db.session.rollback()
+    elif current_weight_cat_id == second_weight_category_id:
+        # редактируем третью категорию
+        last_weight_category_data.weight_category_name = f"Свыше {first_weight_category_finish} кг"
+        last_weight_category_data.weight_category_start = first_weight_category_finish
+
+        # Удаляем текущую категорию
+        db.session.delete(current_weight_cat_data)
+    else:
+        "Удаление пошло не по плану"
+
+    try:
+        db.session.commit()
+        flash(f'Весовая категория удалена', 'alert-success')
+
+    except Exception as e:
+        print(e)
+        flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
+        db.session.rollback()
 
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
 
@@ -1062,7 +1082,7 @@ def delete_weight_cat_ajaxfile():
                 {'htmlresponse': render_template('response_weight_cat_delete_2_regs.html',
                                                  text_regs_list=text_regs_list, competition_id=competition_id)})
 
-        # Если категорий - 3 и удалять их можно
+        # Если категорий - 3, удалять можно
         elif delete_confirmation == 1 and number_of_weight_categories == 3:
             weight_cat_id = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[3]
             weight_cat_name = text_regs_list[0]
