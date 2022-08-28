@@ -29,6 +29,15 @@ def check_delete_weight_category(weight_cat_id):
     last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         desc(WeightcategoriesDB.sort_index)).first()
     last_weight_category_id = last_weight_category_data.weight_cat_id
+    last_weight_category_sort_index = last_weight_category_data.sort_index
+
+    # Определяем предпоследнюю категорию
+    before_last_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
+        WeightcategoriesDB.sort_index.desc()).filter(
+        WeightcategoriesDB.sort_index < last_weight_category_sort_index).first()
+    before_last_weight_category_name = before_last_weight_category_data.weight_category_name
+    before_last_weight_category_id = before_last_weight_category_data.weight_cat_id
+
 
     if number_of_weight_categories == 2:
         # если количество категорий равно 2, то удаляем обе при условии, что нет связанных регистраций
@@ -67,7 +76,7 @@ def check_delete_weight_category(weight_cat_id):
             text_regs_data = weight_cat_name_list
             return delete_confirmation, text_regs_data, number_of_weight_categories
 
-    if number_of_weight_categories == 3:
+    elif number_of_weight_categories == 3:
         number_of_registrations_dict = {}
         weight_cat_name_list = []
         text_regs_list = []
@@ -135,6 +144,71 @@ def check_delete_weight_category(weight_cat_id):
         else:
             print("что-то не так")
 
+    elif number_of_weight_categories >= 4:
+        number_of_registrations_dict = {}
+        weight_cat_name_list = []
+        text_regs_list = []
+        current_weight_cat_registrations_data = RegistrationsDB.query.filter_by(weight_cat_id=weight_cat_id).all()
+        if weight_cat_id == first_weight_category_id:
+            if current_weight_cat_registrations_data:
+                regs_qty = len(list(current_weight_cat_registrations_data))
+                number_of_registrations_dict[current_weight_cat_name] = regs_qty
+                for (key, value) in number_of_registrations_dict.items():
+                    text_var = ""
+                    if value != 0:
+                        text_var = f"{key}: кол-во регистраций - {value}"
+                        text_regs_list.append(text_var)
+
+                text_regs_data = text_regs_list
+                delete_confirmation = 0
+                return delete_confirmation, text_regs_data, number_of_weight_categories
+            else:
+                delete_confirmation = 1
+                # названия удаляемых категорий
+                weight_cat_name_list.append(current_weight_cat_name)
+                text_regs_data = weight_cat_name_list
+                return delete_confirmation, text_regs_data, number_of_weight_categories, weight_cat_id
+
+        elif weight_cat_id == second_weight_category_weight_cat_id:
+            if current_weight_cat_registrations_data:
+                regs_qty = len(list(current_weight_cat_registrations_data))
+                number_of_registrations_dict[current_weight_cat_name] = regs_qty
+                for (key, value) in number_of_registrations_dict.items():
+                    text_var = ""
+                    if value != 0:
+                        text_var = f"{key}: кол-во регистраций - {value}"
+                        text_regs_list.append(text_var)
+                text_regs_data = text_regs_list
+                delete_confirmation = 0
+                return delete_confirmation, text_regs_data, number_of_weight_categories
+
+            else:
+                delete_confirmation = 1
+                # названия удаляемых категорий
+                weight_cat_name_list.append(current_weight_cat_name)
+                text_regs_data = weight_cat_name_list
+                return delete_confirmation, text_regs_data, number_of_weight_categories, weight_cat_id
+
+        # если удаляется предпоследняя категория
+        elif weight_cat_id == before_last_weight_category_id:
+            if current_weight_cat_registrations_data:
+                regs_qty = len(list(current_weight_cat_registrations_data))
+                number_of_registrations_dict[current_weight_cat_name] = regs_qty
+                for (key, value) in number_of_registrations_dict.items():
+                    text_var = ""
+                    if value != 0:
+                        text_var = f"{key}: кол-во регистраций - {value}"
+                        text_regs_list.append(text_var)
+                text_regs_data = text_regs_list
+                delete_confirmation = 0
+                return delete_confirmation, text_regs_data, number_of_weight_categories
+
+            else:
+                delete_confirmation = 1
+                # названия удаляемых категорий
+                weight_cat_name_list.append(current_weight_cat_name)
+                text_regs_data = weight_cat_name_list
+                return delete_confirmation, text_regs_data, number_of_weight_categories, weight_cat_id
 
     else:
         print('какой-то сценарий не покрыт')

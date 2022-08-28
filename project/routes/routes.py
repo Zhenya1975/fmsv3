@@ -718,6 +718,8 @@ def age_cat_delete(age_cat_id):
 @home.route('/weight_1_cat_delete/<int:competition_id>/<int:weight_cat_id>', methods=["POST", "GET"])
 def weight_1_cat_delete(competition_id, weight_cat_id):
     """Удаление одной весовой категории"""
+    weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
+    number_of_weight_categories = len(list(weight_categories_data))
     # Проверяем является ли категория первой
     first_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         asc(WeightcategoriesDB.sort_index)).first()
@@ -734,6 +736,20 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
             WeightcategoriesDB.sort_index.asc()).filter(
             WeightcategoriesDB.sort_index > current_weight_cat_sort_index).first()
         next_weight_category_weight_category_finish = next_weight_category_data.weight_category_finish
+        next_weight_category_id = next_weight_category_data.weight_cat_id
+    except:
+        pass
+
+    # предыдущая весовая категория
+    try:
+        previous_weight_category_data = db.session.query(WeightcategoriesDB).order_by(
+            WeightcategoriesDB.sort_index.desc()).filter(
+            WeightcategoriesDB.sort_index < current_weight_cat_sort_index).first()
+        previous_weight_category_id = previous_weight_category_data.weight_cat_id
+        previous_weight_category_name = previous_weight_category_data.weight_category_name
+        previous_weight_category_finish = previous_weight_category_data.weight_category_finish
+
+
     except:
         pass
 
@@ -742,6 +758,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         WeightcategoriesDB.sort_index.asc()).filter(
         WeightcategoriesDB.sort_index > first_weight_category_sort_index).first()
     second_weight_category_id = second_weight_category_data.weight_cat_id
+
 
     # последняя весовая категория
     last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
@@ -756,6 +773,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         WeightcategoriesDB.sort_index < last_weight_category_sort_index).first()
     before_last_weight_category_finish = before_last_weight_category_data.weight_category_finish
     before_last_weight_category_start = before_last_weight_category_data.weight_category_start
+    before_last_weight_category_id = before_last_weight_category_data.weight_cat_id
 
 
     if current_weight_cat_id == first_weight_category_id:
@@ -765,7 +783,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         # удаляем текущую категорию
         db.session.delete(current_weight_cat_data)
 
-    elif current_weight_cat_id == second_weight_category_id:
+    elif current_weight_cat_id == second_weight_category_id and number_of_weight_categories == 3:
         # редактируем третью категорию
         last_weight_category_data.weight_category_name = f"Свыше {first_weight_category_finish} кг"
         last_weight_category_data.weight_category_start = first_weight_category_finish
@@ -774,9 +792,25 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         db.session.delete(current_weight_cat_data)
 
     elif current_weight_cat_id == last_weight_category_id:
-        # редактируем предыдущую категорию
+        # редактируем предпоследнюю категорию
         before_last_weight_category_data.weight_category_name = f"Свыше {before_last_weight_category_start} кг"
         before_last_weight_category_data.weight_category_finish = 1000000
+        # Удаляем текущую категорию
+        db.session.delete(current_weight_cat_data)
+
+    elif current_weight_cat_id == second_weight_category_id and number_of_weight_categories >= 4:
+        # редактируем третью категорию
+        next_weight_category_data.weight_category_name = f"От {first_weight_category_finish} до {next_weight_category_data.weight_category_finish} кг"
+        next_weight_category_data.weight_category_start = first_weight_category_finish
+
+        # Удаляем текущую категорию
+        db.session.delete(current_weight_cat_data)
+
+    elif current_weight_cat_id == before_last_weight_category_id and number_of_weight_categories >= 4:
+        # редактируем последнюю категорию
+        last_weight_category_data.weight_category_name = f"Свыше {previous_weight_category_finish} кг"
+        last_weight_category_data.weight_category_start = previous_weight_category_finish
+
         # Удаляем текущую категорию
         db.session.delete(current_weight_cat_data)
 
@@ -1113,6 +1147,15 @@ def delete_weight_cat_ajaxfile():
 
         # Если категорий - 3, удалять можно
         elif delete_confirmation == 1 and number_of_weight_categories == 3:
+            weight_cat_id = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[3]
+            weight_cat_name = text_regs_list[0]
+            return jsonify(
+                {'htmlresponse': render_template('response_weight_cat_delete_1_regs.html',
+                                                 weight_cat_name=weight_cat_name, competition_id=competition_id,
+                                                 weight_cat_id=weight_cat_id)})
+
+        # Если категорий - больше или равно 4, удалять можно
+        elif delete_confirmation == 1 and number_of_weight_categories >= 4:
             weight_cat_id = check_delete_weight_category.check_delete_weight_category(weight_cat_id)[3]
             weight_cat_name = text_regs_list[0]
             return jsonify(
