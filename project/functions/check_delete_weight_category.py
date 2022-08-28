@@ -56,9 +56,18 @@ def check_delete_weight_category(weight_cat_id):
         delete_confirmation = 0
         return delete_confirmation, text_regs_data, number_of_weight_categories
     else:
+        if number_of_weight_categories == 2:
+            for weight_cat in all_weight_categories_data:
+                # регистрации, связанные с регистрацией
+                weight_cat_id = weight_cat.weight_cat_id
+                weight_cat_name = weight_cat.weight_category_name
+                weight_cat_name_list.append(weight_cat_name)
+            text_regs_data = weight_cat_name_list
+        else:
+            weight_cat_name_list.append(current_weight_cat_name)
+            text_regs_data = weight_cat_name_list
+
         delete_confirmation = 1
-        # названия удаляемых категорий
-        weight_cat_name_list.append(current_weight_cat_name)
-        text_regs_data = weight_cat_name_list
+
         return delete_confirmation, text_regs_data, number_of_weight_categories, weight_cat_id
 

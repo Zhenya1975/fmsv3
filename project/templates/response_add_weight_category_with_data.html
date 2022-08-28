@@ -6,14 +6,14 @@
     <div class="col">
       <div class="form-group">
         <label for="from">Вес от, кг</label>
-        <input type="number" class="form-control" id="from" name="from" value={{ value_from }}>
+        <input type="number" class="form-control" id="from" name="from" value={{ value_from }} required min="{{from_field_min}}" max="{{from_field_max}}">
       </div>
 
     </div>
     <div class="col">
        <div class="form-group">
       <label for="to">Вес до, кг</label>
-        <input type="number" class="form-control" id="to" name="to">
+        <input type="number" class="form-control" id="to" name="to" required>
       </div>
     </div>
   </div>
