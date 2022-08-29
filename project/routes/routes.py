@@ -791,12 +791,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         # Удаляем текущую категорию
         db.session.delete(current_weight_cat_data)
 
-    elif current_weight_cat_id == last_weight_category_id:
-        # редактируем предпоследнюю категорию
-        before_last_weight_category_data.weight_category_name = f"Свыше {before_last_weight_category_start} кг"
-        before_last_weight_category_data.weight_category_finish = 1000000
-        # Удаляем текущую категорию
-        db.session.delete(current_weight_cat_data)
+    
 
     elif current_weight_cat_id == second_weight_category_id and number_of_weight_categories >= 4:
         # редактируем третью категорию
@@ -814,11 +809,20 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         # Удаляем текущую категорию
         db.session.delete(current_weight_cat_data)
 
-
+    elif current_weight_cat_id == last_weight_category_id:
+        # редактируем предпоследнюю категорию
+        before_last_weight_category_data.weight_category_name = f"Свыше {before_last_weight_category_start} кг"
+        before_last_weight_category_data.weight_category_finish = 1000000
+        # Удаляем текущую категорию
+        db.session.delete(current_weight_cat_data)
 
 
     else:
-        "Удаление пошло не по плану"
+      # удаляем категорию в середине - не первую, не вторую, не последнюю, ни предпоследнюю
+      previous_weight_category_data.weight_category_name = f"От {previous_weight_category_data.weight_category_start} до {next_weight_category_data.weight_category_start} кг"
+      previous_weight_category_data.weight_category_finish = next_weight_category_data.weight_category_start
+      # Удаляем текущую категорию
+      db.session.delete(current_weight_cat_data)
 
     try:
         db.session.commit()
