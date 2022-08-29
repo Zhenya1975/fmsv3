@@ -1006,10 +1006,11 @@ def add_weight_category_with_data_ajaxfile():
             last_weight_category_data_to_value = last_weight_category_data.weight_category_finish
             last_weight_category_data_weight_cat_id = last_weight_category_data.weight_cat_id
 
+            # Если следующая категория - это последняя категория
             if next_weight_category_data_weight_cat_id == last_weight_category_data_weight_cat_id:
-
                 value_from = current_weight_category_to_value
                 status_of_last_record = 1
+                
             else:
                 # print("следующая категория существует - и она НЕ последняя")
                 value_from = current_weight_category_to_value
@@ -1018,11 +1019,12 @@ def add_weight_category_with_data_ajaxfile():
             # следующей категории нет
             value_from = current_weight_category_from_value
             status_of_last_record = 0
-
+        from_field_min = current_weight_category_from_value
         return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html',
                                                         competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                         weight_category_data=current_weight_category_data,
                                                         value_from=value_from,
+                                                        from_field_min=from_field_min,
                                                         status_of_last_record=status_of_last_record)})
 
 
