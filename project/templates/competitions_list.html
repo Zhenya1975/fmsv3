@@ -43,9 +43,9 @@
                 <tr>
                     <th>№</th>
                     <th>Наименование</th>
-                    <th>Дата начала</th>
-                    <th>Дата завершения</th>
+                    <th>Даты</th>
                     <th>Город</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -57,9 +57,18 @@
                               {{ competition_row.competition_name }}
                         </a>
                     </td>
-                    <td>{{ competition_row.competition_date_start.strftime('%d.%m.%Y') }}</td>
-                    <td>{{ competition_row.competition_date_finish.strftime('%d.%m.%Y')}}</td>
+                    <td>
+                        {% if competition_row.competition_date_start == competition_row.competition_date_finish %}
+                            {{ competition_row.competition_date_start.strftime('%d.%m.%Y') }}
+                        {% else %}
+                            {{ competition_row.competition_date_start.strftime('%d.%m.%Y') }} - {{ competition_row.competition_date_finish.strftime('%d.%m.%Y')}}
+                        {% endif %}
+
+                    </td>
                     <td>{{ competition_row.competition_city}}</td>
+                    <td style="text-align: center;">
+                        <a href="{{url_for('home.fights', competition_id=competition_row.competition_id)}}" type="button" class="btn btn-outline-primary fights_configurator" data-id={{ competition_row.competition_id }}>Поединки</a>
+                    </td>
                 </tr>
             {% endfor %}
         </table>
