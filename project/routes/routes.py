@@ -966,13 +966,19 @@ def registration_delete(reg_id):
 
 
 
+
 @home.route('/edit_rounds_ajaxfile', methods=["POST", "GET"])
 def edit_rounds_ajaxfile():
     if request.method == 'POST':
         competition_id = int(request.form['competition_id'])
-        print("competition_id: ", competition_id)
-        return jsonify({'htmlresponse': render_template('response_rounds_data.html')})
         
+        
+        return jsonify({'htmlresponse': render_template('response_rounds_data.html')})
+
+
+
+
+
 
 @home.route('/edit_age_cat_ajaxfile', methods=["POST", "GET"])
 def edit_age_cat_ajaxfile():

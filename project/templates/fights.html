@@ -15,7 +15,7 @@
       cursor:pointer;
      }
     </style>
-    <title>{{ competition_data.competition_name }}</title>
+    <title>{{ competition_data.competition_name }}. Поединки</title>
 </head>
 <body>
 
@@ -110,7 +110,7 @@
         </div>
 
 
-      <div class="modal fade" id="rounds_modal" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal fade" id="edit_rounds_modal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
               <div class="modal-content">
                     <div class="modal-header">
@@ -146,8 +146,8 @@
     $(document).ready(function(){
 
        $('.edit_rounds').click(function(){
-        // var weight_cat_id = $(this).data('id');
-
+        var competition_id = $(this).data('id');
+         console.log("competition_id: ", competition_id)
          $.ajax({
              url: '/edit_rounds_ajaxfile',
              type: 'post',
@@ -156,9 +156,10 @@
 
                 $('.modal-body').html(data);
                 $('.modal-body').append(data.htmlresponse);
-                $('#edit_rounds').modal('show');
+                $('#edit_rounds_modal').modal('show');
             }
          });
+
         });
       
     })
