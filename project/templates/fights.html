@@ -94,7 +94,7 @@
                     <div class="col">
                       <div class="p-2 align-self-center">
                         
-                        <button style="margin-top: 35px" class="btn btn-sm btn-outline-secondary edit_rounds" id="edit_rounds" type="button" data-id={{ competition_data.competition_id }}>Круги</button>
+                        <button style="margin-top: 35px" class="btn btn-sm btn-outline-secondary edit_rounds" id="edit_rounds" type="button" data-compid={{ competition_data.competition_id }}>Круги</button>
                       </div>
                       </div>
                   </div>
@@ -144,21 +144,32 @@
 
 <script>
     $(document).ready(function(){
+        var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
+        var selectedagecategory = $('#age_cat_select').children("option:selected").val();
+
+
+         $("select.weight_category_select").change(function(){
+            selectedweightcategory = $(this).children("option:selected").val();
+        });
+        $("select.age_category_select").change(function(){
+            selectedagecategory = $(this).children("option:selected").val();
+        });
+
 
        $('.edit_rounds').click(function(){
-        var competition_id = $(this).data('id');
-         console.log("competition_id: ", competition_id)
-         $.ajax({
-             url: '/edit_rounds_ajaxfile',
-             type: 'post',
-             data: {competition_id:competition_id},
-             success: function(data){
+           var competition_id = $(this).data('compid');
 
-                $('.modal-body').html(data);
-                $('.modal-body').append(data.htmlresponse);
-                $('#edit_rounds_modal').modal('show');
-            }
-         });
+           $.ajax({
+                 url: '/edit_rounds_ajaxfile',
+                 type: 'post',
+                 data: {competition_id:competition_id, selectedweightcategory:selectedweightcategory,selectedagecategory:selectedagecategory},
+                 success: function(data){
+
+                    $('.modal-body').html(data);
+                    $('.modal-body').append(data.htmlresponse);
+                    $('#edit_rounds_modal').modal('show');
+                }
+             });
 
         });
       

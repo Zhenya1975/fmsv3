@@ -77,3 +77,12 @@ class AgecategoriesDB(db.Model):
     age_category_finish = db.Column(db.Integer)
     registration_age_cat = db.relationship('RegistrationsDB', backref='registration_age_cat')
     # fights = db.relationship('FightsDB', backref = 'age_category_backref')
+
+
+class RoundsDB(db.Model):
+    """Модель для кругов"""
+    round_id = db.Column(db.Integer, primary_key=True)
+    round_name = db.Column(db.String)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
+    weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'))
+    age_cat_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))

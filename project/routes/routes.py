@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, \
-    AgecategoriesDB
+    AgecategoriesDB, RoundsDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
 from functions import check_delete_weight_category
@@ -970,7 +970,17 @@ def registration_delete(reg_id):
 @home.route('/edit_rounds_ajaxfile', methods=["POST", "GET"])
 def edit_rounds_ajaxfile():
     if request.method == 'POST':
+        selectedweightcategory = 0
+        selectedagecategory = 0
         competition_id = int(request.form['competition_id'])
+        selectedweightcategory = int(request.form['selectedweightcategory'])
+        selectedagecategory = int(request.form['selectedagecategory'])
+        print("competition_id: ", competition_id, "selectedweightcategory: ", selectedweightcategory, "selectedagecategory: ", selectedagecategory)
+        if selectedweightcategory !=0 and selectedagecategory !=0:
+            weight_cat_id = selectedweightcategory
+            age_cat_id = selectedagecategory
+            rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
+            print("rounds_data: ", rounds_data)
         
         
         return jsonify({'htmlresponse': render_template('response_rounds_data.html')})
