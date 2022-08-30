@@ -67,7 +67,7 @@
                     </td>
                     <td>{{ competition_row.competition_city}}</td>
                     <td style="text-align: center;">
-                        <a href="{{url_for('home.fights', competition_id=competition_row.competition_id)}}" type="button" class="btn btn-outline-primary fights_configurator" data-id={{ competition_row.competition_id }}>Поединки</a>
+                        <a href="{{url_for('home.fights', competition_id=competition_row.competition_id)}}" type="button" class="btn btn-sm btn-outline-primary fights_configurator" data-id={{ competition_row.competition_id }}>Поединки</a>
                     </td>
                 </tr>
             {% endfor %}
