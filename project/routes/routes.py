@@ -962,6 +962,35 @@ def registration_delete(reg_id):
 
 
 
+@home.route('/rounds_edit/<int:competition_id>/<int:weight_cat_id>//<int:age_cat_id>', methods=["POST", "GET"])
+def rounds_edit(competition_id, weight_cat_id, age_cat_id):
+    if request.method == 'POST':
+
+        all_round_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
+
+        # получаем список id раундов
+        round_id_list = []
+        for round_data in all_round_data:
+            round_id = round_data.round_id
+            round_id_list.append(round_id)
+        # итерируемся по списку id
+
+        for round_id in round_id_list:
+            round_data = RoundsDB.query.get(round_id)
+            round_id_from_form = str(round_id)
+            round_name = (request.form[round_id_from_form])
+            round_data.round_name = round_name
+            try:
+                db.session.commit()
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+
+        return redirect(url_for('home.fights', competition_id=competition_id))
+
+
+
+
 @home.route('/add_rounds_ajaxfile', methods=["POST", "GET"])
 def add_rounds_ajaxfile():
     if request.method == 'POST':
