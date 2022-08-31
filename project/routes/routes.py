@@ -135,6 +135,7 @@ def fights(competition_id):
     age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).all()
     weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
 
+
     return render_template("fights.html",
                            competition_data=competition_data,
                            age_catagories_data=age_catagories_data,
