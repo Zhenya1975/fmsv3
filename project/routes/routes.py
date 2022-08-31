@@ -129,7 +129,6 @@ def participants():
     return render_template('participants_list.html', participants_data=participants_data)
 
 
-
 @home.route('/fights/<int:competition_id>/')
 def fights(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
@@ -141,7 +140,6 @@ def fights(competition_id):
                            age_catagories_data=age_catagories_data,
                            weight_categories_data=weight_categories_data
                            )
-
 
 
 @home.route('/participant/<int:participant_id>/<active_tab_name>')
@@ -600,7 +598,7 @@ def registration_new(competition_id, participant_id):
         try:
             weight_cat_select_id = int(request.form.get('weight_catagory_selector'))
         except:
-            weight_cat_select_id=0
+            weight_cat_select_id = 0
         # Если поле с весовой категорией приехало пустым, то делаем расчет и записываем
         if weight_cat_select_id == 0:
             weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
@@ -774,7 +772,6 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         WeightcategoriesDB.sort_index > first_weight_category_sort_index).first()
     second_weight_category_id = second_weight_category_data.weight_cat_id
 
-
     # последняя весовая категория
     last_weight_category_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         desc(WeightcategoriesDB.sort_index)).first()
@@ -789,7 +786,6 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
     before_last_weight_category_finish = before_last_weight_category_data.weight_category_finish
     before_last_weight_category_start = before_last_weight_category_data.weight_category_start
     before_last_weight_category_id = before_last_weight_category_data.weight_cat_id
-
 
     if current_weight_cat_id == first_weight_category_id:
         # редактируем вторую категорию
@@ -806,7 +802,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         # Удаляем текущую категорию
         db.session.delete(current_weight_cat_data)
 
-    
+
 
     elif current_weight_cat_id == second_weight_category_id and number_of_weight_categories >= 4:
         # редактируем третью категорию
@@ -833,11 +829,11 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
 
 
     else:
-      # удаляем категорию в середине - не первую, не вторую, не последнюю, ни предпоследнюю
-      previous_weight_category_data.weight_category_name = f"От {previous_weight_category_data.weight_category_start} до {next_weight_category_data.weight_category_start} кг"
-      previous_weight_category_data.weight_category_finish = next_weight_category_data.weight_category_start
-      # Удаляем текущую категорию
-      db.session.delete(current_weight_cat_data)
+        # удаляем категорию в середине - не первую, не вторую, не последнюю, ни предпоследнюю
+        previous_weight_category_data.weight_category_name = f"От {previous_weight_category_data.weight_category_start} до {next_weight_category_data.weight_category_start} кг"
+        previous_weight_category_data.weight_category_finish = next_weight_category_data.weight_category_start
+        # Удаляем текущую категорию
+        db.session.delete(current_weight_cat_data)
 
     try:
         db.session.commit()
@@ -966,6 +962,29 @@ def registration_delete(reg_id):
 
 
 
+@home.route('/add_rounds_ajaxfile', methods=["POST", "GET"])
+def add_rounds_ajaxfile():
+    if request.method == 'POST':
+        competition_id = int(request.form['competition_id'])
+        weight_cat_id = int(request.form['weight_cat_id'])
+        age_cat_id = int(request.form['age_cat_id'])
+        new_round_value = request.form['new_round_value']
+        new_round = RoundsDB(round_name=new_round_value,
+                             competition_id=competition_id,
+                             weight_cat_id=weight_cat_id,
+                             age_cat_id=age_cat_id)
+        db.session.add(new_round)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
+
+        return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data)})
+
+
 
 @home.route('/edit_rounds_ajaxfile', methods=["POST", "GET"])
 def edit_rounds_ajaxfile():
@@ -975,19 +994,15 @@ def edit_rounds_ajaxfile():
         competition_id = int(request.form['competition_id'])
         selectedweightcategory = int(request.form['selectedweightcategory'])
         selectedagecategory = int(request.form['selectedagecategory'])
-        print("competition_id: ", competition_id, "selectedweightcategory: ", selectedweightcategory, "selectedagecategory: ", selectedagecategory)
-        if selectedweightcategory !=0 and selectedagecategory !=0:
+        # print("competition_id: ", competition_id, "selectedweightcategory: ", selectedweightcategory,
+        #       "selectedagecategory: ", selectedagecategory)
+        if selectedweightcategory != 0 and selectedagecategory != 0:
             weight_cat_id = selectedweightcategory
             age_cat_id = selectedagecategory
-            rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
-            print("rounds_data: ", rounds_data)
-        
-        
-        return jsonify({'htmlresponse': render_template('response_rounds_data.html')})
-
-
-
-
+            rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
+                                                   age_cat_id=age_cat_id).all()
+            # print("rounds_data: ", rounds_data)
+            return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data)})
 
 
 @home.route('/edit_age_cat_ajaxfile', methods=["POST", "GET"])
@@ -1051,7 +1066,7 @@ def add_weight_category_with_data_ajaxfile():
                 value_from = current_weight_category_to_value
                 status_of_last_record = 1
                 from_field_max = current_weight_category_to_value
-                
+
             else:
                 # print("следующая категория существует - и она НЕ последняя")
                 value_from = current_weight_category_to_value
@@ -1061,7 +1076,7 @@ def add_weight_category_with_data_ajaxfile():
             # следующей категории нет
             value_from = current_weight_category_from_value
             status_of_last_record = 0
-            from_field_max = 1000000-1
+            from_field_max = 1000000 - 1
         from_field_min = current_weight_category_from_value
         return jsonify({'htmlresponse': render_template('response_add_weight_category_with_data.html',
                                                         competition_id=competition_id, weight_cat_id=weight_cat_id,
@@ -1343,7 +1358,6 @@ def weight_value_changed(received_message):
         weight_category_finish = weight_category.weight_category_finish
         # print("new_weight_value: ", new_weight_value, "weight_category_start: ", weight_category_start, "weight_category_finish: ", weight_category_finish)
         if new_weight_value >= weight_category_start and new_weight_value <= weight_category_finish:
-
             updated_weight_cat['weight_cat_id'] = weight_cat_id
             updated_weight_cat['weight_category_name'] = weight_category_name
             emit('update_weight_category_select_value', {'data': weight_cat_id}, broadcast=True)
