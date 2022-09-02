@@ -1318,6 +1318,16 @@ def test_connect():
 
 values = {}
 
+@socketio.on('define_rounds_data')
+def define_rounds_data(received_message):
+    values['selectedweightcategory'] = received_message['selectedweightcategory']
+    values['selectedagecategory'] = received_message['selectedagecategory']
+    weight_cat_id = int(values['selectedweightcategory'])
+    age_cat_id = int(values['selectedagecategory'])
+    weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
+    competition_id = weight_cat_data.competition_id
+    rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,age_cat_id=age_cat_id).all()
+    print(rounds_data)
 
 @socketio.on('age_value_changed')
 def age_value_changed(received_message):

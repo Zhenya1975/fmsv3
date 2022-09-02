@@ -144,15 +144,21 @@
 
 <script>
     $(document).ready(function(){
+        var socket = io.connect();
         var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
+        // при загрузке страницы отправляем на сервер значения в селектах 
+        // возрастной и весовой категории с тем чтобы обратно получить значения для кругов
+        socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
 
 
          $("select.weight_category_select").change(function(){
             selectedweightcategory = $(this).children("option:selected").val();
+            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
         });
         $("select.age_category_select").change(function(){
             selectedagecategory = $(this).children("option:selected").val();
+            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
         });
 
 
