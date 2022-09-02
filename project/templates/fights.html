@@ -84,9 +84,9 @@
                               <label for="round_select">Круг</label>
                               <select style="width:auto;" class="round_select form-control" id="round_select" name="round_selector">
                                 <option value=0 selected disabled>Выбрать круг</option>
-                                  {% for weight_cat in weight_categories_data %}
+<!--                                   {% for weight_cat in weight_categories_data %}
                                     <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
-                                  {% endfor %}
+                                  {% endfor %} -->
                                 </select>
                           </div>
                       </div>
@@ -147,18 +147,37 @@
         var socket = io.connect();
         var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
+        var selectround = $('#round_select').children("option:selected").val();
         // при загрузке страницы отправляем на сервер значения в селектах 
         // возрастной и весовой категории с тем чтобы обратно получить значения для кругов
-        socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
+        socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
 
+        socket.on('update_round_selector', function (msg){
+            var option = $('<option></option>').attr("value", "option value").text("Text");
+            
+            var rounds_selector_data = msg.rounds_selector_data
+            var $el = $("#round_select");
+            $('#round_select option:gt(0)').remove();
+            $.each(rounds_selector_data, function(key,value) {
+              $el.append($("<option></option>")
+                 .attr("value", value).text(key));
+            });
+          })
 
          $("select.weight_category_select").change(function(){
-            selectedweightcategory = $(this).children("option:selected").val();
-            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
+              $(".round_select").val(0)
+             selectedweightcategory = $(this).children("option:selected").val();
+            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
+           
+           var option = $('<option></option>').attr("value", "option value").text("Text");
+           $('#round_select option:gt(0)').remove(); // remove all options, but not the first  
+           // $("#round_select").empty().append(option);
         });
+
+      
         $("select.age_category_select").change(function(){
             selectedagecategory = $(this).children("option:selected").val();
-            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
+            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
         });
 
 

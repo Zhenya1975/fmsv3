@@ -1322,12 +1322,24 @@ values = {}
 def define_rounds_data(received_message):
     values['selectedweightcategory'] = received_message['selectedweightcategory']
     values['selectedagecategory'] = received_message['selectedagecategory']
+    values['selectround'] = received_message['selectround']
+  
     weight_cat_id = int(values['selectedweightcategory'])
     age_cat_id = int(values['selectedagecategory'])
+    round_id = int(values['selectround'])
+    
     weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
     competition_id = weight_cat_data.competition_id
     rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,age_cat_id=age_cat_id).all()
-    print(rounds_data)
+    # кол-во раундов в выборке
+    number_of_rounds = len(list(rounds_data))
+    if number_of_rounds >0:
+      rounds_selector_data = {}
+      for round_data in rounds_data:
+        rounds_selector_data[round_data.round_name] = round_data.round_id
+      emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)  
+      
+    # print(values)
 
 @socketio.on('age_value_changed')
 def age_value_changed(received_message):
