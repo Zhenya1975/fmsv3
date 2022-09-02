@@ -1318,12 +1318,19 @@ def test_connect():
 
 values = {}
 
+
+@socketio.on('save_round_selector_data')
+def save_round_selector_data(received_message):
+    values['selectround'] = received_message['selectround']
+    print("selectround: ", values['selectround'])
+
+
 @socketio.on('define_rounds_data')
 def define_rounds_data(received_message):
     values['selectedweightcategory'] = received_message['selectedweightcategory']
     values['selectedagecategory'] = received_message['selectedagecategory']
     values['selectround'] = received_message['selectround']
-    print("values: ", values)
+    # print("values: ", values)
   
     weight_cat_id = int(values['selectedweightcategory'])
     age_cat_id = int(values['selectedagecategory'])

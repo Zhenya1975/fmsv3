@@ -82,7 +82,7 @@
                       <div class="p-2">
                         <div class="form-group">
                               <label for="round_select">Круг</label>
-                              <select style="width:auto;" class="round_select form-control" id="round_select" name="round_selector">
+                              <select style="width:auto;" class="round_select form-control" id="round_selector_id" name="round_selector">
                                 <option value=0 selected disabled>Выбрать круг</option>
 <!--                                   {% for weight_cat in weight_categories_data %}
                                     <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
@@ -147,7 +147,7 @@
         var socket = io.connect();
         var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
-        var selectround = $('#round_select').children("option:selected").val();
+        var selectround = $('#round_selector_id').children("option:selected").val();
         // при загрузке страницы отправляем на сервер значения в селектах 
         // возрастной и весовой категории с тем чтобы обратно получить значения для кругов
         socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
@@ -164,6 +164,13 @@
             });
           })
 
+          $("select.round_select").change(function(){
+            selectround = $(this).children("option:selected").val();
+            console.log("selectround: ", selectround)
+            socket.emit('save_round_selector_data', {'selectround':selectround});
+        });
+
+      
          $("select.weight_category_select").change(function(){
               $(".round_select").val(0)
              selectedweightcategory = $(this).children("option:selected").val();
@@ -180,10 +187,7 @@
             socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
         });
 
-        $("select.round_select").change(function(){
-            selectround = $(this).children("option:selected").val();
-            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
-        });
+        
 
 
        $('.edit_rounds').click(function(){
