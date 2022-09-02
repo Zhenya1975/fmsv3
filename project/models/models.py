@@ -42,10 +42,11 @@ class RegistrationsDB(db.Model):
 class FightsDB(db.Model):
     fight_id = db.Column(db.Integer, primary_key=True)
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
-    round_number = db.Column(db.Integer)
+    round_number = db.Column(db.Integer, db.ForeignKey('roundsDB.round_id'))
     red_fighter_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     blue_fighter_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     fight_winner_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
+    fight_status = db.Column(db.Integer, default=0)  # 0 - не начат, 1 - в процессе, 2 - завершен
     final_status = db.Column(db.String, default='continue')
 
 
