@@ -180,6 +180,11 @@
             socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
         });
 
+        $("select.round_select").change(function(){
+            selectround = $(this).children("option:selected").val();
+            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
+        });
+
 
        $('.edit_rounds').click(function(){
            var competition_id = $(this).data('compid');

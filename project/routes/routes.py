@@ -1323,6 +1323,7 @@ def define_rounds_data(received_message):
     values['selectedweightcategory'] = received_message['selectedweightcategory']
     values['selectedagecategory'] = received_message['selectedagecategory']
     values['selectround'] = received_message['selectround']
+    print("values: ", values)
   
     weight_cat_id = int(values['selectedweightcategory'])
     age_cat_id = int(values['selectedagecategory'])
