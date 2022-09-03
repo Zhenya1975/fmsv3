@@ -88,3 +88,11 @@ class RoundsDB(db.Model):
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'))
     age_cat_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))
+
+
+class FightcandidateDB(db.Model):
+    """Модель для кругов"""
+    id = db.Column(db.Integer, primary_key=True)
+    round_id = db.Column(db.Integer, db.ForeignKey('roundsDB.round_id'))
+    red_candidate_reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
+    blue_candidate_reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))

@@ -6,14 +6,19 @@
 <!--<div class="d-flex flex-row" style="min-width:780px">-->
 <div class="d-flex flex-row">
   <div class="col">
-<!--    <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="red_fighter_candidate">-->
-        <div style="height: 100px; width: 300px; box-shadow: inset 2px 2px 5px rgba(154, 147, 140, 0.5), 1px 1px 5px rgba(255, 255, 255, 1);"  class="red_fighter_candidate">
-    </div>
+        <div class="red_candidate_div">
+      <!--    <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="red_fighter_candidate">-->
+            <div style="height: 100px; width: 300px; box-shadow: inset 2px 2px 5px rgba(154, 147, 140, 0.5), 1px 1px 5px rgba(255, 255, 255, 1);"  class="red_fighter_candidate">
+
+            </div>
+        </div>
   </div>
 
     <div class="col">
 <!--        <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="blue_fighter_candidate">-->
-        <div style="height: 100px; width: 300px; box-shadow: inset 2px 2px 5px rgba(154, 147, 140, 0.5), 1px 1px 5px rgba(255, 255, 255, 1);"  class="blue_fighter_candidate">
+        <div class="blue_candidate_div">
+            <div style="height: 100px; width: 300px; box-shadow: inset 2px 2px 5px rgba(154, 147, 140, 0.5), 1px 1px 5px rgba(255, 255, 255, 1);"  class="blue_fighter_candidate">
+            </div>
         </div>
     </div>
     <div class="col">
@@ -22,24 +27,25 @@
 </div>
 
 
+<div class="backlog_list">
+    <!--      Список бойцов в бэклоге   -->
+    <div style="margin-top:40px;">
+        <ul style="list-style-type: none; padding-left: 14px;">
+           {% for backlog in backlog_data %}
+            <li>
+                <div style="margin-top:2px; height: 40px; min-width:635px; padding-top: 3px; padding-left: 15px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="d-flex justify-content-between blue_fighter_candidate">
+                    <div style="padding-top: 5px">
+                        {{ backlog.backlog_reg.registration_participant.participant_last_name }} {{ backlog.backlog_reg.registration_participant.participant_first_name }}
+                    </div>
+                    <div style="margin-top: 1px; margin-right:5px">
+                        <button class="btn btn-sm btn-outline-secondary add_candidate" id="add_candidate_id" type="button" data-id="{{backlog.id}}">Выбрать</button>
+                    </div>
 
-<!--      Список бойцов в бэклоге   -->
-<div style="margin-top:40px;">
-    <ul style="list-style-type: none; padding-left: 14px;">
-       {% for backlog in backlog_data %}
-        <li>
-            <div style="margin-top:2px; height: 40px; width:635px; padding-top: 3px; padding-left: 15px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="d-flex justify-content-between blue_fighter_candidate">
-                <div style="padding-top: 5px">
-                    {{ backlog.backlog_reg.registration_participant.participant_last_name }} {{ backlog.backlog_reg.registration_participant.participant_first_name }}
                 </div>
-                <div style="margin-top: 1px; margin-right:5px">
-                    <button class="btn btn-sm btn-outline-secondary add_candidate" id="add_candidate_id" type="button">Выбрать</button>
-                </div>
-
-            </div>
-        </li>
-        {% endfor %}
-    </ul>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 
 
@@ -93,5 +99,28 @@
             }
          });
         });
+
+
+        $('.add_candidate').click(function(){
+        var backlog_id = $(this).data('id');
+
+         $.ajax({
+             url: '/add_candidate_ajaxfile',
+             type: 'post',
+             data: {backlog_id:backlog_id},
+             success: function(response){
+                $('.red_candidate_div').html(response);
+                $('.red_candidate_div').append(response.htmlresponse_red_candidate);
+                $('.blue_candidate_div').html(response);
+                $('.blue_candidate_div').append(response.htmlresponse_blue_candidate);
+                $('.backlog_list').html(response);
+                $('.backlog_list').append(response.htmlresponse_backlog_list);
+
+
+            }
+         });
+        });
+
+
     })
 </script>
