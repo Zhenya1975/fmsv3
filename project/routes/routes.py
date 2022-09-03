@@ -1276,16 +1276,18 @@ def delete_weight_cat_ajaxfile():
                                                  number_of_regs=number_of_regs)})
 
 
+@home.route('/create_fight_ajaxfile', methods=["POST", "GET"])
+def create_fight_ajaxfile():
+    if request.method == 'POST':
+        return "x"
 
 @home.route('/fights_list_ajaxfile', methods=["POST", "GET"])
 def fights_list_ajaxfile():
     if request.method == 'POST':
-        selectround = request.form['selectround']
+        selectround = int(request.form['selectround'])
+        fights_data = FightsDB.query.filter_by(round_number=selectround).all()
 
-
-        return jsonify({'htmlresponse': render_template('fights_list.html')})
-
-
+        return jsonify({'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround)})
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
