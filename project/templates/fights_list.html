@@ -1,9 +1,51 @@
-<button type="button" class="btn btn-primary new_fight" data-id="{{round_id}}">Создать</button>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+
+<!--<button type="button" class="btn btn-primary new_fight" data-id="{{round_id}}">Создать</button>-->
 <p></p>
+<div class="d-flex flex-row" style="min-width:780px">
+  <div class="col">
+    <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="red_fighter_candidate">
+
+    </div>
+  </div>
+
+    <div class="col">
+        <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="blue_fighter_candidate">
+
+        </div>
+    </div>
+    <div class="col">
+        <button type="button" class="btn btn-outline-primary new_fight" data-id="{{round_id}}">Создать бой</button>
+    </div>
+</div>
+
+
+
+<!--      Список бойцов в бэклоге   -->
+<div style="margin-top:40px;">
+    <ul style="list-style-type: none; padding-left: 14px;">
+       {% for backlog in backlog_data %}
+        <li>
+            <div style="margin-top:2px; height: 40px; width:635px; padding-top: 3px; padding-left: 15px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="d-flex justify-content-between blue_fighter_candidate">
+                <div style="padding-top: 5px">
+                    {{ backlog.backlog_reg.registration_participant.participant_last_name }} {{ backlog.backlog_reg.registration_participant.participant_first_name }}
+                </div>
+                <div style="margin-top: 1px; margin-right:5px">
+                    <button class="btn btn-sm btn-outline-secondary add_candidate" id="add_candidate_id" type="button">Выбрать</button>
+                </div>
+
+            </div>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+
+
 
 <ul>
     {% for fight in fights_data %}
-        {{ fight.red_fighter.registration_participant.participant_last_name }} - {{ fight.red_fighter.registration_participant.participant_first_name }}
+        {{ fight.red_fighter.registration_participant.participant_last_name }} {{ fight.red_fighter.registration_participant.participant_first_name }}
     {% endfor %}
 </ul>
 

@@ -37,6 +37,7 @@ class RegistrationsDB(db.Model):
     red_fighter = db.relationship('FightsDB', backref='red_fighter', foreign_keys="[FightsDB.red_fighter_id]")
     blue_fighter = db.relationship('FightsDB', backref='blue_fighter', foreign_keys="[FightsDB.blue_fighter_id]")
     winner_reg = db.relationship('FightsDB', backref='winner_reg', foreign_keys="[FightsDB.fight_winner_id]")
+    backlog_reg = db.relationship('BacklogDB', backref='backlog_reg')
 
 
 class FightsDB(db.Model):

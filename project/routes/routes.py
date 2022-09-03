@@ -595,8 +595,10 @@ def registration_list(competition_id):
 def registration_new(competition_id, participant_id):
     if request.method == 'POST':
         weight_value_from_form = request.form.get('weight_input')
+        weight_cat_id = 0
         try:
             weight_cat_select_id = int(request.form.get('weight_catagory_selector'))
+            weight_cat_id = weight_cat_select_id
         except:
             weight_cat_select_id = 0
         # Если поле с весовой категорией приехало пустым, то делаем расчет и записываем
@@ -613,20 +615,26 @@ def registration_new(competition_id, participant_id):
                     updated_weight_cat['weight_category_name'] = weight_category_name
             weight_cat_select_id = updated_weight_cat['weight_cat_id']
 
-        age_value = int(request.form.get('age_input'))
-        age_cat_select_id = int(request.form.get('age_catagory_selector'))
+        age_cat_id = 0
+        age_value = 0
+        try:
+            age_value = int(request.form.get('age_input'))
+            age_cat_select_id = int(request.form.get('age_catagory_selector'))
+            age_cat_id = age_cat_select_id
+        except:
+            age_cat_select_id = 0
+
         new_reg = RegistrationsDB(
             weight_value=weight_value_from_form,
             competition_id=competition_id,
             participant_id=participant_id,
-            weight_cat_id=weight_cat_select_id,
+            weight_cat_id=weight_cat_id,
             age_value=age_value,
-            age_cat_id=age_cat_select_id,
+            age_cat_id=age_cat_id,
             activity_status=1
         )
 
         db.session.add(new_reg)
-        db.session.commit()
         try:
             db.session.commit()
             flash(f"Изменения сохранены", 'alert-success')
@@ -634,6 +642,49 @@ def registration_new(competition_id, participant_id):
         except Exception as e:
             print(e)
             flash(f'Изменения не сохранены. Ошибка: {e}', 'alert-danger')
+            db.session.rollback()
+
+        # получаем id созданной регистрации
+        last_reg_data = RegistrationsDB.query.filter_by(competition_id=competition_id).order_by(
+            desc(RegistrationsDB.reg_id)).first()
+        last_reg_id = last_reg_data.reg_id
+        # проверяем есть ли хотя бы хотя бы один раунд в весовой и возрастной категории
+        weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
+        age_cat_data = AgecategoriesDB.query.get(age_cat_id)
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
+                                               age_cat_id=age_cat_id).all()
+
+        # Если есть раунд, то получаем  id записи
+        round_id = 0
+        if rounds_data:
+            round_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
+                                                  age_cat_id=age_cat_id).order_by(RoundsDB.round_id).first()
+            round_id = round_data.round_id
+        # если раунда нет, то сначала создаем раунд и затем получаем ее id
+        else:
+            new_round = RoundsDB(
+                round_name="Круг 1",
+                competition_id=competition_id,
+                weight_cat_id=weight_cat_id,
+                age_cat_id=age_cat_id
+            )
+            db.session.add(new_round)
+            # данные созданного раунда
+            last_round_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
+                                                       age_cat_id=age_cat_id).order_by(desc(RoundsDB.round_id)).first()
+            round_id = last_round_data.round_id
+
+        # создаем запись в бэклоге
+        new_backlog_record = BacklogDB(
+            reg_id=last_reg_id,
+            competition_id=competition_id,
+            round_id=round_id
+        )
+        db.session.add(new_backlog_record)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print("Не сохранились изменения при создании раунда во время регистрации", e)
             db.session.rollback()
 
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
@@ -1281,13 +1332,19 @@ def create_fight_ajaxfile():
     if request.method == 'POST':
         return "x"
 
+
 @home.route('/fights_list_ajaxfile', methods=["POST", "GET"])
 def fights_list_ajaxfile():
     if request.method == 'POST':
         selectround = int(request.form['selectround'])
-        fights_data = FightsDB.query.filter_by(round_number=selectround).all()
+        round_data = RoundsDB.query.get(selectround)
 
-        return jsonify({'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround)})
+
+        fights_data = FightsDB.query.filter_by(round_number=selectround).all()
+        backlog_data = BacklogDB.query.filter_by(round_id=selectround).all()
+
+        return jsonify(
+            {'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround, backlog_data=backlog_data)})
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
