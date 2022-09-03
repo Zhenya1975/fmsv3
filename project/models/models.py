@@ -54,7 +54,7 @@ class BacklogDB(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
-    round_number = db.Column(db.Integer)
+    round_id = db.Column(db.Integer, db.ForeignKey('roundsDB.round_id'))
 
 
 class WeightcategoriesDB(db.Model):
