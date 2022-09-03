@@ -1341,13 +1341,14 @@ def define_rounds_data(received_message):
     competition_id = weight_cat_data.competition_id
     rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
                                            age_cat_id=age_cat_id).all()
+    # print("rounds_data: ", rounds_data)
     # кол-во раундов в выборке
     number_of_rounds = len(list(rounds_data))
     if number_of_rounds > 0:
         rounds_selector_data = {}
         for round_data in rounds_data:
             rounds_selector_data[round_data.round_name] = round_data.round_id
-
+        # print("rounds_selector_data: ", rounds_selector_data)
         emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)
 
         # print(values)
