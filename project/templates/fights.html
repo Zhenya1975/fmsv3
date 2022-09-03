@@ -105,11 +105,7 @@
                 <hr>
 
                 <div class="fights_data">
-                    <button type="button" class="btn btn-primary new_comp">Создать</button>
-                    <p></p>
-                    <ul>
 
-                    </ul>
                 </div>
 
              
@@ -158,7 +154,7 @@
         var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
         var selectround = $('#round_selector_id').children("option:selected").val();
-        $(".fights_data").hide()
+
         // при загрузке страницы отправляем на сервер значения в селектах 
         // возрастной и весовой категории с тем чтобы обратно получить значения для кругов
         socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
@@ -184,8 +180,19 @@
 
               // если значение не равно нулю, то показываем бои в выбранном круге
               if (parseInt(selectround) !=0){
-                  $(".fights_data").show()
-                  socket.emit('show_fights_list', {'selectround':selectround});
+                  // $(".fights_data").show()
+                  //socket.emit('show_fights_list', {'selectround':selectround});
+                      $.ajax({
+                         url: '/fights_list_ajaxfile',
+                         type: 'post',
+                         data: {selectround:parseInt(selectround)},
+                         success: function(response){
+                            $('.fights_data').html(response);
+                            $('.fights_data').append(response.htmlresponse);
+
+                        }
+                 });
+
               }
         });
 

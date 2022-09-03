@@ -1276,6 +1276,18 @@ def delete_weight_cat_ajaxfile():
                                                  number_of_regs=number_of_regs)})
 
 
+
+@home.route('/fights_list_ajaxfile', methods=["POST", "GET"])
+def fights_list_ajaxfile():
+    if request.method == 'POST':
+        selectround = request.form['selectround']
+
+
+        return jsonify({'htmlresponse': render_template('fights_list.html')})
+
+
+
+
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
 def delete_reg_ajaxfile():
     if request.method == 'POST':
@@ -1323,7 +1335,7 @@ values = {}
 @socketio.on('save_round_selector_data')
 def save_round_selector_data(received_message):
     values['selectround'] = received_message['selectround']
-    print("selectround: ", values['selectround'])
+    # print("selectround: ", values['selectround'])
 
 
 @socketio.on('define_rounds_data')
