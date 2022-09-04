@@ -661,6 +661,7 @@ def registration_new(competition_id, participant_id):
         if rounds_data_qty > 0:
             for round_data in rounds_data:
                 round_id = round_data.round_id
+                # запускаем функцию созданяи записи в бэклоге, передавая в нее параметры
                 create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
             # print("созданы записи в бэклоге")
 
