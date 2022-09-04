@@ -55,7 +55,7 @@ $(document).ready(function(){
 
     $('.add_round').click(function(){
         var new_round_value = $('#round_input_id').val();
-        // console.log("new_round_name: ", new_round_value)
+        console.log("new_round_name: ", new_round_value)
         $.ajax({
              url: '/add_rounds_ajaxfile',
              type: 'post',
