@@ -165,7 +165,7 @@
         socket.on('update_round_selector', function (msg){
             var option = $('<option></option>').attr("value", "option value").text("Text");
             var rounds_selector_data = msg.rounds_selector_data
-            console.log("есть контакт")
+            // console.log("есть контакт")
             var $el = $("#round_selector_id");
             $('#round_selector_id option:gt(0)').remove();
             $.each(rounds_selector_data, function(key,value) {
@@ -209,6 +209,7 @@
 
       
         $("select.age_category_select").change(function(){
+            $(".round_select").val(0)
             selectedagecategory = $(this).children("option:selected").val();
             socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
         });

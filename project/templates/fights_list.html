@@ -44,12 +44,12 @@
 
 
 
+    <ul>
+        {% for fight in fights_data %}
+            {{ fight.red_fighter.registration_participant.participant_last_name }} {{ fight.red_fighter.registration_participant.participant_first_name }}
+        {% endfor %}
+    </ul>
 
-<ul>
-    {% for fight in fights_data %}
-        {{ fight.red_fighter.registration_participant.participant_last_name }} {{ fight.red_fighter.registration_participant.participant_first_name }}
-    {% endfor %}
-</ul>
 
 <div class="modal fade" id="create_fight_modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
