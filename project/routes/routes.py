@@ -654,12 +654,16 @@ def registration_new(competition_id, participant_id):
         rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                age_cat_id=age_cat_id).all()
 
-        # Если есть раунд, то получаем id записи
-        round_id = 0
-        if rounds_data:
-            round_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
-                                                  age_cat_id=age_cat_id).order_by(RoundsDB.round_id).first()
-            round_id = round_data.round_id
+        # print("last_reg_data", last_reg_data, "rounds_data: ", rounds_data)
+
+        # Если есть раунды, то вписываем в бэклоги этих раундов зарегистрированного бойца
+        rounds_data_qty = len(list(rounds_data))
+        if rounds_data_qty > 0:
+            for round_data in rounds_data:
+                round_id = round_data.round_id
+                create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
+            # print("созданы записи в бэклоге")
+
         # если раунда нет, то сначала создаем раунд и затем получаем ее id
         else:
             new_round = RoundsDB(
@@ -672,12 +676,13 @@ def registration_new(competition_id, participant_id):
             # данные созданного раунда
             last_round_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                        age_cat_id=age_cat_id).order_by(desc(RoundsDB.round_id)).first()
+
             round_id = last_round_data.round_id
 
         # создаем запись в бэклоге
-        # запись в бэклоге создаем если регистрации нет ни в кандидатах, ни в боях
+        # запись в бэклоге создаем если регистрации нет в боях
         related_fights_qty = create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
-        if related_fights_qty >0:
+        if related_fights_qty > 0:
             print("related_fights_qty: ", related_fights_qty, ". Запись в бэклоге не создана")
 
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
@@ -727,6 +732,26 @@ def weight_category_edit(weight_cat_id):
 def registration_edit(reg_id):
     reg_data = RegistrationsDB.query.filter_by(reg_id=reg_id).first()
     competition_id = reg_data.competition_id
+    # Проверяем есть ли связанные бои с данной регистрацией
+    fights_red_data = FightsDB.query.filter_by(competition_id=competition_id, red_fighter_id=reg_id).all()
+    fights_red_qty = len(list(fights_red_data))
+    fights_blue_data = FightsDB.query.filter_by(competition_id=competition_id, blue_fighter_id=reg_id).all()
+    fights_blue_qty = len(list(fights_blue_data))
+    fights_qty = fights_red_qty + fights_blue_qty
+    if fights_qty > 0:
+        flash(f"Изменения не сохранены. Есть связанные поединки", 'alert-danger')
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+    else:
+        # если связанных поединков нет, то удаляем бэклог записи, если они есть и создаем новые
+        # получаем данные в каких раундах участвует данная регистрация
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id,
+                                               weight_cat_id=reg_data.weight_cat_id).all()
+        if rounds_data:
+            for round in rounds_data:
+                if round:
+                    round_id = round.round_id
+                    create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
+
     # form = RegistrationeditForm()
     # if form.validate_on_submit():
     if request.method == 'POST':
@@ -1040,6 +1065,8 @@ def add_rounds_ajaxfile():
         weight_cat_id = int(request.form['weight_cat_id'])
         age_cat_id = int(request.form['age_cat_id'])
         new_round_value = request.form['new_round_value']
+        # print("new_round_value: ", new_round_value)
+
         new_round = RoundsDB(round_name=new_round_value,
                              competition_id=competition_id,
                              weight_cat_id=weight_cat_id,
@@ -1053,10 +1080,17 @@ def add_rounds_ajaxfile():
 
         rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                age_cat_id=age_cat_id).all()
+        rounds_selector_data = {}
+        for round_data in rounds_data:
+            rounds_selector_data[round_data.round_name] = round_data.round_id
+        # print("rounds_selector_data: ", rounds_selector_data)
 
         return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id,
                                                         weight_cat_id=weight_cat_id, age_cat_id=age_cat_id,
-                                                        rounds_data=rounds_data)})
+                                                        rounds_data=rounds_data),
+                        'weight_cat_id': weight_cat_id,
+                        'age_cat_id': age_cat_id
+                        })
 
 
 @home.route('/edit_rounds_ajaxfile', methods=["POST", "GET"])
@@ -1340,14 +1374,10 @@ def add_candidate_ajaxfile():
         # количество занятых записей
         candidate_records_qty = len(list(candidate_records_data))
         # Если количество занятых записей меньше двух, то создаем новую запись
-        if candidate_records_qty<2:
+        if candidate_records_qty < 2:
             # итерируемся по списку записей кандидатов
             for candidate in candidate_records_data:
                 print(candidate.red_candidate_reg_id)
-
-
-
-
 
 
 @home.route('/create_fight_ajaxfile', methods=["POST", "GET"])
@@ -1424,12 +1454,11 @@ def save_round_selector_data(received_message):
 def define_rounds_data(received_message):
     values['selectedweightcategory'] = received_message['selectedweightcategory']
     values['selectedagecategory'] = received_message['selectedagecategory']
-    values['selectround'] = received_message['selectround']
+
     # print("values: ", values)
 
     weight_cat_id = int(values['selectedweightcategory'])
     age_cat_id = int(values['selectedagecategory'])
-    round_id = int(values['selectround'])
 
     weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
     competition_id = weight_cat_data.competition_id

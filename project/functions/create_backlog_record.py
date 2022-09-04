@@ -1,4 +1,4 @@
-from models.models import FightsDB, BacklogDB, FightcandidateDB
+from models.models import FightsDB, BacklogDB, FightcandidateDB, RegistrationsDB
 from sqlalchemy import desc, asc
 from extensions import extensions
 
@@ -15,6 +15,8 @@ def create_backlog_record(competition_id, reg_id, round_id):
                                                 round_number=round_id).all()
     fights_blue_qty = len(list(fights_blue_data))
     fights_qty = fights_red_qty + fights_blue_qty
+    reg_data = RegistrationsDB.query.get(reg_id)
+    reg_activity_status = reg_data.activity_status
     if fights_qty == 0:
         # если связанных боев нет, то проверяем есть ли связанная запись в бэклоге и в кандидатах
         backlog_data = BacklogDB.query.filter_by(competition_id=competition_id, reg_id=reg_id, round_id=round_id).all()
@@ -51,16 +53,17 @@ def create_backlog_record(competition_id, reg_id, round_id):
                 db.session.rollback()
 
         # создаем запись в бэклоге
-        new_backlog_record = BacklogDB(
-            reg_id=reg_id,
-            competition_id=competition_id,
-            round_id=round_id
-        )
-        db.session.add(new_backlog_record)
-        try:
-            db.session.commit()
-        except Exception as e:
-            print("Не удалось добавить запись в бэклог в check_delete_weight_category.py", e)
-            db.session.rollback()
+        if reg_activity_status == 1:
+            new_backlog_record = BacklogDB(
+                reg_id=reg_id,
+                competition_id=competition_id,
+                round_id=round_id
+            )
+            db.session.add(new_backlog_record)
+            try:
+                db.session.commit()
+            except Exception as e:
+                print("Не удалось добавить запись в бэклог в check_delete_weight_category.py", e)
+                db.session.rollback()
 
     return fights_qty

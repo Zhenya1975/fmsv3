@@ -157,14 +157,15 @@
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
         var selectround = $('#round_selector_id').children("option:selected").val();
 
+
         // при загрузке страницы отправляем на сервер значения в селектах 
         // возрастной и весовой категории с тем чтобы обратно получить значения для кругов
-        socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
+        socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
 
         socket.on('update_round_selector', function (msg){
             var option = $('<option></option>').attr("value", "option value").text("Text");
             var rounds_selector_data = msg.rounds_selector_data
-
+            console.log("есть контакт")
             var $el = $("#round_selector_id");
             $('#round_selector_id option:gt(0)').remove();
             $.each(rounds_selector_data, function(key,value) {
@@ -202,14 +203,14 @@
          $("select.weight_category_select").change(function(){
               $(".round_select").val(0)
              selectedweightcategory = $(this).children("option:selected").val();
-            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
+            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
 
          });
 
       
         $("select.age_category_select").change(function(){
             selectedagecategory = $(this).children("option:selected").val();
-            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory, 'selectround':selectround});
+            socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
         });
 
         

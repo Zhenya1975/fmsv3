@@ -47,12 +47,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.min.js"></script>
 <script>
 $(document).ready(function(){
+    var socket = io.connect();
     var competition_id = {{ competition_id }}
     var weight_cat_id = {{weight_cat_id}}
     var age_cat_id = {{ age_cat_id }}
     $(".alert_message").hide();
+
     $('.add_round').click(function(){
         var new_round_value = $('#round_input_id').val();
+        // console.log("new_round_name: ", new_round_value)
         $.ajax({
              url: '/add_rounds_ajaxfile',
              type: 'post',
@@ -62,6 +65,10 @@ $(document).ready(function(){
                  age_cat_id:age_cat_id
              },
              success: function(data){
+                // при успешном создании нового круга запускаем функцию обновления селекта с раундами
+                 selectedweightcategory = data.weight_cat_id
+                 selectedagecategory = data.age_cat_id
+                 socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
 
                 $('.modal-body').html(data);
                 $('.modal-body').append(data.htmlresponse);
