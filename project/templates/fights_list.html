@@ -26,27 +26,22 @@
     </div>
 </div>
 
-
 <div class="backlog_list">
     <!--      Список бойцов в бэклоге   -->
     <div style="margin-top:40px;">
-        <ul style="list-style-type: none; padding-left: 14px;">
-           {% for backlog in backlog_data %}
-            <li>
-                <div style="margin-top:2px; height: 40px; min-width:635px; padding-top: 3px; padding-left: 15px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="d-flex justify-content-between blue_fighter_candidate">
-                    <div style="padding-top: 5px">
-                        {{ backlog.backlog_reg.registration_participant.participant_last_name }} {{ backlog.backlog_reg.registration_participant.participant_first_name }}
-                    </div>
-                    <div style="margin-top: 1px; margin-right:5px">
-                        <button class="btn btn-sm btn-outline-secondary add_candidate" id="add_candidate_id" type="button" data-id="{{backlog.id}}">Выбрать</button>
-                    </div>
-
-                </div>
+        <ul class="list-group">
+          {% for backlog in backlog_data %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ backlog.backlog_reg.registration_participant.participant_last_name }} {{ backlog.backlog_reg.registration_participant.participant_first_name }}
+                 <button class="btn btn-sm btn-outline-secondary add_candidate" id="add_candidate_id" type="button" data-id="{{backlog.id}}">Выбрать</button>
             </li>
-            {% endfor %}
+          {% endfor %}
+
         </ul>
     </div>
 </div>
+
+
 
 
 

@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, \
-    AgecategoriesDB, RoundsDB
+    AgecategoriesDB, RoundsDB, FightcandidateDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
-from functions import check_delete_weight_category
+from functions import check_delete_weight_category, create_backlog_record
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
@@ -647,14 +647,14 @@ def registration_new(competition_id, participant_id):
         # получаем id созданной регистрации
         last_reg_data = RegistrationsDB.query.filter_by(competition_id=competition_id).order_by(
             desc(RegistrationsDB.reg_id)).first()
-        last_reg_id = last_reg_data.reg_id
+        reg_id = last_reg_data.reg_id
         # проверяем есть ли хотя бы хотя бы один раунд в весовой и возрастной категории
         weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
         age_cat_data = AgecategoriesDB.query.get(age_cat_id)
         rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                age_cat_id=age_cat_id).all()
 
-        # Если есть раунд, то получаем  id записи
+        # Если есть раунд, то получаем id записи
         round_id = 0
         if rounds_data:
             round_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
@@ -675,17 +675,10 @@ def registration_new(competition_id, participant_id):
             round_id = last_round_data.round_id
 
         # создаем запись в бэклоге
-        new_backlog_record = BacklogDB(
-            reg_id=last_reg_id,
-            competition_id=competition_id,
-            round_id=round_id
-        )
-        db.session.add(new_backlog_record)
-        try:
-            db.session.commit()
-        except Exception as e:
-            print("Не сохранились изменения при создании раунда во время регистрации", e)
-            db.session.rollback()
+        # запись в бэклоге создаем если регистрации нет ни в кандидатах, ни в боях
+        related_fights_qty = create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
+        if related_fights_qty >0:
+            print("related_fights_qty: ", related_fights_qty, ". Запись в бэклоге не создана")
 
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
@@ -1327,6 +1320,36 @@ def delete_weight_cat_ajaxfile():
                                                  number_of_regs=number_of_regs)})
 
 
+@home.route('/add_candidate_ajaxfile', methods=["POST", "GET"])
+def add_candidate_ajaxfile():
+    if request.method == 'POST':
+        backlog_id = int(request.form['backlog_id'])
+        # удаляем запись из бэклога
+        backlog_data_to_delete = BacklogDB.query.get(backlog_id)
+        round_id = backlog_data_to_delete.round_id
+        db.session.delete(backlog_data_to_delete)
+        try:
+            db.session.commit()
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+
+        # проверяем есть ли свободные записи в FightcandidateDB
+        candidate_records_data = FightcandidateDB.query.filter_by(round_id=round_id).all()
+        print("candidate_records_data: ", candidate_records_data)
+        # количество занятых записей
+        candidate_records_qty = len(list(candidate_records_data))
+        # Если количество занятых записей меньше двух, то создаем новую запись
+        if candidate_records_qty<2:
+            # итерируемся по списку записей кандидатов
+            for candidate in candidate_records_data:
+                print(candidate.red_candidate_reg_id)
+
+
+
+
+
+
 @home.route('/create_fight_ajaxfile', methods=["POST", "GET"])
 def create_fight_ajaxfile():
     if request.method == 'POST':
@@ -1339,12 +1362,12 @@ def fights_list_ajaxfile():
         selectround = int(request.form['selectround'])
         round_data = RoundsDB.query.get(selectround)
 
-
         fights_data = FightsDB.query.filter_by(round_number=selectround).all()
         backlog_data = BacklogDB.query.filter_by(round_id=selectround).all()
 
         return jsonify(
-            {'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround, backlog_data=backlog_data)})
+            {'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround,
+                                             backlog_data=backlog_data)})
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
