@@ -1133,6 +1133,32 @@ def add_rounds_ajaxfile():
             print(e)
             db.session.rollback()
 
+        # определяем есть ли регистрации, которыми можно заполнить созданный круг
+        
+        # последний созданный раунд 
+        last_round_data = RoundsDB.query.order_by(desc(RoundsDB.round_id)).first()  
+        last_round_id = last_round_data.round_id
+        # получаем список id в текущем бэклоге
+        backlogs_data = BacklogDB.query.filter_by(competition_id=competition_id, round_id=last_round_id).all()
+        backlogs_data_id_list = []
+        try:
+          for backlog in backlogs_data:
+            backlog_id = backlog.id
+            backlogs_data_id_list.append(backlog_id)
+        except:
+          pass
+        
+        potencial_backlog_data = RegistrationsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, activity_status=1).all()
+        try:
+          for reg_data in potencial_backlog_data:
+            reg_id = reg_data.reg_id
+            if reg_id not in backlogs_data_id_list:
+              new_backlog = BacklogDB(reg_id=reg_data.reg_id, competition_id=reg_data.competition_id, round_id=last_round_id)
+              db.session.add(new_backlog)
+              db.session.commit()
+        except:
+          pass
+          
         rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
         rounds_selector_data = {}
         for round_data in rounds_data:
