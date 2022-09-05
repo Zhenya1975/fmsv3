@@ -1,3 +1,12 @@
+<style>
+  .warning{
+    background-color: linen;
+    border:2px solid;
+    border-color: red;
+    
+  }
+</style>
+
 <div class="alert_message">
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <p id="message"></p>
@@ -26,8 +35,8 @@
 
     <hr>
     <div class="input-group">
-      <input class="form-control" type="text" id="round_input_id" name="round_input_name"  placeholder="Наименование раунда">
-      <div class="input-group-append">
+      <input class="form-control add_round_input" type="text" id="round_input_id" name="round_input_name"  placeholder="Наименование раунда" style="margin-left=5px; margin-right=5px;">
+      <div style="margin-left: 5px" class="input-group-append">
           <button class="btn btn-outline-secondary add_round" type="button">Добавить</button>
         </div>
     </div>
@@ -56,25 +65,33 @@ $(document).ready(function(){
     $('.add_round').click(function(){
         var new_round_value = $('#round_input_id').val();
         console.log("new_round_name: ", new_round_value)
-        $.ajax({
-             url: '/add_rounds_ajaxfile',
-             type: 'post',
-             data: {competition_id:competition_id,
-                 new_round_value:new_round_value,
-                 weight_cat_id:weight_cat_id,
-                 age_cat_id:age_cat_id
-             },
-             success: function(data){
-                // при успешном создании нового круга запускаем функцию обновления селекта с раундами
-                 selectedweightcategory = data.weight_cat_id
-                 selectedagecategory = data.age_cat_id
-                 socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
-
-                $('.modal-body').html(data);
-                $('.modal-body').append(data.htmlresponse);
-                //$('#edit_rounds_modal').modal('show');
-            }
-         });
+        
+        if(new_round_value.length>0){
+          $.ajax({
+               url: '/add_rounds_ajaxfile',
+               type: 'post',
+               data: {competition_id:competition_id,
+                   new_round_value:new_round_value,
+                   weight_cat_id:weight_cat_id,
+                   age_cat_id:age_cat_id
+               },
+               success: function(data){
+                  // при успешном создании нового круга запускаем функцию обновления селекта с раундами
+                   selectedweightcategory = data.weight_cat_id
+                   selectedagecategory = data.age_cat_id
+                   socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
+  
+                  $('.modal-body').html(data);
+                  $('.modal-body').append(data.htmlresponse);
+                  //$('#edit_rounds_modal').modal('show');
+              }
+           });
+        }
+      else {
+        console.log("поле пустое")
+        $('.add_round_input').addClass('warning');
+      }
+      
 
 
         // $(".alert_message").show();
