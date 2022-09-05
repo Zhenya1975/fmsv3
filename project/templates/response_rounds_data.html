@@ -106,11 +106,12 @@ $(document).ready(function(){
                      age_cat_id:age_cat_id
                      },
                success: function(data){
-                 console.log("ответ от удаления круга получен")
+                 
                   var alert_trigger = data.alert_trigger
-                   selectedweightcategory = data.weight_cat_id
-                   selectedagecategory = data.age_cat_id
-                   socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
+                   weightcategory = data.weight_cat_id
+                   agecategory = data.age_cat_id
+                   console.log("weightcategory, ", weightcategory, ", agecategory: ", agecategory) 
+                   socket.emit('define_rounds_data', {'selectedweightcategory': weightcategory, 'selectedagecategory':agecategory});
                   $('.modal-body').html(data);
                   $('.modal-body').append(data.htmlresponse);
 

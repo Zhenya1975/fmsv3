@@ -1108,17 +1108,10 @@ def delete_round_ajaxfile():
         for round_data in rounds_data:
             rounds_selector_data[round_data.round_name] = round_data.round_id
         # print("rounds_selector_data: ", rounds_selector_data)
-      
+        
         return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data), 'weight_cat_id': weight_cat_id, 'age_cat_id': age_cat_id, 'alert_trigger':alert_trigger})  
               
           
-
-
-
-
-            
-            
-        
 
 @home.route('/add_rounds_ajaxfile', methods=["POST", "GET"])
 def add_rounds_ajaxfile():
@@ -1140,18 +1133,13 @@ def add_rounds_ajaxfile():
             print(e)
             db.session.rollback()
 
-        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
-                                               age_cat_id=age_cat_id).all()
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
         rounds_selector_data = {}
         for round_data in rounds_data:
             rounds_selector_data[round_data.round_name] = round_data.round_id
         # print("rounds_selector_data: ", rounds_selector_data)
-
-        return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id,
-                                                        weight_cat_id=weight_cat_id, age_cat_id=age_cat_id,
-                                                        rounds_data=rounds_data),
-                        'weight_cat_id': weight_cat_id,
-                        'age_cat_id': age_cat_id
+        
+        return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data), 'weight_cat_id': weight_cat_id, 'age_cat_id': age_cat_id
                         })
 
 
@@ -1524,18 +1512,18 @@ def define_rounds_data(received_message):
 
     weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
     competition_id = weight_cat_data.competition_id
-    rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
-                                           age_cat_id=age_cat_id).all()
+    rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
     # print("rounds_data: ", rounds_data)
     # кол-во раундов в выборке
     number_of_rounds = len(list(rounds_data))
+    rounds_selector_data = {}
     if number_of_rounds > 0:
-        rounds_selector_data = {}
-        for round_data in rounds_data:
-            rounds_selector_data[round_data.round_name] = round_data.round_id
-        # print("rounds_selector_data: ", rounds_selector_data)
-        emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)
+      for round_data in rounds_data:
+          rounds_selector_data[round_data.round_name] = round_data.round_id
+      # print("rounds_selector_data: ", rounds_selector_data)
+      emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)
 
+      
         # print(values)
 
 
