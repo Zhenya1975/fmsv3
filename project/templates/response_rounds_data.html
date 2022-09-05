@@ -1,7 +1,7 @@
 <style>
   .warning{
     background-color: linen;
-    border:2px solid;
+    border:1px solid;
     border-color: red;
     
   }
@@ -25,7 +25,7 @@
             <div class="input-group" style="margin-bottom: 10px">
               <input class="form-control" required type="text"  id="round_input" name="{{ round.round_id }}" value="{{ round.round_name }}" placeholder="Наименование раунда">
               <div style="margin-left: 5px" class="input-group-append">
-                  <button  class="btn btn-sm btn-outline-danger delete_round" type="button">Удалить</button>
+                  <button  class="btn btn-sm btn-outline-danger delete_round" type="button" data-id={{round.round_id}}>Удалить</button>
                 </div>
             </div>
           </li>
@@ -64,7 +64,7 @@ $(document).ready(function(){
 
     $('.add_round').click(function(){
         var new_round_value = $('#round_input_id').val();
-        console.log("new_round_name: ", new_round_value)
+        // console.log("new_round_name: ", new_round_value)
         
         if(new_round_value.length>0){
           $.ajax({
@@ -88,17 +88,43 @@ $(document).ready(function(){
            });
         }
       else {
-        console.log("поле пустое")
+        // console.log("поле пустое")
         $('.add_round_input').addClass('warning');
       }
       
-
-
-        // $(".alert_message").show();
-        // $().alert()
-        // $('#message').text('rtgretbgretbgrtg');
     });
 
+    
+   $('.delete_round').click(function(){
+     var round_id = parseInt($(this).data('id'));
+     $.ajax({
+               url: '/delete_round_ajaxfile',
+               type: 'post',
+               data: {round_id:round_id,
+                      competition_id:competition_id,
+                      weight_cat_id:weight_cat_id,
+                     age_cat_id:age_cat_id
+                     },
+               success: function(data){
+                  var alert_trigger = data.alert_trigger
+                   selectedweightcategory = data.weight_cat_id
+                   selectedagecategory = data.age_cat_id
+                   socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
+                  $('.modal-body').html(data);
+                  $('.modal-body').append(data.htmlresponse);
+
+                 // если приехал alert_trigger равный единице, значит есть связанные поединки и удаление не произошло
+                   if (alert_trigger != 0){
+                     $(".alert_message").show();
+                     $().alert()
+                      $('#message').text('Удаление запрещено. Есть связанные поединки');
+                   }
+                  
+              }
+           });
+     
+   })
+    
 
 
     // var alert_trigger = 0
