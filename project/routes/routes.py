@@ -1059,6 +1059,60 @@ def rounds_edit(competition_id, weight_cat_id, age_cat_id):
         return redirect(url_for('home.fights', competition_id=competition_id))
 
 
+
+
+@home.route('/delete_round_ajaxfile', methods=["POST", "GET"])
+def delete_round_ajaxfile():
+    if request.method == 'POST':
+        round_id = int(request.form['round_id'])
+        competition_id = int(request.form['competition_id'])
+        weight_cat_id = int(request.form['weight_cat_id'])
+        age_cat_id = int(request.form['age_cat_id'])
+        # проверяем есть ли созданные поединки в данном круге
+        fights_data_in_round = FightsDB.query.filter_by(round_number=round_id).all()
+        number_of_fights_data_in_round = len(list(fights_data_in_round))
+        # print("number_of_fights_data_in_round: ", number_of_fights_data_in_round)
+        if number_of_fights_data_in_round > 0:
+          alert_trigger = 1
+        else:
+          alert_trigger = 0
+          # записи в бэклоге в удаляемом раунде
+          backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+          try:
+            for backlog in backlog_data:
+              db.session.delete(backlog)
+              db.session.commit()
+          except:
+            pass
+          # записи кандидатов на удаление в удаляемом раунде
+          candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).all()
+          try:
+            for candidate in candidates_data:
+              db.session.delete(candidate)
+              db.session.commit()
+          except:
+            pass
+          round_to_delete = RoundsDB.query.get(round_id)
+          
+          try:
+              db.session.delete(round_to_delete)
+              db.session.commit()
+          except Exception as e:
+              print(f'Круг не удалился. Ошибка: {e}')
+              db.session.rollback()
+          
+
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
+        
+        rounds_selector_data = {}
+        for round_data in rounds_data:
+            rounds_selector_data[round_data.round_name] = round_data.round_id
+        # print("rounds_selector_data: ", rounds_selector_data)
+        
+        return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data), 'weight_cat_id': weight_cat_id, 'age_cat_id': age_cat_id, 'alert_trigger':alert_trigger})  
+              
+          
+
 @home.route('/add_rounds_ajaxfile', methods=["POST", "GET"])
 def add_rounds_ajaxfile():
     if request.method == 'POST':
@@ -1079,18 +1133,39 @@ def add_rounds_ajaxfile():
             print(e)
             db.session.rollback()
 
-        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
-                                               age_cat_id=age_cat_id).all()
+        # определяем есть ли регистрации, которыми можно заполнить созданный круг
+        
+        # последний созданный раунд 
+        last_round_data = RoundsDB.query.order_by(desc(RoundsDB.round_id)).first()  
+        last_round_id = last_round_data.round_id
+        # получаем список id в текущем бэклоге
+        backlogs_data = BacklogDB.query.filter_by(competition_id=competition_id, round_id=last_round_id).all()
+        backlogs_data_id_list = []
+        try:
+          for backlog in backlogs_data:
+            backlog_id = backlog.id
+            backlogs_data_id_list.append(backlog_id)
+        except:
+          pass
+        
+        potencial_backlog_data = RegistrationsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, activity_status=1).all()
+        try:
+          for reg_data in potencial_backlog_data:
+            reg_id = reg_data.reg_id
+            if reg_id not in backlogs_data_id_list:
+              new_backlog = BacklogDB(reg_id=reg_data.reg_id, competition_id=reg_data.competition_id, round_id=last_round_id)
+              db.session.add(new_backlog)
+              db.session.commit()
+        except:
+          pass
+          
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
         rounds_selector_data = {}
         for round_data in rounds_data:
             rounds_selector_data[round_data.round_name] = round_data.round_id
         # print("rounds_selector_data: ", rounds_selector_data)
-
-        return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id,
-                                                        weight_cat_id=weight_cat_id, age_cat_id=age_cat_id,
-                                                        rounds_data=rounds_data),
-                        'weight_cat_id': weight_cat_id,
-                        'age_cat_id': age_cat_id
+        
+        return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data), 'weight_cat_id': weight_cat_id, 'age_cat_id': age_cat_id
                         })
 
 
@@ -1463,18 +1538,18 @@ def define_rounds_data(received_message):
 
     weight_cat_data = WeightcategoriesDB.query.get(weight_cat_id)
     competition_id = weight_cat_data.competition_id
-    rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
-                                           age_cat_id=age_cat_id).all()
+    rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
     # print("rounds_data: ", rounds_data)
     # кол-во раундов в выборке
     number_of_rounds = len(list(rounds_data))
+    rounds_selector_data = {}
     if number_of_rounds > 0:
-        rounds_selector_data = {}
-        for round_data in rounds_data:
-            rounds_selector_data[round_data.round_name] = round_data.round_id
-        # print("rounds_selector_data: ", rounds_selector_data)
-        emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)
+      for round_data in rounds_data:
+          rounds_selector_data[round_data.round_name] = round_data.round_id
+      # print("rounds_selector_data: ", rounds_selector_data)
+      emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)
 
+      
         # print(values)
 
 
