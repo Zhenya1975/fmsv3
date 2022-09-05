@@ -1071,17 +1071,47 @@ def delete_round_ajaxfile():
         # проверяем есть ли созданные поединки в данном круге
         fights_data_in_round = FightsDB.query.filter_by(round_number=round_id).all()
         number_of_fights_data_in_round = len(list(fights_data_in_round))
-        print("number_of_fights_data_in_round: ", number_of_fights_data_in_round)
+        # print("number_of_fights_data_in_round: ", number_of_fights_data_in_round)
         if number_of_fights_data_in_round > 0:
           alert_trigger = 1
-          rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
-          rounds_selector_data = {}
-          for round_data in rounds_data:
-              rounds_selector_data[round_data.round_name] = round_data.round_id
-          # print("rounds_selector_data: ", rounds_selector_data)
-          return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data), 'weight_cat_id': weight_cat_id, 'age_cat_id': age_cat_id, 'alert_trigger':alert_trigger})
         else:
-          print("fights_data_in_round: ", fights_data_in_round)
+          alert_trigger = 0
+          # записи в бэклоге в удаляемом раунде
+          backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+          try:
+            for backlog in backlog_data:
+              db.session.delete(backlog)
+              db.session.commit()
+          except:
+            pass
+          # записи кандидатов на удаление в удаляемом раунде
+          candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).all()
+          try:
+            for candidate in candidates_data:
+              db.session.delete(candidate)
+              db.session.commit()
+          except:
+            pass
+          round_to_delete = RoundsDB.query.get(round_id)
+          
+          try:
+              db.session.delete(round_to_delete)
+              db.session.commit()
+          except Exception as e:
+              print(f'Круг не удалился. Ошибка: {e}')
+              db.session.rollback()
+          
+
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
+        
+        rounds_selector_data = {}
+        for round_data in rounds_data:
+            rounds_selector_data[round_data.round_name] = round_data.round_id
+        # print("rounds_selector_data: ", rounds_selector_data)
+      
+        return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data), 'weight_cat_id': weight_cat_id, 'age_cat_id': age_cat_id, 'alert_trigger':alert_trigger})  
+              
+          
 
 
 

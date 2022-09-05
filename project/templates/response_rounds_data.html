@@ -106,6 +106,7 @@ $(document).ready(function(){
                      age_cat_id:age_cat_id
                      },
                success: function(data){
+                 console.log("ответ от удаления круга получен")
                   var alert_trigger = data.alert_trigger
                    selectedweightcategory = data.weight_cat_id
                    selectedagecategory = data.age_cat_id
