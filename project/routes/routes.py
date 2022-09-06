@@ -3,7 +3,7 @@ from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, R
     AgecategoriesDB, RoundsDB, FightcandidateDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
-from functions import check_delete_weight_category, create_backlog_record
+from functions import check_delete_weight_category, create_backlog_record, new_round_name
 from extensions import extensions
 from sqlalchemy import desc, asc
 from flask_socketio import SocketIO, emit
@@ -1230,7 +1230,9 @@ def add_round_ajaxfile():
         if selectedweightcategory != 0 and selectedagecategory != 0:
             weight_cat_id = selectedweightcategory
             age_cat_id = selectedagecategory
-            return jsonify({'htmlresponse': render_template('response_new_round.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id)})
+            new_round_title = new_round_name.new_round_name_func(competition_id, weight_cat_id, age_cat_id)
+          
+            return jsonify({'htmlresponse': render_template('response_new_round.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, new_round_title=new_round_title)})
 
 
 
