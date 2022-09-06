@@ -591,6 +591,49 @@ def registration_list(competition_id):
 #     return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
 
 
+@home.route('/new_round_create/<int:competition_id>/<int:weight_cat_id>/<int:age_cat_id>', methods=["POST", "GET"])
+def new_round_create(competition_id, weight_cat_id, age_cat_id):
+    if request.method == 'POST':
+      round_name = request.form.get('round_name')
+      # print("я здесь")
+      new_round = RoundsDB(round_name=round_name, competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id)
+      db.session.add(new_round)
+      try:
+          db.session.commit()
+          flash(f"Изменения сохранены", 'alert-success')
+
+      except Exception as e:
+          print(e)
+          flash(f'Изменения не сохранены. Ошибка: {e}', 'alert-danger')
+          db.session.rollback()
+      # последний созданный раунд 
+      last_round_data = RoundsDB.query.order_by(desc(RoundsDB.round_id)).first()  
+      last_round_id = last_round_data.round_id
+      # получаем список id в текущем бэклоге
+      backlogs_data = BacklogDB.query.filter_by(competition_id=competition_id, round_id=last_round_id).all()
+      backlogs_data_id_list = []
+      try:
+        for backlog in backlogs_data:
+          backlog_id = backlog.id
+          backlogs_data_id_list.append(backlog_id)
+      except:
+        pass
+      
+      potencial_backlog_data = RegistrationsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, activity_status=1).all()
+      try:
+        for reg_data in potencial_backlog_data:
+          reg_id = reg_data.reg_id
+          if reg_id not in backlogs_data_id_list:
+            new_backlog = BacklogDB(reg_id=reg_data.reg_id, competition_id=reg_data.competition_id, round_id=last_round_id)
+            db.session.add(new_backlog)
+            db.session.commit()
+      except:
+        pass  
+      return redirect(url_for('home.fights', competition_id=competition_id))
+
+    flash(f'Изменения не сохранены')
+    return redirect(url_for('home.fights', competition_data=competition_data, age_catagories_data=age_catagories_data, weight_categories_data=weight_categories_data))
+
 @home.route('/registration_new/<int:competition_id>/<int:participant_id>', methods=["POST", "GET"])
 def registration_new(competition_id, participant_id):
     if request.method == 'POST':
@@ -1169,6 +1212,29 @@ def add_rounds_ajaxfile():
                         })
 
 
+
+@home.route('/add_round_ajaxfile', methods=["POST", "GET"])
+def add_round_ajaxfile():
+    if request.method == 'POST':
+        selectedweightcategory = 0
+        selectedagecategory = 0
+        competition_id = int(request.form['competition_id'])
+        try:
+          selectedweightcategory = int(request.form['selectedweightcategory'])
+        except:
+          pass
+        try:  
+          selectedagecategory = int(request.form['selectedagecategory'])
+        except:
+          pass
+        if selectedweightcategory != 0 and selectedagecategory != 0:
+            weight_cat_id = selectedweightcategory
+            age_cat_id = selectedagecategory
+            return jsonify({'htmlresponse': render_template('response_new_round.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id)})
+
+
+
+
 @home.route('/edit_rounds_ajaxfile', methods=["POST", "GET"])
 def edit_rounds_ajaxfile():
     if request.method == 'POST':
@@ -1185,9 +1251,7 @@ def edit_rounds_ajaxfile():
             rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id,
                                                    age_cat_id=age_cat_id).all()
             # print("rounds_data: ", rounds_data)
-            return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id,
-                                                            weight_cat_id=weight_cat_id, age_cat_id=age_cat_id,
-                                                            rounds_data=rounds_data)})
+            return jsonify({'htmlresponse': render_template('response_rounds_data.html', competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id, rounds_data=rounds_data)})
 
 
 @home.route('/edit_age_cat_ajaxfile', methods=["POST", "GET"])

@@ -1,0 +1,17 @@
+<form method="POST" action="{{ url_for('home.new_round_create', competition_id=competition_id, 
+  weight_cat_id=weight_cat_id, age_cat_id=age_cat_id) }}">
+
+  <div class="form-group">
+    <label for="round_name_id">Наименование раунда</label>
+    <input type="text" class="form-control" id="round_name_id" name="round_name" required>
+  </div>
+
+
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</div>
+</form>
+  
+  

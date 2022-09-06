@@ -104,7 +104,7 @@
 
                                 </select>
                           
-                          <div class="input-group-append">
+                          <div class="input-group-append add_round_button" data-compid={{ competition_data.competition_id }}>
                             <button  class="btn btn-outline-secondary">
                               <i class="fa fa-plus fa-lg"></i>
                           </button>
@@ -147,12 +147,31 @@
                     <div class="modal-body">
 
                     </div>
-
               </div>
         </div>
       </div>
 
 
+      <div class="modal fade" id="add_round_modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                    <div class="modal-header">
+                          <h5 class="modal-title">Новый круг</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                    </div>
+
+                    <div class="modal-body">
+
+                    </div>
+              </div>
+        </div>
+      </div>
+
+
+
+      
 
 
 
@@ -190,6 +209,7 @@
                  .attr("value", value).text(key));
             });
           })
+
 
           $("select.round_select").change(function(){
               // Получаем значение из селекта раунда
@@ -231,7 +251,24 @@
             socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
         });
 
-        
+
+      
+       $('.add_round_button').click(function(){
+           var competition_id = $(this).data('compid');
+           $.ajax({
+                 url: '/add_round_ajaxfile',
+                 type: 'post',
+                 data: {competition_id:competition_id, selectedweightcategory:selectedweightcategory,selectedagecategory:selectedagecategory},
+                 success: function(data){
+                    $('.modal-body').html(data);
+                    $('.modal-body').append(data.htmlresponse);
+                    $('#add_round_modal').modal('show');
+                }
+             });
+
+        });
+
+      
 
 
        $('.edit_rounds').click(function(){
