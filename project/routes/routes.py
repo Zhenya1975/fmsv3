@@ -1547,7 +1547,8 @@ def define_rounds_data(received_message):
       for round_data in rounds_data:
           rounds_selector_data[round_data.round_name] = round_data.round_id
       # print("rounds_selector_data: ", rounds_selector_data)
-      emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)
+      
+    emit('update_round_selector', {'rounds_selector_data': rounds_selector_data}, broadcast=True)
 
       
         # print(values)

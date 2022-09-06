@@ -55,42 +55,10 @@
                 <p><a href="{{url_for('home.competitions')}}">Список соревнований</a></p>
                 <h3>{{ competition_data.competition_name }}. Поединки</h3>
                 <div class="d-flex flex-row" style="min-width:780px">
-                  <div class="p-2">
-                      <div class="form-group">
-                          <label for="age_cat_select">Возрастная категория</label>
-                          <select style="width:auto;" class="age_category_select form-control" id="age_cat_select" name="age_catagory_selector">
-                              {% for age_cat in age_catagories_data %}
-                                <option value={{ age_cat.age_cat_id }}>{{ age_cat.age_category_name }}</option>
-                              {% endfor %}
-                            </select>
-                      </div>
-                  </div>
+                 
                   <div class="row">
-                    <div class="col">
-                      <div class="p-2">
-                           <div class="form-group">
-                              <label for="weight_cat_select">Весовая категория</label>
-                              <select style="width:auto;" class="weight_category_select form-control" id="weight_cat_select" name="weight_catagory_selector">
-                                  {% for weight_cat in weight_categories_data %}
-                                    <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
-                                  {% endfor %}
-                                </select>
-                          </div>
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="p-2">
-                            <div class="form-group">
-                              <label for="round_select">Круг</label>
-                              <select style="width:auto;" class="round_select form-control" id="round_selector_id" name="round_selector">
-                                <option value=0 selected disabled>Выбрать круг</option>
-<!--                                   {% for weight_cat in weight_categories_data %}
-                                    <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
-                                  {% endfor %} -->
-                                </select>
-                            </div>
-                      </div>
-                      </div>
+                 
+                    
                     <div class="col">
                           <div class="p-2 align-self-center">
 
@@ -105,23 +73,32 @@
 
                 <div class="form-row">
                     <div class="form-group col-md-3">
-                      <label for="inputCity">City</label>
-                      <input type="text" class="form-control" id="inputCity">
+                      <label for="age_cat_select">Возрастная категория</label>
+                      <select class="age_category_select form-control" id="age_cat_select" name="age_catagory_selector">
+                              {% for age_cat in age_catagories_data %}
+                                <option value={{ age_cat.age_cat_id }}>{{ age_cat.age_category_name }}</option>
+                              {% endfor %}
+                            </select>
                     </div>
 
                     <div class="form-group col-md-3">
-                      <label for="inputState">State</label>
-                      <select id="inputState" class="form-control">
-                        <option selected>Choose...</option>
-                        <option>...</option>
-                      </select>
+                      <label for="weight_cat_select">Весовая категория</label>
+                      <select class="weight_category_select form-control" id="weight_cat_select" name="weight_catagory_selector">
+                                  {% for weight_cat in weight_categories_data %}
+                                    <option value={{ weight_cat.weight_cat_id }}>{{ weight_cat.weight_category_name }}</option>
+                                  {% endfor %}
+                                </select>
                     </div>
 
                     <div class="form-group col-md-6">
-                        <label for="inputState_1">State</label>
+                        <label for="inputState_1">Круг</label>
                         <div class="input-group">
 
-                          <input type="text" id="inputState_1" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2">
+                          <select style="width:auto;" class="round_select form-control" id="round_selector_id" name="round_selector">
+                                <option value=0 selected disabled>Выбрать круг</option>
+
+                                </select>
+                          
                           <div class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button">Button</button>
                             <button class="btn btn-outline-secondary" type="button">Button</button>
@@ -193,6 +170,7 @@
         socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
 
         socket.on('update_round_selector', function (msg){
+            // console.log("ответ получен при обновлении селекта")
             var option = $('<option></option>').attr("value", "option value").text("Text");
             var rounds_selector_data = msg.rounds_selector_data
             // console.log("есть контакт")
