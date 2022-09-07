@@ -1236,7 +1236,6 @@ def add_round_ajaxfile():
 
 
 
-
 @home.route('/edit_rounds_ajaxfile', methods=["POST", "GET"])
 def edit_rounds_ajaxfile():
     if request.method == 'POST':

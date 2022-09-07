@@ -133,6 +133,7 @@
             </div>
         </div>
 
+      
 
       <div class="modal fade" id="edit_rounds_modal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -252,6 +253,22 @@
         });
 
 
+      $('.edit_rounds_button').click(function(){
+           var competition_id = $(this).data('compid');
+           $.ajax({
+                 url: '/edit_rounds_ajaxfile',
+                 type: 'post',
+                 data: {competition_id:competition_id, selectedweightcategory:selectedweightcategory,selectedagecategory:selectedagecategory},
+                 success: function(data){
+                    $('.modal-body').html(data);
+                    $('.modal-body').append(data.htmlresponse);
+                    $('#edit_rounds_modal').modal('show');
+                }
+             });
+
+        });
+
+      
       
        $('.add_round_button').click(function(){
            var competition_id = $(this).data('compid');

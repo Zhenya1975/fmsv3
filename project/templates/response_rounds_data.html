@@ -33,14 +33,6 @@
     </ul>
 
 
-    <hr>
-    <div class="input-group">
-      <input class="form-control add_round_input" type="text" id="round_input_id" name="round_input_name"  placeholder="Наименование раунда" style="margin-left=5px; margin-right=5px;">
-      <div style="margin-left: 5px" class="input-group-append">
-          <button class="btn btn-outline-secondary add_round" type="button">Добавить</button>
-        </div>
-    </div>
-
      <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
             <button type="submit" class="btn btn-primary">Сохранить</button>
@@ -61,38 +53,6 @@ $(document).ready(function(){
     var weight_cat_id = {{weight_cat_id}}
     var age_cat_id = {{ age_cat_id }}
     $(".alert_message").hide();
-
-    $('.add_round').click(function(){
-        var new_round_value = $('#round_input_id').val();
-        // console.log("new_round_name: ", new_round_value)
-        
-        if(new_round_value.length>0){
-          $.ajax({
-               url: '/add_rounds_ajaxfile',
-               type: 'post',
-               data: {competition_id:competition_id,
-                   new_round_value:new_round_value,
-                   weight_cat_id:weight_cat_id,
-                   age_cat_id:age_cat_id
-               },
-               success: function(data){
-                  // при успешном создании нового круга запускаем функцию обновления селекта с раундами
-                   selectedweightcategory = data.weight_cat_id
-                   selectedagecategory = data.age_cat_id
-                   socket.emit('define_rounds_data', {'selectedweightcategory': selectedweightcategory, 'selectedagecategory':selectedagecategory});
-  
-                  $('.modal-body').html(data);
-                  $('.modal-body').append(data.htmlresponse);
-                  //$('#edit_rounds_modal').modal('show');
-              }
-           });
-        }
-      else {
-        // console.log("поле пустое")
-        $('.add_round_input').addClass('warning');
-      }
-      
-    });
 
     
    $('.delete_round').click(function(){
@@ -127,16 +87,6 @@ $(document).ready(function(){
      
    })
     
-
-
-    // var alert_trigger = 0
-    //
-    // if (alert_trigger == 0){
-    //
-    // }
-    //
-
-
 
 })
 
