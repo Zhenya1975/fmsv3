@@ -657,8 +657,8 @@ def registration_new(competition_id, participant_id):
                 if weight_category_start <= int(weight_value_from_form) <= weight_category_finish:
                     updated_weight_cat['weight_cat_id'] = weight_cat_id
                     updated_weight_cat['weight_category_name'] = weight_category_name
-                    print("weight_category_start: ", weight_category_start, "weight_value_from_form: ", weight_value_from_form, "weight_category_finish: ", weight_category_finish)
-                    print("updated_weight_cat: ", updated_weight_cat)
+                    # print("weight_category_start: ", weight_category_start, "weight_value_from_form: ", weight_value_from_form, "weight_category_finish: ", weight_category_finish)
+                    # print("updated_weight_cat: ", updated_weight_cat)
             weight_cat_select_id = updated_weight_cat['weight_cat_id']
 
         age_cat_id = 0
@@ -1538,7 +1538,7 @@ def fights_list_ajaxfile():
 
         fights_data = FightsDB.query.filter_by(round_number=selectround).all()
         backlog_data = BacklogDB.query.filter_by(round_id=selectround).all()
-
+        print("backlog_data: ", backlog_data)
         return jsonify(
             {'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround,
                                              backlog_data=backlog_data)})
