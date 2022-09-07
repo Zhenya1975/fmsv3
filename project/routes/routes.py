@@ -653,9 +653,12 @@ def registration_new(competition_id, participant_id):
                 weight_category_name = weight_category.weight_category_name
                 weight_category_start = weight_category.weight_category_start
                 weight_category_finish = weight_category.weight_category_finish
+                
                 if weight_category_start <= int(weight_value_from_form) <= weight_category_finish:
                     updated_weight_cat['weight_cat_id'] = weight_cat_id
                     updated_weight_cat['weight_category_name'] = weight_category_name
+                    print("weight_category_start: ", weight_category_start, "weight_value_from_form: ", weight_value_from_form, "weight_category_finish: ", weight_category_finish)
+                    print("updated_weight_cat: ", updated_weight_cat)
             weight_cat_select_id = updated_weight_cat['weight_cat_id']
 
         age_cat_id = 0
@@ -671,7 +674,7 @@ def registration_new(competition_id, participant_id):
             weight_value=weight_value_from_form,
             competition_id=competition_id,
             participant_id=participant_id,
-            weight_cat_id=weight_cat_id,
+            weight_cat_id=updated_weight_cat['weight_cat_id'],
             age_value=age_value,
             age_cat_id=age_cat_id,
             activity_status=1

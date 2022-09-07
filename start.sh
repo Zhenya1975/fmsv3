@@ -6,4 +6,4 @@
 #flask db upgrade
 cd project
 pip install -r requirements.txt
-gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 --reload -b 0.0.0.0:8080 app:app
+gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:8080 app:app
