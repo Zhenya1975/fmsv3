@@ -76,13 +76,18 @@ $(document).ready(function(){
                   $('.modal-body').append(data.htmlresponse);
 
                  // если приехал alert_trigger равный единице, значит есть связанные поединки и удаление не произошло
-                   if (alert_trigger != 0){
-                     $(".alert_message").show();
-                     $().alert()
-                      $('#message').text('Удаление запрещено. Есть связанные поединки');
-                   }
+                  //  if (alert_trigger == 1){
+                  //    $(".alert_message").show();
+                     
+                  //     $('#message').text('Удаление запрещено. Есть связанные поединки');
+                  //  }
+                  // else if (alert_trigger == 2) {
+                  //   $(".alert_message").show();
+                
+                  //     $('#message').text('Последний круг нельзя удалять');
+                  // }
                   
-              }
+              } 
            });
      
    })

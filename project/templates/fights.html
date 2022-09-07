@@ -217,7 +217,7 @@
               selectround = $(this).children("option:selected").val();
 
               // Отправляем на сервер значение в селекте раунда для сохранения
-              socket.emit('save_round_selector_data', {'selectround':selectround});
+              // socket.emit('save_round_selector_data', {'selectround':selectround});
 
               // если значение не равно нулю, то показываем бои в выбранном круге
               if (parseInt(selectround) !=0){
@@ -228,6 +228,7 @@
                          type: 'post',
                          data: {selectround:parseInt(selectround)},
                          success: function(response){
+                           // console.log("должен отработать список боев")
                             $('.fights_data').html(response);
                             $('.fights_data').append(response.htmlresponse);
 

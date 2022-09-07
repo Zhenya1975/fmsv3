@@ -1118,36 +1118,42 @@ def delete_round_ajaxfile():
         fights_data_in_round = FightsDB.query.filter_by(round_number=round_id).all()
         number_of_fights_data_in_round = len(list(fights_data_in_round))
         # print("number_of_fights_data_in_round: ", number_of_fights_data_in_round)
-        if number_of_fights_data_in_round > 0:
-          alert_trigger = 1
+        # Проверяем, чтобы остался хотя бы один раунд
+        # Коичество раундов
+        rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
+        number_of_rounds_data = len(list(rounds_data))
+        if number_of_rounds_data>1:
+          if number_of_fights_data_in_round > 0:
+            alert_trigger = 1
+          else:
+            alert_trigger = 0
+            # записи в бэклоге в удаляемом раунде
+            backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+            try:
+              for backlog in backlog_data:
+                db.session.delete(backlog)
+                db.session.commit()
+            except:
+              pass
+            # записи кандидатов на удаление в удаляемом раунде
+            candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).all()
+            try:
+              for candidate in candidates_data:
+                db.session.delete(candidate)
+                db.session.commit()
+            except:
+              pass
+            round_to_delete = RoundsDB.query.get(round_id)
+            
+            try:
+                db.session.delete(round_to_delete)
+                db.session.commit()
+            except Exception as e:
+                print(f'Круг не удалился. Ошибка: {e}')
+                db.session.rollback()
         else:
-          alert_trigger = 0
-          # записи в бэклоге в удаляемом раунде
-          backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
-          try:
-            for backlog in backlog_data:
-              db.session.delete(backlog)
-              db.session.commit()
-          except:
-            pass
-          # записи кандидатов на удаление в удаляемом раунде
-          candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).all()
-          try:
-            for candidate in candidates_data:
-              db.session.delete(candidate)
-              db.session.commit()
-          except:
-            pass
-          round_to_delete = RoundsDB.query.get(round_id)
+          alert_trigger = 2   # если alert_trigger =2 значит показываем сообщение на странице, что последний круг удалять нельзя
           
-          try:
-              db.session.delete(round_to_delete)
-              db.session.commit()
-          except Exception as e:
-              print(f'Круг не удалился. Ошибка: {e}')
-              db.session.rollback()
-          
-
         rounds_data = RoundsDB.query.filter_by(competition_id=competition_id, weight_cat_id=weight_cat_id, age_cat_id=age_cat_id).all()
         
         rounds_selector_data = {}
@@ -1538,7 +1544,7 @@ def fights_list_ajaxfile():
 
         fights_data = FightsDB.query.filter_by(round_number=selectround).all()
         backlog_data = BacklogDB.query.filter_by(round_id=selectround).all()
-        print("backlog_data: ", backlog_data)
+        # print("backlog_data: ", backlog_data, "fights_data: ", fights_data)
         return jsonify(
             {'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround,
                                              backlog_data=backlog_data)})
