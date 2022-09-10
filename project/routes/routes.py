@@ -704,6 +704,7 @@ def registration_new(competition_id, participant_id):
 
         # Если есть раунды, то вписываем в бэклоги этих раундов зарегистрированного бойца
         rounds_data_qty = len(list(rounds_data))
+        round_id = 0
         if rounds_data_qty > 0:
             for round_data in rounds_data:
                 round_id = round_data.round_id
@@ -727,10 +728,8 @@ def registration_new(competition_id, participant_id):
             round_id = last_round_data.round_id
 
         # создаем запись в бэклоге
-        # запись в бэклоге создаем если регистрации нет в боях
-        related_fights_qty = create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
-        if related_fights_qty > 0:
-            print("related_fights_qty: ", related_fights_qty, ". Запись в бэклоге не создана")
+        create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
+
 
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
     return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
