@@ -132,8 +132,8 @@ def participants():
 @home.route('/fights/<int:competition_id>/')
 def fights(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
-    age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).all()
-    weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).all()
+    age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(AgecategoriesDB.sort_index.asc()).all()
+    weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index.asc()).all()
 
     return render_template("fights.html",
                            competition_data=competition_data,
