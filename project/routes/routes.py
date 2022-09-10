@@ -659,7 +659,7 @@ def registration_new(competition_id, participant_id):
                     updated_weight_cat['weight_category_name'] = weight_category_name
                     # print("weight_category_start: ", weight_category_start, "weight_value_from_form: ", weight_value_from_form, "weight_category_finish: ", weight_category_finish)
                     # print("updated_weight_cat: ", updated_weight_cat)
-            weight_cat_select_id = updated_weight_cat['weight_cat_id']
+            weight_cat_id = updated_weight_cat['weight_cat_id']
 
         age_cat_id = 0
         age_value = 0
@@ -674,7 +674,7 @@ def registration_new(competition_id, participant_id):
             weight_value=weight_value_from_form,
             competition_id=competition_id,
             participant_id=participant_id,
-            weight_cat_id=updated_weight_cat['weight_cat_id'],
+            weight_cat_id=weight_cat_id,
             age_value=age_value,
             age_cat_id=age_cat_id,
             activity_status=1
@@ -1059,11 +1059,38 @@ def registration_delete(reg_id):
     fights_data_red = FightsDB.query.filter_by(red_fighter_id=reg_id).all()
     fights_data_blue = FightsDB.query.filter_by(blue_fighter_id=reg_id).all()
     number_of_fights = len(list(fights_data_red)) + len(list(fights_data_blue))
-    # print(number_of_comp_regs)
+
+
     if number_of_fights > 0:
         flash(f"Количество связанных поединков: {number_of_fights}. Сначала удалите связанные поединки.",
               'alert-danger')
     else:
+        # удаление бэклогов, связанных с регистрацией
+        backlogs_data = BacklogDB.query.filter_by(reg_id=reg_id).all()
+        try:
+            for backlog in backlogs_data:
+                db.session.delete(backlog)
+                db.session.commit()
+        except:
+            pass
+
+        # удаление кандидатов, связанных с регистрацией
+        candidates_data = FightcandidateDB.query.filter_by(red_candidate_reg_id=reg_id).all()
+        try:
+            for candidate in candidates_data:
+                db.session.delete(candidate)
+                db.session.commit()
+        except:
+            pass
+        candidates_data = FightcandidateDB.query.filter_by(blue_candidate_reg_id=reg_id).all()
+        try:
+            for candidate in candidates_data:
+                db.session.delete(candidate)
+                db.session.commit()
+        except:
+            pass
+
+
         db.session.delete(reg_data)
         try:
             db.session.commit()
