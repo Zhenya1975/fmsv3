@@ -5,35 +5,50 @@
 <p></p>
 <!--<div class="d-flex flex-row" style="min-width:780px">-->
 <div class="row">
-  <div class="col">
-        <div class="red_candidate_div">
-      <!--    <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="red_fighter_candidate">-->
-            <div style="margin-top: 10px; height: 100px; width: 300px; box-shadow: inset 2px 2px 5px rgba(154, 147, 140, 0.5), 1px 1px 5px rgba(255, 255, 255, 1);"  class="red_fighter_candidate">
+            <div class="col">
+              {% if  candidates_data %}
+                {% if  candidates_data.red_candidate_reg_id %}
+                   <div class="d-flex align-items-center justify-content-between red_fighter_candidate" style="margin-top: 10px; padding-left: 10px; height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
+                        <div>
+                            {{ candidates_data.red_candidate.registration_participant.participant_last_name }}
+                            <br>
+                            {{ candidates_data.red_candidate.registration_participant.participant_first_name }}
+                        </div>
+                        <div style="padding-right: 10px">
+                            <button type="button" class="btn btn-sm btn-outline-secondary delete_blue_candidate">Отменить</button>
+                        </div>
 
+                    </div>
+                {% endif  %}
+
+        <!--        <div class="red_candidate_div">-->
+        <!--      &lt;!&ndash;    <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="red_fighter_candidate">&ndash;&gt;-->
+        <!--            <div style="margin-top: 10px; height: 100px; width: 300px; box-shadow: inset 2px 2px 5px rgba(154, 147, 140, 0.5), 1px 1px 5px rgba(255, 255, 255, 1);"  class="red_fighter_candidate">-->
+
+        <!--            </div>-->
             </div>
-        </div>
-  </div>
+      {% else %}
+        {{ candidates_data.red_candidate.registration_participant.participant_last_name }}
 
-    <div class="col">
-<!--        <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="blue_fighter_candidate">-->
-        <div class="blue_candidate_div">
-            <div class="d-flex align-items-center justify-content-between blue_fighter_candidate" style="margin-top: 10px; padding-left: 10px; height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;">
-                <div>
-                    Карелин
-                    <br>
-                    Александр
+      {% endif %}
+
+
+
+        <div class="col">
+    <!--        <div style="height: 100px; width: 300px; box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;"  class="blue_fighter_candidate">-->
+                <div class="blue_candidate_div">
+                            <div class="d-flex align-items-center justify-content-between red_fighter_candidate" style="margin-top: 10px; height: 100px; width: 300px; box-shadow: inset 2px 2px 5px rgba(154, 147, 140, 0.5), 1px 1px 5px rgba(255, 255, 255, 1);">
+
+                            </div>
+
+
                 </div>
-                <div style="padding-right: 10px">
-                    <button type="button" class="btn btn-sm btn-outline-secondary delete_blue_candidate">Отменить</button>
-                </div>
-
-            </div>
-
         </div>
-    </div>
-    <div class="col">
-        <button type="button" class="btn btn-outline-primary new_fight" data-id="{{round_id}}" style="margin-top: 10px;">Создать бой</button>
-    </div>
+
+
+        <div class="col">
+            <button type="button" class="btn btn-outline-primary new_fight" data-id="{{round_id}}" style="margin-top: 10px;">Создать бой</button>
+        </div>
 </div>
 
 <div class="backlog_list">
@@ -118,8 +133,8 @@
                 $('.red_candidate_div').append(response.htmlresponse_red_candidate);
                 $('.blue_candidate_div').html(response);
                 $('.blue_candidate_div').append(response.htmlresponse_blue_candidate);
-                $('.backlog_list').html(response);
-                $('.backlog_list').append(response.htmlresponse_backlog_list);
+                $('.fights_data').html(response);
+                $('.fights_data').append(response.htmlresponse_fights_list);
 
 
             }

@@ -132,8 +132,11 @@ def participants():
 @home.route('/fights/<int:competition_id>/')
 def fights(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
-    age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(AgecategoriesDB.sort_index.asc()).all()
-    weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(WeightcategoriesDB.sort_index.asc()).all()
+    age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        AgecategoriesDB.sort_index.asc()).all()
+    weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        WeightcategoriesDB.sort_index.asc()).all()
+
 
     return render_template("fights.html",
                            competition_data=competition_data,
@@ -1551,6 +1554,7 @@ def add_candidate_ajaxfile():
         backlog_id = int(request.form['backlog_id'])
         # удаляем запись из бэклога
         backlog_data_to_delete = BacklogDB.query.get(backlog_id)
+        reg_id = backlog_data_to_delete.reg_id
         round_id = backlog_data_to_delete.round_id
         db.session.delete(backlog_data_to_delete)
         try:
@@ -1560,15 +1564,43 @@ def add_candidate_ajaxfile():
             db.session.rollback()
 
         # проверяем есть ли свободные записи в FightcandidateDB
-        candidate_records_data = FightcandidateDB.query.filter_by(round_id=round_id).all()
-        print("candidate_records_data: ", candidate_records_data)
-        # количество занятых записей
-        candidate_records_qty = len(list(candidate_records_data))
-        # Если количество занятых записей меньше двух, то создаем новую запись
-        if candidate_records_qty < 2:
-            # итерируемся по списку записей кандидатов
-            for candidate in candidate_records_data:
-                print(candidate.red_candidate_reg_id)
+        candidate_records_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+        # Если записи в кандидатах есть
+        if candidate_records_data:
+            red_candidate_reg_id = candidate_records_data.red_candidate_reg_id
+        # Если записей в кандидатах нет
+        else:
+            # создаем запись в красном кандидате
+            red_candidate = FightcandidateDB(
+                round_id=round_id,
+                red_candidate_reg_id=reg_id
+            )
+            db.session.add(red_candidate)
+            try:
+                db.session.commit()
+                fights_data = FightsDB.query.filter_by(round_number=round_id).all()
+                backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+
+                # данные красного кандидата
+                candidates_data = FightcandidateDB.query.first()
+                red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
+                red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
+
+
+
+                return jsonify(
+                    {'htmlresponse_red_candidate': render_template('response_red_candidate.html',
+                                                                   red_candidate_last_name=red_candidate_last_name,
+                                                                   red_candidate_first_name=red_candidate_first_name),
+                     # 'htmlresponse_blue_candidate': render_template('response_blue_fighter_div.html',
+                     #                                                fight_data=last_created_fight),
+                     'htmlresponse_fights_list': render_template('fights_list.html', fights_data=fights_data,
+                                                                 round_id=round_id,
+                                                                 backlog_data=backlog_data),
+                     })
+            except Exception as e:
+                print(e)
+                db.session.rollback()
 
 
 @home.route('/create_fight_ajaxfile', methods=["POST", "GET"])
@@ -1585,10 +1617,18 @@ def fights_list_ajaxfile():
 
         fights_data = FightsDB.query.filter_by(round_number=selectround).all()
         backlog_data = BacklogDB.query.filter_by(round_id=selectround).all()
-        # print("backlog_data: ", backlog_data, "fights_data: ", fights_data)
+        candidates_data = FightcandidateDB.query.filter_by(round_id=selectround).first()
+        # print("candidates_data: ", candidates_data)
+        red_candidate_reg_id = 0
+        blue_candidate_reg_id = 0
+        if candidates_data:
+            red_candidate_reg_id = candidates_data.red_candidate_reg_id
+            blue_candidate_reg_id = candidates_data.blue_candidate_reg_id
+
+
         return jsonify(
             {'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround,
-                                             backlog_data=backlog_data)})
+                                             backlog_data=backlog_data, candidates_data=candidates_data)})
 
 
 @home.route('/delete_reg_ajaxfile', methods=["POST", "GET"])
