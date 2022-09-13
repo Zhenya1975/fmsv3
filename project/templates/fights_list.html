@@ -6,7 +6,7 @@
 <!--<div class="d-flex flex-row" style="min-width:780px">-->
 <div class="row">
             <div class="col">
-                <div class="red_candidate_div_1"></div>
+                
                 
               {% if  candidates_data %}
                     {% if  candidates_data.red_candidate_reg_id %}
@@ -157,6 +157,7 @@
              type: 'post',
              data: {backlog_id:backlog_id},
              success: function(response){
+                console.log("response.htmlresponse_red_candidate: ", response.htmlresponse_red_candidate)
                 $('.red_candidate_div_1').html(response);
                 $('.red_candidate_div_1').append(response.htmlresponse_red_candidate);
                 $('.blue_candidate_div').html(response);

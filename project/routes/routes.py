@@ -1589,7 +1589,7 @@ def add_candidate_ajaxfile():
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
 
 
-
+                print("red_candidate_last_name: ", red_candidate_last_name)
                 return jsonify(
                     {'htmlresponse_red_candidate': render_template('response_red_candidate.html',
                                                                    red_candidate_last_name=red_candidate_last_name,
@@ -1627,7 +1627,8 @@ def fights_list_ajaxfile():
             red_candidate_reg_id = candidates_data.red_candidate_reg_id
             blue_candidate_reg_id = candidates_data.blue_candidate_reg_id
 
-
+        
+        
         return jsonify(
             {'htmlresponse': render_template('fights_list.html', fights_data=fights_data, round_id=selectround,
                                              backlog_data=backlog_data, candidates_data=candidates_data)})
