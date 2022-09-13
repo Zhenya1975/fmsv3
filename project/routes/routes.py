@@ -1568,6 +1568,8 @@ def add_candidate_ajaxfile():
         # Если записи в кандидатах есть
         if candidate_records_data:
             red_candidate_reg_id = candidate_records_data.red_candidate_reg_id
+            blue_candidate_reg_id = candidate_records_data.blue_candidate_reg_id
+            print("red_candidate_reg_id: ", red_candidate_reg_id, " blue_candidate_reg_id: ", blue_candidate_reg_id)
         # Если записей в кандидатах нет
         else:
             # создаем запись в красном кандидате
@@ -1582,7 +1584,7 @@ def add_candidate_ajaxfile():
                 backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
 
                 # данные красного кандидата
-                candidates_data = FightcandidateDB.query.first()
+                candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
 
