@@ -2,7 +2,9 @@
         <ul class="list-group">
           {% for fight in fights_data %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ fight.red_fighter.registration_participant.participant_last_name }} {{ fight.red_fighter.registration_participant.participant_first_name }} - {{ fight.blue_fighter.registration_participant.participant_last_name }} {{ fight.blue_fighter.registration_participant.participant_first_name }}
+                    <a href="{{url_for('home.fight', fight_id=fight.fight_id)}}">
+                  {{ fight.red_fighter.registration_participant.participant_last_name }} {{ fight.red_fighter.registration_participant.participant_first_name }} - {{ fight.blue_fighter.registration_participant.participant_last_name }} {{ fight.blue_fighter.registration_participant.participant_first_name }}
+                </a>
                  <button class="btn btn-sm btn-outline-secondary delete_fight" id="delete_fight_id" type="button" data-id="{{fight.fight_id}}">Удалить</button>
             </li>
           {% endfor %}

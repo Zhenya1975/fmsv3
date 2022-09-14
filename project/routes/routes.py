@@ -18,6 +18,9 @@ home = Blueprint('home', __name__, template_folder='templates')
 
 socketio = extensions.socketio
 
+values = {
+    'fight_duration_server_value':120,
+}
 
 # @socketio.event
 # def my_event(message):
@@ -129,6 +132,21 @@ def participants():
     return render_template('participants_list.html', participants_data=participants_data)
 
 
+
+
+@home.route('/fight/<int:fight_id>')
+def fight(fight_id):
+    fight_data = FightsDB.query.get(fight_id)
+    round_id = fight_data.round_number
+    round_data = RoundsDB.query.get(round_id)
+    round_name = round_data.round_name
+    competition_id = round_data.competition_id
+    competition_data = CompetitionsDB.query.get(competition_id)
+    fight_duration = competition_data.fight_duration
+    return render_template("fight.html", fight_data = fight_data, round_name=round_name, fight_duration=fight_duration)
+
+
+
 @home.route('/fights/<int:competition_id>/')
 def fights(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
@@ -201,6 +219,7 @@ def edit_comp_general(competition_id):
         competition_data.competition_date_start = form.competition_date_start.data
         competition_data.competition_date_finish = form.competition_date_finish.data
         competition_data.competition_city = form.competition_city.data
+        competition_data.fight_duration = form.fight_duration.data
 
         db.session.commit()
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))

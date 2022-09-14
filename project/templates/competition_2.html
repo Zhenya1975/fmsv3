@@ -98,7 +98,16 @@
                                         {{ form_general_info.competition_city.label }}
                                         {{ form_general_info.competition_city (class ='form-control', type="text", value = competition_data.competition_city)}}
                                     <br>
-                                          {% for error in form_general_info.competition_date_start.errors %}
+                                          {% for error in form_general_info.competition_city.errors %}
+                                            <span style="color: red;">[{{ error }}]</span>
+                                          {% endfor %}
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        {{ form_general_info.fight_duration.label }}
+                                        {{ form_general_info.fight_duration (class ='form-control', type="number", value = competition_data.fight_duration)}}
+                                    <br>
+                                          {% for error in form_general_info.fight_duration.errors %}
                                             <span style="color: red;">[{{ error }}]</span>
                                           {% endfor %}
                                     </div>

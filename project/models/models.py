@@ -21,6 +21,7 @@ class CompetitionsDB(db.Model):
     competition_date_start = db.Column(db.Date, default=datetime.utcnow)
     competition_date_finish = db.Column(db.Date, default=datetime.utcnow)
     competition_city = db.Column(db.String)
+    fight_duration =  db.Column(db.Integer, default=120)
     fights = db.relationship('FightsDB', backref='competition')
     registration_comp = db.relationship('RegistrationsDB', backref='registration_comp')
 
@@ -99,3 +100,5 @@ class FightcandidateDB(db.Model):
     round_id = db.Column(db.Integer, db.ForeignKey('roundsDB.round_id'))
     red_candidate_reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     blue_candidate_reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
+    
+
