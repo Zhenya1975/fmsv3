@@ -55,7 +55,7 @@
 
 
                 <p><a href="{{url_for('home.competitions')}}">Список соревнований</a></p>
-                <h3>{{ competition_data.competition_name }}. Поединки</h3>
+                <h3>Конфигуратор</h3>
 
 
                 <div class="form-row">
@@ -104,7 +104,9 @@
 
 
                 <div class="fights_data">
+                    
                     <div class="backlog">
+                        <h4>Бэклог</h4>
                                 <div class="row">
                                     <div class="col">
                                         <div class="red_candidate">
@@ -133,7 +135,17 @@
 
                     </div>
 
-                <hr>
+                    <hr>
+                    <div class="fights_div">
+                        <div class="row">
+                            <div class="col">
+                                <h4>Поединки</h4>
+                                <div class="fights_list">
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                  </div>
 
@@ -202,6 +214,7 @@
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
         var selectround = $('#round_selector_id').children("option:selected").val();
         $('.backlog').hide()
+        $('.fights_div').hide()
         // $('.fights_data').html();
         // $('.fights_data').append("test");
 
@@ -242,12 +255,15 @@
                          success: function(response){
                            // console.log("должен отработать список боев")
                             $('.backlog').show()
+                            $('.fights_div').show()
                             $('.red_candidate').html(response);
                             $('.red_candidate').append(response.htmlresponse_red_candidate);
                             $('.blue_candidate').html(response);
                             $('.blue_candidate').append(response.htmlresponse_blue_candidate);
                             $('.backlog_list').html(response);
                             $('.backlog_list').append(response.htmlresponse_backlog);
+                            $('.fights_list').html(response);
+                            $('.fights_list').append(response.htmlresponse_fights);
 
                         }
                  });
@@ -305,6 +321,28 @@
 
       
 
+        $('.new_fight').click(function(){
+           var round_id = selectround;
+           $.ajax({
+             url: '/new_fight_ajaxfile',
+             type: 'post',
+             data: {round_id:round_id},
+             success: function(response){
+                $('.backlog').show()
+                $('.fights_div').show()
+                $('.red_candidate').html(response);
+                $('.red_candidate').append(response.htmlresponse_red_candidate);
+                $('.blue_candidate').html(response);
+                $('.blue_candidate').append(response.htmlresponse_blue_candidate);
+                $('.backlog_list').html(response);
+                $('.backlog_list').append(response.htmlresponse_backlog);
+                $('.fights_list').html(response);
+                $('.fights_list').append(response.htmlresponse_fights);
+
+            }
+         });
+           
+        })
 
        $('.edit_rounds').click(function(){
            var competition_id = $(this).data('compid');
