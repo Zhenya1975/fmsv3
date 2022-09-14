@@ -1548,6 +1548,62 @@ def delete_weight_cat_ajaxfile():
                                                  number_of_regs=number_of_regs)})
 
 
+
+
+
+@home.route('/delete_red_candidate_ajaxfile', methods=["POST", "GET"])
+def delete_red_candidate_ajaxfile():
+    if request.method == 'POST':
+        round_id = int(request.form['round_id'])
+        round_data = RoundsDB.query.get(round_id)
+        competition_id = round_data.competition_id
+        candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+        reg_id = candidates_data.red_candidate_reg_id
+        candidates_data.red_candidate_reg_id = 0
+        red_candidate_reg_id = 0
+        # Создаем запись в бэклоге
+        new_backlog_record = BacklogDB(
+            reg_id = reg_id,
+            competition_id = competition_id,
+            round_id = round_id
+            )
+        db.session.add(new_backlog_record)
+        db.session.commit()
+        candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+        blue_candidate_reg_id = 0
+
+        if candidates_data.red_candidate_reg_id:
+            red_candidate_reg_id = candidates_data.red_candidate_reg_id
+        if candidates_data.blue_candidate_reg_id:
+            blue_candidate_reg_id = candidates_data.blue_candidate_reg_id
+    
+        if red_candidate_reg_id == 0 and blue_candidate_reg_id == 0:
+            backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+            return jsonify(
+            {'htmlresponse_red_candidate': render_template('empty_candidate.html'),
+                'htmlresponse_blue_candidate': render_template('empty_candidate.html'),
+                'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
+                'htmlresponse_fights': render_template('fights_in_round.html'),
+            })
+            
+        else:
+            candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+            blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
+            blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+            backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+            return jsonify(
+            {'htmlresponse_red_candidate':  render_template('empty_candidate.html'),
+                'htmlresponse_blue_candidate': render_template('blue_candidate.html', blue_candidate_last_name=blue_candidate_last_name, blue_candidate_first_name=blue_candidate_first_name, round_id=round_id),
+                'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
+                'htmlresponse_fights': render_template('fights_in_round.html'),
+            })          
+                
+                
+
+        
+        
+
+
 @home.route('/add_candidate_ajaxfile', methods=["POST", "GET"])
 def add_candidate_ajaxfile():
     if request.method == 'POST':
@@ -1603,6 +1659,7 @@ def add_candidate_ajaxfile():
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
                 blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
                 blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 return jsonify(
                 {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=round_id),
                     'htmlresponse_blue_candidate': render_template('blue_candidate.html', blue_candidate_last_name=blue_candidate_last_name, blue_candidate_first_name=blue_candidate_first_name, round_id=round_id),
@@ -1621,6 +1678,7 @@ def add_candidate_ajaxfile():
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
                 blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
                 blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 return jsonify(
                 {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=round_id),
                     'htmlresponse_blue_candidate': render_template('blue_candidate.html', blue_candidate_last_name=blue_candidate_last_name, blue_candidate_first_name=blue_candidate_first_name, round_id=round_id),
@@ -1635,6 +1693,7 @@ def add_candidate_ajaxfile():
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
                 blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
                 blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 return jsonify(
                 {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=round_id),
                     'htmlresponse_blue_candidate': render_template('blue_candidate.html', blue_candidate_last_name=blue_candidate_last_name, blue_candidate_first_name=blue_candidate_first_name, round_id=round_id),

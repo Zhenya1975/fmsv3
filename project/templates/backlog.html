@@ -24,7 +24,7 @@
     
     $('.add_candidate').click(function(){
         var backlog_id = $(this).data('id');
-        console.log("backlog_id: ", backlog_id)
+        // console.log("backlog_id: ", backlog_id)
          $.ajax({
              url: '/add_candidate_ajaxfile',
              type: 'post',
