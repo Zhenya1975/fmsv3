@@ -1595,16 +1595,54 @@ def add_candidate_ajaxfile():
                 })
                 
             elif red_candidate_reg_id != 0 and blue_candidate_reg_id == 0:
+                 # редактируем запись, вписывая в нее красного кандидата
+                candidates_data.blue_candidate_reg_id = reg_id
+                db.session.commit()
+                candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
-                backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+                blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
+                blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
                 return jsonify(
                 {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=round_id),
-                    'htmlresponse_blue_candidate': render_template('empty_candidate.html'),
+                    'htmlresponse_blue_candidate': render_template('blue_candidate.html', blue_candidate_last_name=blue_candidate_last_name, blue_candidate_first_name=blue_candidate_first_name, round_id=round_id),
+                    'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
+                    'htmlresponse_fights': render_template('fights_in_round.html'),
+                    
+                })  
+                
+                
+            elif red_candidate_reg_id == 0 and blue_candidate_reg_id != 0:
+                # редактируем запись, вписывая в нее красного кандидата
+                candidates_data.red_candidate_reg_id = reg_id
+                db.session.commit()
+                candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+                red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
+                red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
+                blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
+                blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                return jsonify(
+                {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=round_id),
+                    'htmlresponse_blue_candidate': render_template('blue_candidate.html', blue_candidate_last_name=blue_candidate_last_name, blue_candidate_first_name=blue_candidate_first_name, round_id=round_id),
+                    'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
+                    'htmlresponse_fights': render_template('fights_in_round.html'),
+                    
+                })          
+                
+            else:
+                candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+                red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
+                red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
+                blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
+                blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                return jsonify(
+                {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=round_id),
+                    'htmlresponse_blue_candidate': render_template('blue_candidate.html', blue_candidate_last_name=blue_candidate_last_name, blue_candidate_first_name=blue_candidate_first_name, round_id=round_id),
                     'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
                     'htmlresponse_fights': render_template('fights_in_round.html'),
                     
                 })
+                
                 
         
         else:    
@@ -1614,16 +1652,16 @@ def add_candidate_ajaxfile():
                 red_candidate_reg_id=reg_id
             )
             db.session.add(new_candidate_record)
-            db.sessionn.commit()
+            db.session.commit()
             
             backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
             
-            candidates_data = FightcandidateDB.query.filter_by(round_id=selectround).first()
+            candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
             
             red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
             red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
             return jsonify(
-            {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=selectround),
+            {'htmlresponse_red_candidate': render_template('red_candidate.html', red_candidate_last_name=red_candidate_last_name, red_candidate_first_name=red_candidate_first_name, round_id=round_id),
                 'htmlresponse_blue_candidate': render_template('empty_candidate.html'),
                 'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
                 'htmlresponse_fights': render_template('fights_in_round.html'),

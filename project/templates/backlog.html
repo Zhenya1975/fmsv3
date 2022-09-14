@@ -30,6 +30,13 @@
              type: 'post',
              data: {backlog_id:backlog_id},
              success: function(response){
+                $('.backlog').show()
+                $('.red_candidate').html(response);
+                $('.red_candidate').append(response.htmlresponse_red_candidate);
+                $('.blue_candidate').html(response);
+                $('.blue_candidate').append(response.htmlresponse_blue_candidate);
+                $('.backlog_list').html(response);
+                $('.backlog_list').append(response.htmlresponse_backlog);
 
 
             }
