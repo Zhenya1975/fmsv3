@@ -22,6 +22,7 @@ class CompetitionsDB(db.Model):
     competition_date_finish = db.Column(db.Date, default=datetime.utcnow)
     competition_city = db.Column(db.String)
     fight_duration = db.Column(db.Integer, default=120)
+    added_time = db.Column(db.Integer, default=60)
     fights = db.relationship('FightsDB', backref='competition')
     registration_comp = db.relationship('RegistrationsDB', backref='registration_comp')
 

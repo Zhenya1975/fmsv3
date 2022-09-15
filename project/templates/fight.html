@@ -70,13 +70,13 @@
                         <br>
                         <hr/>
 
-                        <button type="button" class="btn btn-danger btn-sm" id="reset_button">
+                        <button type="button" class="btn btn-danger btn-block" id="reset_button">
                           Сброс таймера
                         </button>
         
                         <hr/>
                         {#<p>Добавить время#}
-                            <button type="button" class="btn btn-info btn-sm" id="add_time_button">
+                            <button type="button" class="btn btn-info btn-block" id="add_time_button">
                               Добавить время
                             </button>
                         <hr/>
@@ -135,37 +135,62 @@
                 else if ($this.hasClass('btn-primary')) {
                     $this.removeClass('btn-primary').addClass('btn-dark');
                 }
-
-
                 if (myInterval === -1 && time >0) {
-
                         document.getElementById('start-stop-button').innerHTML = 'Pause';
                         myInterval = setInterval(function(){
+                            time --;
+                            var minutes = ('0' + Math.floor((time / 60) % 60)).slice(-2);
+                            var seconds = ('0' + Math.floor(time % 60)).slice(-2);
+                            time_display = minutes + ':' + seconds
 
-                                    time --;
-                                    var minutes = ('0' + Math.floor((time / 60) % 60)).slice(-2);
-                                    var seconds = ('0' + Math.floor(time % 60)).slice(-2);
-                                    time_display = minutes + ':' + seconds
-
-                                    socket.emit('Timer value changed', {'timer_sent': time});
-                                    document.getElementById('timer_master').innerHTML = time_display;
+                            socket.emit('Timer value changed', {'timer_sent': time});
+                            document.getElementById('timer_master').innerHTML = time_display;
 
 
-                                    if (time <= 0){
-                                        clearInterval(myInterval);
-                                        audio.play();
-                                        document.getElementById('start-stop-button').innerHTML = 'Finished';
+                            if (time <= 0){
+                                clearInterval(myInterval);
+                                document.getElementById('start-stop-button').innerHTML = 'Finished';
+                                audio.play();
+                            }
 
-                                    }
                         }, 1000);
                     } else {
                         clearInterval(myInterval);
                         myInterval = -1;
                         document.getElementById('start-stop-button').innerHTML = 'Start';
-
                     }
-
             })
+
+
+            $('#reset_button').on('click', function(event) {
+                time = {{fight_duration}}
+                document.getElementById('timer_master').innerHTML = timer_display(time)
+                socket.emit('Timer value changed', {'timer_sent': time});
+                clearInterval(myInterval);
+                myInterval = -1;
+                document.getElementById('start-stop-button').innerHTML = 'Start';
+                var $this = $('#start-stop-button');
+                if ($this.hasClass('btn-primary')) {
+                    $this.removeClass('btn-primary').addClass('btn-dark');
+                    }
+                })
+
+
+            // Кнопка Добавить время
+            ////////////////////////////////////////////////////
+            $('#add_time_button').on('click', function(event) {
+                time = {{added_time}}
+                document.getElementById('timer_master').innerHTML = timer_display(time)
+                socket.emit('Timer value changed', {'timer_sent': time});
+                clearInterval(myInterval);
+                myInterval = -1;
+                document.getElementById('start-stop-button').innerHTML = 'Start';
+                var $this = $('#start-stop-button');
+                if ($this.hasClass('btn-primary')) {
+                    $this.removeClass('btn-primary').addClass('btn-dark');
+                    }
+                })
+            /////////////////////////////////////////////////////
             
             
             
