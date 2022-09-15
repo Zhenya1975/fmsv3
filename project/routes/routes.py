@@ -569,6 +569,7 @@ def competition_create_new():
                                          competition_date_start=form.competition_date_start.data,
                                          competition_date_finish=form.competition_date_finish.data,
                                          competition_city=form.competition_city.data,
+
                                          )
         db.session.add(new_competition)
         db.session.commit()
@@ -2331,3 +2332,14 @@ def finish(fight_id):
     winner_data = ParticipantsDB.query.get(participant_id)
     fights_data = FightsDB.query.filter_by(competition_id=competition_id).all()
     return render_template("finish.html", winner_data=winner_data, fights_data=fights_data)
+
+@home.route('/visitor/<int:competition_id>')
+def visitor(competition_id):
+    competition_data = CompetitionsDB.query.get(competition_id)
+    fight_duration = competition_data.fight_duration
+    return render_template('visitor.html', fight_duration=fight_duration)
+
+@socketio.on('Timer value changed')
+def timer_value_changed(timer_message):
+    timer_sent = timer_message
+    emit('update_timer_value', timer_sent, broadcast=True)

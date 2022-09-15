@@ -12,7 +12,7 @@ class CompetitionForm(FlaskForm):
     competition_date_finish = DateField('Дата завершения соревнования', format='%Y-%m-%d',
                                         validators=[validators.DataRequired()])
     competition_city = StringField('Город турнира', validators=[validators.DataRequired()])
-    fight_duration = IntegerField('Время поединка, сек', validators=[validators.DataRequired()])
+    fight_duration = IntegerField('Время поединка, сек')
     submit = SubmitField('Сохранить')
 
 
