@@ -257,11 +257,13 @@ def comp2(competition_id, active_tab_name):
 
     # определяем количество строк весовых категорий
     number_of_weight_categories = len(list(w_categories))
+    
+    tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
     # print(number_of_weight_categories)  
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
                            w_categories=w_categories, a_categories=a_categories,
-                           number_of_weight_categories=number_of_weight_categories)
+                           number_of_weight_categories=number_of_weight_categories, tatami_data=tatami_data)
 
 
 # создание возрастной категории

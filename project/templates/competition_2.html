@@ -208,6 +208,10 @@
                 
                                           <select style="width:auto;" class="tatami_select form-control" id="tatami_selector_id" name="tatami_selector">
                                                 <option value=0 selected disabled>Выбрать татами</option>
+                                                 {% for tatami in tatami_data %}
+                                                    <option value={{ tatami.tatami_id }}>{{ tatami.tatami_name }}</option>
+                                                  {% endfor %}
+                                                
                                             </select>
                                           
                                           <div class="input-group-append">
