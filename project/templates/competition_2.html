@@ -53,12 +53,13 @@
 
 
         <p><a href="{{url_for('home.competitions')}}">Список соревнований</a></p>
-{#                <p></p>#}
+
                 <h3>{{ competition_data.competition_name }}</h3>
 
                 <ul class="nav nav-tabs">
                     <li class="nav-item"><a class="nav-link" href="#competition_general_info" data-toggle="tab">Общая информация</a></li>
                     <li class="nav-item"><a class="nav-link" href="#registrations_tab" data-toggle="tab">Регистрации</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#schedule_tab" data-toggle="tab">Расписание</a></li>
                     <li class="nav-item"><a class="nav-link" href="#competition_settings" data-toggle="tab">Настройки</a></li>
                 </ul>
 
@@ -134,20 +135,7 @@
 
                             <div>
                             <div>
-{#                            <form id="select_fighter_form" method="POST" action="{{ url_for('home.registration_new_2', competition_id = competition_data.competition_id)}}">#}
-                                    <select class="my-select selectpicker w-50" id="select_reg" data-live-search="true" title="Выберете участника из списка" name="fighter_pick">
-                                      {% for participant in participants_data_for_selection %}
-                                        <option value={{ participant.participant_id }}>{{ participant.participant_first_name }} {{ participant.participant_last_name }}</option>
 
-                                       {% endfor %}
-                                    </select>
-
-                                <p></p>
-                            <div>
-                                <button class="btn btn-primary select_new_reg" type="button" data-id={{ competition_data.competition_id }} >Выбрать</button>
-                            </div>
-
-{#                            </form>#}
 
                                 <p></p>
 
@@ -204,6 +192,42 @@
 
 
                     </div>
+                    </div>
+                    
+                    
+                    <div class="tab-pane" id="schedule_tab">
+                        <div style="margin-top: 20px">
+                            <!--<button type="button" class="btn btn-outline-primary add_tatami" data-id={{ competition_data.competition_id }}>Добавить татами</button>-->
+                            <div class="row">
+                                <div class="col">
+                                    <!--<button type="button" class="btn btn-outline-primary add_tatami" data-id={{ competition_data.competition_id }}>Добавить</button>-->
+                                    
+                                    <div class="form-group col-md-4">
+                                        <!--<label for="tatami_selector_id">Круг</label>-->
+                                        <div class="input-group">
+                
+                                          <select style="width:auto;" class="tatami_select form-control" id="tatami_selector_id" name="tatami_selector">
+                                                <option value=0 selected disabled>Выбрать татами</option>
+                                            </select>
+                                          
+                                          <div class="input-group-append">
+                                            <button  class="btn btn-outline-secondary add_tatami_button" data-compid={{ competition_data.competition_id }}>
+                                              <i class="fa fa-plus fa-lg"></i>
+                                          </button>
+                                            <button  class="btn btn-outline-secondary edit_tatami_button" data-compid={{ competition_data.competition_id }}>
+                                              <i class="fa fa-edit fa-lg"></i>
+                                          </button>
+                                          </div>
+                                        </div>
+                                    </div>
+                                    
+                                    
+            
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
                     </div>
 
                     <div class="tab-pane" id="competition_settings">
