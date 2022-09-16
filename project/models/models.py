@@ -93,6 +93,7 @@ class RoundsDB(db.Model):
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'))
     age_cat_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))
+    tatami_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))
 
 
 class FightcandidateDB(db.Model):
@@ -103,3 +104,9 @@ class FightcandidateDB(db.Model):
     blue_candidate_reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     
 
+class TatamiDB(db.Model):
+    """Модель для татами"""
+    tatami_id = db.Column(db.Integer, primary_key=True)
+    tatami_name = db.Column(db.String)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
+    # round_tatami = db.relationship('RoundsDB', backref='round_tatami')
