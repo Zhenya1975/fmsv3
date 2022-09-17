@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, \
-    AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB
+    AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB, QueueDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
 from functions import check_delete_weight_category, create_backlog_record, new_round_name
 from extensions import extensions
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, func
 from flask_socketio import SocketIO, emit
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -1629,6 +1629,28 @@ def new_fight_ajaxfile():
                 )
                 db.session.add(new_fight)
                 db.session.commit()
+
+                # создаем очередь для боя
+                # определяем последний созданный бой
+                last_created_fight = FightsDB.query.filter_by(competition_id=competition_id,
+                                                              round_number=round_id).order_by(
+                    desc(FightsDB.fight_id)).first()
+                fight_id = last_created_fight.fight_id
+                # определяем последний сорт индекс в очереди
+                queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).all()
+                max_sort_index = 0
+                if queue_data:
+                    max_sort_index_data = db.session.query(func.max(QueueDB.queue_sort_index)).first()
+                    max_sort_index = list(max_sort_index_data)[0]
+                max_sort_index = max_sort_index + 1
+                new_queue = QueueDB(
+                    tatami_id = tatami_id,
+                    fight_id = fight_id,
+                    queue_sort_index = max_sort_index
+                )
+                db.session.add(new_queue)
+                db.session.commit()
+
                 backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 fights_data = FightsDB.query.filter_by(round_number=round_id).all()
 
@@ -1651,6 +1673,10 @@ def delete_fight_ajaxfile():
         round_id = fight_data.round_number
         competition_id = fight_data.competition_id
         if fight_status == 0:
+            # удаляем очередь, связанную с боем
+            queue_data = QueueDB.query.filter_by(fight_id=fight_id).first()
+            if queue_data:
+                db.session.delete(queue_data)
             # удаляем бой
             db.session.delete(fight_data)
             # создаем записи в бэклоге
