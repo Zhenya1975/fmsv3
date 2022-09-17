@@ -142,11 +142,12 @@ def fights(competition_id):
         AgecategoriesDB.sort_index.asc()).all()
     weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         WeightcategoriesDB.sort_index.asc()).all()
-
+    tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
     return render_template("fights.html",
                            competition_data=competition_data,
                            age_catagories_data=age_catagories_data,
-                           weight_categories_data=weight_categories_data
+                           weight_categories_data=weight_categories_data,
+                           tatami_data=tatami_data
                            )
 
 
