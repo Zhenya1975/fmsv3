@@ -52,6 +52,7 @@ class FightsDB(db.Model):
     red_fighter_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     blue_fighter_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     fight_winner_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
+    tatami_id = db.Column(db.Integer, db.ForeignKey('tatamiDB.tatami_id'))
     fight_status = db.Column(db.Integer, default=0)  # 0 - не начат, 1 - в процессе, 2 - завершен
     final_status = db.Column(db.String, default='continue')
 
@@ -93,7 +94,7 @@ class RoundsDB(db.Model):
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'))
     age_cat_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))
-    tatami_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))
+
 
 
 class FightcandidateDB(db.Model):
@@ -109,4 +110,4 @@ class TatamiDB(db.Model):
     tatami_id = db.Column(db.Integer, primary_key=True)
     tatami_name = db.Column(db.String)
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
-    # round_tatami = db.relationship('RoundsDB', backref='round_tatami')
+    fight_tatami = db.relationship('FightsDB', backref='fight_tatami')

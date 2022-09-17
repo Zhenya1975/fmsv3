@@ -135,11 +135,22 @@
 
                             <div>
                             <div>
+{#                            <form id="select_fighter_form" method="POST" action="{{ url_for('home.registration_new_2', competition_id = competition_data.competition_id)}}">#}
+                                    <select class="my-select selectpicker w-50" id="select_reg" data-live-search="true" title="Выберете участника из списка" name="fighter_pick">
+                                      {% for participant in participants_data_for_selection %}
+                                        <option value={{ participant.participant_id }}>{{ participant.participant_first_name }} {{ participant.participant_last_name }}</option>
 
+                                       {% endfor %}
+                                    </select>
 
                                 <p></p>
+                            <div>
+                                <button class="btn btn-primary select_new_reg" type="button" data-id={{ competition_data.competition_id }} >Выбрать</button>
+                            </div>
 
+{#                            </form>#}
 
+                                <p></p>
                             <table id="registration_table" class="table table-striped table-bordered" style="width:100%">
                                     <thead>
                                         <tr>

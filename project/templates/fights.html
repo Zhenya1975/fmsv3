@@ -217,6 +217,8 @@
         var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
         var selectround = $('#round_selector_id').children("option:selected").val();
+        var selecttatami = $('#tatami_selector_id').children("option:selected").val();
+
         $('.backlog').hide()
         $('.fights_div').hide()
         // $('.fights_data').html();
@@ -239,6 +241,7 @@
                  .attr("value", value).text(key));
             });
           })
+
 
 
           $("select.round_select").change(function(){
@@ -275,6 +278,9 @@
               }
         });
 
+        $("select.tatami_select").change(function(){
+            selecttatami = $(this).children("option:selected").val();
+         });
       
          $("select.weight_category_select").change(function(){
               $(".round_select").val(0)
@@ -327,10 +333,12 @@
 
         $('.new_fight').click(function(){
            var round_id = selectround;
+           var tatami_id = selecttatami;
+
            $.ajax({
              url: '/new_fight_ajaxfile',
              type: 'post',
-             data: {round_id:round_id},
+             data: {round_id:round_id,tatami_id:tatami_id},
              success: function(response){
                 $('.backlog').show()
                 $('.fights_div').show()

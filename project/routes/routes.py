@@ -1604,6 +1604,7 @@ def add_tatami_ajaxfile():
 def new_fight_ajaxfile():
     if request.method == 'POST':
         round_id = int(request.form['round_id'])
+        tatami_id = int(request.form['tatami_id'])
         round_data = RoundsDB.query.get(round_id)
         competition_id = round_data.competition_id
         candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
@@ -1624,6 +1625,7 @@ def new_fight_ajaxfile():
                     round_number=round_id,
                     red_fighter_id=red_candidate_reg_id,
                     blue_fighter_id=blue_candidate_reg_id,
+                    tatami_id=tatami_id
                 )
                 db.session.add(new_fight)
                 db.session.commit()
