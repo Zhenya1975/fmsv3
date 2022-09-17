@@ -197,35 +197,28 @@
                     
                     <div class="tab-pane" id="schedule_tab">
                         <div style="margin-top: 20px">
-                            <!--<button type="button" class="btn btn-outline-primary add_tatami" data-id={{ competition_data.competition_id }}>Добавить татами</button>-->
+
                             <div class="row">
                                 <div class="col">
-                                    <!--<button type="button" class="btn btn-outline-primary add_tatami" data-id={{ competition_data.competition_id }}>Добавить</button>-->
-                                    
-                                    <div class="form-group col-md-4">
-                                        <!--<label for="tatami_selector_id">Круг</label>-->
-                                        <div class="input-group">
-                
-                                          <select style="width:auto;" class="tatami_select form-control" id="tatami_selector_id" name="tatami_selector">
+
+                                    <div class="input-group">
+                                            <select style="width:auto;" class="tatami_select form-control" id="tatami_selector_id" name="tatami_selector">
                                                 <option value=0 selected disabled>Выбрать татами</option>
                                                  {% for tatami in tatami_data %}
                                                     <option value={{ tatami.tatami_id }}>{{ tatami.tatami_name }}</option>
                                                   {% endfor %}
-                                                
+
                                             </select>
-                                          
-                                          <div class="input-group-append">
+                                        <div class="input-group-append">
                                             <button  class="btn btn-outline-secondary add_tatami_button" data-compid={{ competition_data.competition_id }}>
                                               <i class="fa fa-plus fa-lg"></i>
-                                          </button>
+                                            </button>
                                             <button  class="btn btn-outline-secondary edit_tatami_button" data-compid={{ competition_data.competition_id }}>
                                               <i class="fa fa-edit fa-lg"></i>
-                                          </button>
-                                          </div>
+                                            </button>
                                         </div>
                                     </div>
-                                    
-                                    
+                                    <p></p>
                                     <div class="schedule_list">
                                         <!--<div class="card" style="width: 18rem;">-->
                                         <div class="card">
