@@ -232,15 +232,8 @@
                                     <p></p>
                                     <div class="schedule_list">
                                         <!--<div class="card" style="width: 18rem;">-->
-                                        <div class="card">
-                                          <div class="card-body">
-                                            <h5 class="card-title">Card title</h5>
-                                            <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                                            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                            <a href="#" class="card-link">Card link</a>
-                                            <a href="#" class="card-link">Another link</a>
-                                          </div>
-                                        </div>
+
+
                                     </div>
                                     
                                     
@@ -611,7 +604,7 @@
     $(document).ready(function(){
         var number_of_weight_categories = {{number_of_weight_categories}}
         // console.log("number_of_weight_categories: ", number_of_weight_categories)              
-        
+        var selecttatami = $('#tatami_selector_id').children("option:selected").val();
         
         $('#weight_cat_empty').hide();
         $('#weight_cat_with_data').hide();
@@ -639,7 +632,22 @@
           $('.nav-tabs a[href="#' + tab + '"]').tab('show');
         };
 
-      
+        // При изменении селекта выбора татами меняем значение переменной  selecttatami
+        $("select.tatami_select").change(function(){
+                selecttatami = $(this).children("option:selected").val();
+             });
+
+        // При загрузке страницы отрабатывает ajax загружая список в очереди поединков
+        $.ajax({
+             url: '/queue_ajaxfile',
+             type: 'post',
+             data: {tatami_id:selecttatami},
+             success: function(data){
+                 console.log("данные html", data.htmlresponse)
+                 $('.schedule_list').html(data);
+                 $('.schedule_list').append(data.htmlresponse);
+            }
+         });
 
      $('.create_age_category').click(function(){
         var competition_id = $(this).data('id');

@@ -112,10 +112,12 @@ class TatamiDB(db.Model):
     tatami_name = db.Column(db.String)
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     fight_tatami = db.relationship('FightsDB', backref='fight_tatami')
+    # queue_tatami = db.relationship('QueueDB', backref='queue_tatami')
 
 class QueueDB(db.Model):
     """Модель для очередей"""
     queue_id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     tatami_id = db.Column(db.Integer, db.ForeignKey('tatamiDB.tatami_id'))
     fight_id = db.Column(db.Integer, db.ForeignKey('fightsDB.fight_id'))
     queue_sort_index = db.Column(db.Integer)

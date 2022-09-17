@@ -143,6 +143,7 @@ def fights(competition_id):
     weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         WeightcategoriesDB.sort_index.asc()).all()
     tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
+
     return render_template("fights.html",
                            competition_data=competition_data,
                            age_catagories_data=age_catagories_data,
@@ -260,11 +261,16 @@ def comp2(competition_id, active_tab_name):
     number_of_weight_categories = len(list(w_categories))
     
     tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
-    # print(number_of_weight_categories)  
+    tatami_list = []
+    for tatami in tatami_data:
+        tatami_id = tatami.tatami_id
+        tatami_list.append(tatami_id)
+
+    queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list))
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
                            w_categories=w_categories, a_categories=a_categories,
-                           number_of_weight_categories=number_of_weight_categories, tatami_data=tatami_data)
+                           number_of_weight_categories=number_of_weight_categories, tatami_data=tatami_data, queue_data=queue_data)
 
 
 # создание возрастной категории
@@ -1645,6 +1651,7 @@ def new_fight_ajaxfile():
                 max_sort_index = max_sort_index + 1
                 new_queue = QueueDB(
                     tatami_id = tatami_id,
+                    competition_id=competition_id,
                     fight_id = fight_id,
                     queue_sort_index = max_sort_index
                 )
@@ -1903,7 +1910,7 @@ def add_candidate_ajaxfile():
         backlog_data_to_delete = BacklogDB.query.get(backlog_id)
         reg_id = backlog_data_to_delete.reg_id
         round_id = backlog_data_to_delete.round_id
-        db.session.delete(backlog_data_to_delete)
+
         try:
             db.session.commit()
         except Exception as e:
@@ -1927,6 +1934,7 @@ def add_candidate_ajaxfile():
 
                 # редактируем запись, вписывая в нее красного кандидата
                 candidates_data.red_candidate_reg_id = reg_id
+                db.session.delete(backlog_data_to_delete)
                 db.session.commit()
 
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
@@ -1948,6 +1956,7 @@ def add_candidate_ajaxfile():
             elif red_candidate_reg_id != 0 and blue_candidate_reg_id == 0:
                 # редактируем запись, вписывая в нее красного кандидата
                 candidates_data.blue_candidate_reg_id = reg_id
+                db.session.delete(backlog_data_to_delete)
                 db.session.commit()
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
@@ -1974,6 +1983,7 @@ def add_candidate_ajaxfile():
             elif red_candidate_reg_id == 0 and blue_candidate_reg_id != 0:
                 # редактируем запись, вписывая в нее красного кандидата
                 candidates_data.red_candidate_reg_id = reg_id
+                db.session.delete(backlog_data_to_delete)
                 db.session.commit()
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
@@ -1996,7 +2006,8 @@ def add_candidate_ajaxfile():
 
                      })
 
-            else:
+            elif red_candidate_reg_id != 0 and blue_candidate_reg_id != 0:
+                # print("все кандидаты заполены")
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
@@ -2017,7 +2028,8 @@ def add_candidate_ajaxfile():
                      'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
 
                      })
-
+            else:
+                print("что-то непонятное")
 
 
         else:
@@ -2027,6 +2039,7 @@ def add_candidate_ajaxfile():
                 red_candidate_reg_id=reg_id
             )
             db.session.add(new_candidate_record)
+            db.session.delete(backlog_data_to_delete)
             db.session.commit()
 
             backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
@@ -2046,6 +2059,18 @@ def add_candidate_ajaxfile():
                  'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
 
                  })
+
+
+@home.route('/queue_ajaxfile', methods=["POST", "GET"])
+def queue_ajaxfile():
+    if request.method == 'POST':
+        tatami_id = int(request.form['tatami_id'])
+        # if tatami_id == 0:
+
+        queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).all()
+        print("tatami_id: ",tatami_id, "queue_data: ", queue_data)
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
 
 
 @home.route('/fights_list_ajaxfile', methods=["POST", "GET"])
@@ -2153,6 +2178,9 @@ def edit_reg_ajaxfile():
                                                         weight_categories_data=weight_categories_data,
                                                         age_catagories_data=age_catagories_data,
                                                         competition_id=competition_id, age_eyars=age_eyars)})
+
+
+
 
 
 # Handler for a message received over 'connect' channel
