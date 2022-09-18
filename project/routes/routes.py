@@ -1327,7 +1327,6 @@ def up_queue_ajaxfile():
         tatami_id = int(request.form['selecttatami'])
         # print("move_object_selector: ", move_object_selector)
         if move_object_selector == "move_fight":
-
             # получаем последнюю запись в выборке элементов, которые находятся сверху
             try:
                 upper_sibling_data = db.session.query(QueueDB).filter(
@@ -1338,40 +1337,63 @@ def up_queue_ajaxfile():
 
                 # меняем сорт индекс у верхнего элемента
                 upper_sibling_data.queue_sort_index = current_upper_sibling_sort_index + 1
-                # try:
-                #     db.session.commt()
-                #     print("я тут")
-                # except Exception as e:
-                #     print("ошибка ", e)
-                # изменяем сорт индекс на нашего элемента
                 selected_queue_data.queue_sort_index = current_queue_sort_index - 1
-
-                # try:
-                #     db.session.commt()
-                #     print("я тут")
-                # except Exception as e:
-                #     print("ошибка ", e)
-
-                queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).order_by(QueueDB.queue_sort_index).all()
-                # print("current_upper_sibling_sort_index: ", current_upper_sibling_sort_index)
-                # print("tatami_id: ", tatami_id, " type", type(tatami_id))
-
-                if tatami_id == 0:
-                    queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(
-                        QueueDB.queue_sort_index).all()
-                    # queue_data = db.session.query(QueueDB).filter(QueueDB.participant_id.notin_(list_of_participants_ids))
-
                 try:
                     db.session.commit()
                 except Exception as e:
                     print("ошибка ", e)
 
-                return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+            except:
+                pass
+
+        elif move_object_selector == "move_category":
+            # получаем выборку категории выбранной очереди
+            selected_queue_fight_id =  selected_queue_data.fight_id
+            fight_data = FightsDB.query.get(selected_queue_fight_id)
+            reg_data = RegistrationsDB.query.get(fight_data.red_fighter_id)
+            weight_cat_id = reg_data.weight_cat_id
+            age_cat_id = reg_data.age_cat_id
+            # получаем выборку боев в очереди в данной категории
+            # итерируемся по очереди
+            queue_competition_data = QueueDB.query.filter_by(competition_id=competition_id).all()
+
+            # ищем данные категории, которая находится выше текущей
+            # получаем данные поединков, которые находятся выше
+            try:
+                upper_sibling_data = db.session.query(QueueDB).filter(
+                    QueueDB.queue_sort_index < current_queue_sort_index).filter(
+                    QueueDB.tatami_id == current_tatami_id).order_by(
+                    desc(QueueDB.queue_sort_index)).first()
+                upper_sibling_sort_index = upper_sibling_data.queue_sort_index
+                upper_queue_fight_data = FightsDB.query.get(upper_sibling_data)
+                reg_upper_queue_fight_data = RegistrationsDB.query.get(upper_queue_fight_data.red_fighter_id)
+                upper_queue_weight_cat_id = reg_upper_queue_fight_data.weight_cat_id
+                upper_queue_age_cat_id = reg_upper_queue_fight_data.age_cat_id
+
+
             except:
                 pass
 
 
+            fights_list = []
+            for queue in queue_competition_data:
+                current_queue_fight_id = queue.fight_id
+                current_queue_fight_data = FightsDB.query.get(current_queue_fight_id)
+                reg_current_queue_data = RegistrationsDB.query.get(current_queue_fight_data.red_fighter_id)
+                current_queue_weight_cat_id = reg_current_queue_data.weight_cat_id
+                current_queue_age_cat_id = reg_current_queue_data.age_cat_id
+                if current_queue_weight_cat_id == weight_cat_id and current_queue_age_cat_id == age_cat_id:
+                    fights_list.append(current_queue_fight_id)
 
+
+            selected_category_queue_data = db.session.query(QueueDB).filter(QueueDB.fight_id.in_(fights_list)).all()
+
+
+        queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).order_by(QueueDB.queue_sort_index).all()
+        if tatami_id == 0:
+            queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(
+                QueueDB.queue_sort_index).all()
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 
 
