@@ -1306,6 +1306,25 @@ def add_rounds_ajaxfile():
                         })
 
 
+
+@home.route('/up_queue_ajaxfile', methods=["POST", "GET"])
+def up_queue_ajaxfile():
+    if request.method == 'POST':
+        queue_id = int(request.form['queue_id'])
+        selected_queue_data = QueueDB.query.get(queue_id)
+        competition_id = selected_queue_data.competition_id
+        move_object_selector = request.form['move_object_selector']
+        tatami_id = int(request.form['selecttatami'])
+        if move_object_selector == "move_fight":
+
+
+        queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).order_by(QueueDB.queue_sort_index).all()
+        if tatami_id == 0:
+            queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(QueueDB.queue_sort_index).all()
+            # queue_data = db.session.query(QueueDB).filter(QueueDB.participant_id.notin_(list_of_participants_ids))
+
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
 @home.route('/queue_ajaxfile', methods=["POST", "GET"])
 def queue_ajaxfile():
     if request.method == 'POST':
