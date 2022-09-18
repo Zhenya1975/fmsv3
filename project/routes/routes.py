@@ -132,7 +132,8 @@ def fight(fight_id):
     competition_data = CompetitionsDB.query.get(competition_id)
     fight_duration = competition_data.fight_duration
     added_time = competition_data.added_time
-    return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration, added_time=added_time)
+    return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration,
+                           added_time=added_time)
 
 
 @home.route('/fights/<int:competition_id>/')
@@ -259,7 +260,7 @@ def comp2(competition_id, active_tab_name):
 
     # определяем количество строк весовых категорий
     number_of_weight_categories = len(list(w_categories))
-    
+
     tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
     tatami_list = []
     for tatami in tatami_data:
@@ -267,13 +268,14 @@ def comp2(competition_id, active_tab_name):
         tatami_list.append(tatami_id)
 
     # queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list)).all()
-    queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(QueueDB.queue_sort_index).all()
+    queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(asc(QueueDB.queue_sort_index)).all()
 
     # print("queue_data: ", queue_data)
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
                            w_categories=w_categories, a_categories=a_categories,
-                           number_of_weight_categories=number_of_weight_categories, tatami_data=tatami_data, queue_data=queue_data)
+                           number_of_weight_categories=number_of_weight_categories, tatami_data=tatami_data,
+                           queue_data=queue_data)
 
 
 # создание возрастной категории
@@ -616,7 +618,6 @@ def registration_list(competition_id):
 #     return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
 
 
-
 @home.route('/new_tatami_create/<int:competition_id>', methods=["POST", "GET"])
 def new_tatami_create(competition_id):
     if request.method == 'POST':
@@ -633,7 +634,6 @@ def new_tatami_create(competition_id):
             flash(f'Изменения не сохранены. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-
 
 
 @home.route('/new_round_create/<int:competition_id>/<int:weight_cat_id>/<int:age_cat_id>', methods=["POST", "GET"])
@@ -1308,7 +1308,6 @@ def add_rounds_ajaxfile():
                         })
 
 
-
 @home.route('/up_queue_ajaxfile', methods=["POST", "GET"])
 def up_queue_ajaxfile():
     if request.method == 'POST':
@@ -1317,10 +1316,10 @@ def up_queue_ajaxfile():
         current_queue_sort_index = selected_queue_data.queue_sort_index
         current_tatami_id = selected_queue_data.tatami_id
         # выборка очереди на текущем татами
-        tatami_queue_data = QueueDB.query.filter_by(tatami_id = current_tatami_id).all()
+        tatami_queue_data = QueueDB.query.filter_by(tatami_id=current_tatami_id).all()
         # выборка записей очереди, которые находятся выше чем текущая запись
-        upper_tatami_queue_data = db.session.query(QueueDB).filter(QueueDB.queue_sort_index < current_queue_sort_index).filter(QueueDB.tatami_id == current_tatami_id).all()
-
+        upper_tatami_queue_data = db.session.query(QueueDB).filter(
+            QueueDB.queue_sort_index < current_queue_sort_index).filter(QueueDB.tatami_id == current_tatami_id).all()
 
         competition_id = selected_queue_data.competition_id
         move_object_selector = request.form['move_object_selector']
@@ -1338,6 +1337,7 @@ def up_queue_ajaxfile():
                 # меняем сорт индекс у верхнего элемента
                 upper_sibling_data.queue_sort_index = current_upper_sibling_sort_index + 1
                 selected_queue_data.queue_sort_index = current_queue_sort_index - 1
+                # print("я здесь")
                 try:
                     db.session.commit()
                 except Exception as e:
@@ -1348,7 +1348,7 @@ def up_queue_ajaxfile():
 
         elif move_object_selector == "move_category":
             # получаем выборку категории выбранной очереди
-            selected_queue_fight_id =  selected_queue_data.fight_id
+            selected_queue_fight_id = selected_queue_data.fight_id
             fight_data = FightsDB.query.get(selected_queue_fight_id)
             reg_data = RegistrationsDB.query.get(fight_data.red_fighter_id)
             weight_cat_id = reg_data.weight_cat_id
@@ -1374,7 +1374,6 @@ def up_queue_ajaxfile():
             except:
                 pass
 
-
             fights_list = []
             for queue in queue_competition_data:
                 current_queue_fight_id = queue.fight_id
@@ -1385,25 +1384,24 @@ def up_queue_ajaxfile():
                 if current_queue_weight_cat_id == weight_cat_id and current_queue_age_cat_id == age_cat_id:
                     fights_list.append(current_queue_fight_id)
 
-
             selected_category_queue_data = db.session.query(QueueDB).filter(QueueDB.fight_id.in_(fights_list)).all()
-
 
         queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).order_by(QueueDB.queue_sort_index).all()
         if tatami_id == 0:
             queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(
-                QueueDB.queue_sort_index).all()
+                asc(QueueDB.queue_sort_index)).all()
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
-
 
 
 @home.route('/queue_ajaxfile', methods=["POST", "GET"])
 def queue_ajaxfile():
     if request.method == 'POST':
         selecttatami = int(request.form['selecttatami'])
-        queue_data = QueueDB.query.filter_by(tatami_id=selecttatami).all()
+        queue_data = QueueDB.query.filter_by(tatami_id=selecttatami).order_by(
+                asc(QueueDB.queue_sort_index)).all()
         # print("queue_data: ", queue_data)
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
 
 @home.route('/add_round_ajaxfile', methods=["POST", "GET"])
 def add_round_ajaxfile():
@@ -1690,20 +1688,13 @@ def delete_weight_cat_ajaxfile():
                                                  number_of_regs=number_of_regs)})
 
 
-
-
-
 @home.route('/add_tatami_ajaxfile', methods=["POST", "GET"])
 def add_tatami_ajaxfile():
     if request.method == 'POST':
         competition_id = int(request.form['competition_id'])
-        
+
         return jsonify(
-                {'htmlresponse': render_template('response_new_tatami.html', competition_id=competition_id)})
-
-
-
-
+            {'htmlresponse': render_template('response_new_tatami.html', competition_id=competition_id)})
 
 
 @home.route('/new_fight_ajaxfile', methods=["POST", "GET"])
@@ -1750,10 +1741,10 @@ def new_fight_ajaxfile():
                     max_sort_index = list(max_sort_index_data)[0]
                 max_sort_index = max_sort_index + 1
                 new_queue = QueueDB(
-                    tatami_id = tatami_id,
+                    tatami_id=tatami_id,
                     competition_id=competition_id,
-                    fight_id = fight_id,
-                    queue_sort_index = max_sort_index
+                    fight_id=fight_id,
+                    queue_sort_index=max_sort_index
                 )
                 db.session.add(new_queue)
                 db.session.commit()
@@ -2161,10 +2152,6 @@ def add_candidate_ajaxfile():
                  })
 
 
-
-
-
-
 @home.route('/fights_list_ajaxfile', methods=["POST", "GET"])
 def fights_list_ajaxfile():
     if request.method == 'POST':
@@ -2270,9 +2257,6 @@ def edit_reg_ajaxfile():
                                                         weight_categories_data=weight_categories_data,
                                                         age_catagories_data=age_catagories_data,
                                                         competition_id=competition_id, age_eyars=age_eyars)})
-
-
-
 
 
 # Handler for a message received over 'connect' channel
