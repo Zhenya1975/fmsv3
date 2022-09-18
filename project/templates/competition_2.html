@@ -231,19 +231,7 @@
                                     </div>
                                     <p></p>
                                     <div class="queue_list">
-                                        <!--<div class="card" style="width: 18rem;">-->
-                                        {%  for queue in queue_data %}
-                                            <div class="card">
-                                              <div class="card-body">
-                                                <h5 class="card-title">{{ queue.queue_fight.red_fighter.registration_participant.participant_last_name }}</h5>
-                                                <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-                                                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                                                <a href="#" class="card-link">Card link</a>
-                                                <a href="#" class="card-link">Another link</a>
-                                              </div>
-                                            </div>
-                                        {% endfor %}
-
+                                    {% include 'queue_list.html' %}
 
                                     </div>
                                     
@@ -620,6 +608,7 @@
         
         $('#weight_cat_empty').hide();
         $('#weight_cat_with_data').hide();
+
   
         if (number_of_weight_categories==0) {
           $('#weight_cat_empty').show();
