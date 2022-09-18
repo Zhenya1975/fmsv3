@@ -77,22 +77,21 @@
                                 </select>
                     </div>
 
-                    <div class="form-group col-md-4">
+                    <div class="form-group col-mb-4">
                         <label for="round_selector_id">Круг</label>
                         <div class="input-group">
 
                           <select style="width:auto;" class="round_select form-control" id="round_selector_id" name="round_selector">
                                 <option value=0 selected disabled>Выбрать круг</option>
-
                             </select>
                           
                           <div class="input-group-append">
                             <button  class="btn btn-outline-secondary add_round_button" data-compid={{ competition_data.competition_id }}>
                               <i class="fa fa-plus fa-lg"></i>
-                          </button>
+                            </button>
                             <button  class="btn btn-outline-secondary edit_rounds_button" data-compid={{ competition_data.competition_id }}>
                               <i class="fa fa-edit fa-lg"></i>
-                          </button>
+                            </button>
                           </div>
                         </div>
                     </div>
@@ -121,7 +120,12 @@
                                     </div>
                                     
                                     <div class="col">
-                                        <button type="button" class="btn btn-outline-primary new_fight" data-id="{{round_id}}" style="margin-top: 10px;">Создать бой</button>
+                                        <select style="width:100%; margin-top: 10px;" class="tatami_select form-control" id="tatami_selector_id" name="tatami_selector">
+                                                {% for tatami in tatami_data %}
+                                                    <option value={{ tatami.tatami_id }}>{{ tatami.tatami_name }}</option>
+                                                {% endfor %}
+                                        </select>
+                                        <button type="button" class="btn btn-outline-primary new_fight" data-id="{{round_id}}" style="margin-top: 10px; width: 100%">Создать бой</button>
                                     </div>
                                     
                                 </div>
@@ -213,6 +217,8 @@
         var selectedweightcategory = $('#weight_cat_select').children("option:selected").val();
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
         var selectround = $('#round_selector_id').children("option:selected").val();
+        var selecttatami = $('#tatami_selector_id').children("option:selected").val();
+
         $('.backlog').hide()
         $('.fights_div').hide()
         // $('.fights_data').html();
@@ -235,6 +241,7 @@
                  .attr("value", value).text(key));
             });
           })
+
 
 
           $("select.round_select").change(function(){
@@ -271,6 +278,9 @@
               }
         });
 
+        $("select.tatami_select").change(function(){
+            selecttatami = $(this).children("option:selected").val();
+         });
       
          $("select.weight_category_select").change(function(){
               $(".round_select").val(0)
@@ -323,10 +333,12 @@
 
         $('.new_fight').click(function(){
            var round_id = selectround;
+           var tatami_id = selecttatami;
+
            $.ajax({
              url: '/new_fight_ajaxfile',
              type: 'post',
-             data: {round_id:round_id},
+             data: {round_id:round_id,tatami_id:tatami_id},
              success: function(response){
                 $('.backlog').show()
                 $('.fights_div').show()

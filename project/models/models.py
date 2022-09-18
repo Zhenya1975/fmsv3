@@ -52,8 +52,10 @@ class FightsDB(db.Model):
     red_fighter_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     blue_fighter_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     fight_winner_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
+    tatami_id = db.Column(db.Integer, db.ForeignKey('tatamiDB.tatami_id'))
     fight_status = db.Column(db.Integer, default=0)  # 0 - не начат, 1 - в процессе, 2 - завершен
     final_status = db.Column(db.String, default='continue')
+    queue_fight = db.relationship('QueueDB', backref='queue_fight')
 
 
 class BacklogDB(db.Model):
@@ -95,6 +97,7 @@ class RoundsDB(db.Model):
     age_cat_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'))
 
 
+
 class FightcandidateDB(db.Model):
     """Модель для кругов"""
     id = db.Column(db.Integer, primary_key=True)
@@ -103,3 +106,18 @@ class FightcandidateDB(db.Model):
     blue_candidate_reg_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     
 
+class TatamiDB(db.Model):
+    """Модель для татами"""
+    tatami_id = db.Column(db.Integer, primary_key=True)
+    tatami_name = db.Column(db.String)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
+    fight_tatami = db.relationship('FightsDB', backref='fight_tatami')
+    # queue_tatami = db.relationship('QueueDB', backref='queue_tatami')
+
+class QueueDB(db.Model):
+    """Модель для очередей"""
+    queue_id = db.Column(db.Integer, primary_key=True)
+    competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
+    tatami_id = db.Column(db.Integer, db.ForeignKey('tatamiDB.tatami_id'))
+    fight_id = db.Column(db.Integer, db.ForeignKey('fightsDB.fight_id'))
+    queue_sort_index = db.Column(db.Integer)

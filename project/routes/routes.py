@@ -1,11 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, \
-    AgecategoriesDB, RoundsDB, FightcandidateDB
+    AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB, QueueDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
 from functions import check_delete_weight_category, create_backlog_record, new_round_name
 from extensions import extensions
-from sqlalchemy import desc, asc
+from sqlalchemy import desc, asc, func
 from flask_socketio import SocketIO, emit
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -142,11 +142,13 @@ def fights(competition_id):
         AgecategoriesDB.sort_index.asc()).all()
     weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         WeightcategoriesDB.sort_index.asc()).all()
+    tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
 
     return render_template("fights.html",
                            competition_data=competition_data,
                            age_catagories_data=age_catagories_data,
-                           weight_categories_data=weight_categories_data
+                           weight_categories_data=weight_categories_data,
+                           tatami_data=tatami_data
                            )
 
 
@@ -249,17 +251,29 @@ def comp2(competition_id, active_tab_name):
     elif int(active_tab_name) == 2:
         data = {'active_tab_pass': 'registrations_tab'}
     elif int(active_tab_name) == 3:
+        data = {'active_tab_pass': 'schedule_tab'}
+    elif int(active_tab_name) == 4:
         data = {'active_tab_pass': 'competition_settings'}
     else:
         print("непонятно что передано вместо номера вкладки")
 
     # определяем количество строк весовых категорий
     number_of_weight_categories = len(list(w_categories))
-    # print(number_of_weight_categories)  
+    
+    tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
+    tatami_list = []
+    for tatami in tatami_data:
+        tatami_id = tatami.tatami_id
+        tatami_list.append(tatami_id)
+
+    # queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list)).all()
+    queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(QueueDB.queue_sort_index).all()
+
+    # print("queue_data: ", queue_data)
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
                            w_categories=w_categories, a_categories=a_categories,
-                           number_of_weight_categories=number_of_weight_categories)
+                           number_of_weight_categories=number_of_weight_categories, tatami_data=tatami_data, queue_data=queue_data)
 
 
 # создание возрастной категории
@@ -281,7 +295,7 @@ def age_category_new(competition_id):
         except Exception as e:
             print(e)
             db.session.rollback()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 # добавление весовой категории из непустой
@@ -295,14 +309,14 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
             weight_value_from_form = int(request.form.get('from'))
         else:
             flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
         weight_value_to_form = int(request.form.get('to'))
         if weight_value_to_form:
             weight_value_to_form = int(request.form.get('to'))
         else:
             flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
         current_weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
         current_weight_category_from_value = current_weight_category_data.weight_category_start
@@ -343,11 +357,11 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
                 next_weight_category_data.weight_category_name = f"От {weight_value_to_form} до {next_weight_category_data_to_value} кг"
                 db.session.commit()
                 flash('Изменения сохранены', 'alert-success')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
             else:
                 flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
         # Если следующая запись есть и она последняя
         elif status_of_last_record == 1:
@@ -385,12 +399,12 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
 
                 db.session.commit()
                 flash('Изменения сохранены', 'alert-success')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
             else:
                 flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
         # Если следующая записи нет
         elif status_of_last_record == 0:
@@ -414,19 +428,19 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
 
                 db.session.commit()
                 flash('Изменения сохранены', 'alert-success')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 
 
             else:
                 flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
         else:
             flash('Изменения не сохранены. Что-то пошло не так', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 # добавление весовой категории из пустой
@@ -465,10 +479,10 @@ def add_empty_weight_category_new(competition_id):
                 print(e)
                 db.session.rollback()
 
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
         else:
             flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 # создание весовой категории
@@ -489,8 +503,8 @@ def weight_category_new(competition_id):
         except Exception as e:
             print(e)
             db.session.rollback()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/participantdelete/<int:participant_id>/delete/')
@@ -501,7 +515,7 @@ def participant_delete(participant_id):
     if number_of_participant_regs > 0:
         flash(f"Количество связанных регистраций: {number_of_participant_regs}. Сначала удалите связанные регистрации.",
               'alert-danger')
-        return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=3))
+        return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=4))
     else:
         db.session.delete(participant_data)
         try:
@@ -530,7 +544,7 @@ def competition_delete(competition_id):
               'alert-danger')
         regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
             asc(ParticipantsDB.participant_last_name)).all()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
     else:
         db.session.delete(competition_data)
         try:
@@ -541,7 +555,7 @@ def competition_delete(competition_id):
             print(e)
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/competition_start/')
@@ -602,6 +616,26 @@ def registration_list(competition_id):
 #     return redirect(url_for('home.participant', participant_id=participant_id, active_tab_name=1))
 
 
+
+@home.route('/new_tatami_create/<int:competition_id>', methods=["POST", "GET"])
+def new_tatami_create(competition_id):
+    if request.method == 'POST':
+        tatami_name = request.form.get('tatami_name')
+        competition_id = int(competition_id)
+        new_tatami = TatamiDB(tatami_name=tatami_name, competition_id=competition_id)
+        db.session.add(new_tatami)
+        try:
+            db.session.commit()
+            flash(f"Изменения сохранены", 'alert-success')
+
+        except Exception as e:
+            print(e)
+            flash(f'Изменения не сохранены. Ошибка: {e}', 'alert-danger')
+            db.session.rollback()
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+
+
+
 @home.route('/new_round_create/<int:competition_id>/<int:weight_cat_id>/<int:age_cat_id>', methods=["POST", "GET"])
 def new_round_create(competition_id, weight_cat_id, age_cat_id):
     if request.method == 'POST':
@@ -647,6 +681,9 @@ def new_round_create(competition_id, weight_cat_id, age_cat_id):
         return redirect(url_for('home.fights', competition_id=competition_id))
 
     flash(f'Изменения не сохранены')
+    competition_data = CompetitionsDB.query.get(competition_id)
+    weight_categories_data = WeightcategoriesDB.query.get(weight_cat_id)
+    age_catagories_data = AgecategoriesDB.query.get(age_cat_id)
     return redirect(url_for('home.fights', competition_data=competition_data, age_catagories_data=age_catagories_data,
                             weight_categories_data=weight_categories_data))
 
@@ -764,10 +801,10 @@ def age_category_edit(age_cat_id):
 
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
     else:
         flash(f"Форма не валидировалась", 'alert-danger')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_category_edit/<int:weight_cat_id>/', methods=["POST", "GET"])
@@ -783,11 +820,11 @@ def weight_category_edit(weight_cat_id):
 
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
     else:
         flash(f"Форма не валидировалась", 'alert-danger')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
-    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/registration_edit/<int:reg_id>/', methods=["POST", "GET"])
@@ -857,7 +894,7 @@ def age_cat_delete(age_cat_id):
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_1_cat_delete/<int:competition_id>/<int:weight_cat_id>', methods=["POST", "GET"])
@@ -976,7 +1013,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
         db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_2_cat_delete/<int:competition_id>/', methods=["POST", "GET"])
@@ -994,7 +1031,7 @@ def weight_2_cat_delete(competition_id):
         flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
         db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_cat_delete/<int:weight_cat_id>/', methods=["POST", "GET"])
@@ -1064,7 +1101,7 @@ def weight_cat_delete(weight_cat_id):
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/registration_delete/<int:reg_id>/', methods=["POST", "GET"])
@@ -1270,6 +1307,103 @@ def add_rounds_ajaxfile():
                         'age_cat_id': age_cat_id
                         })
 
+
+
+@home.route('/up_queue_ajaxfile', methods=["POST", "GET"])
+def up_queue_ajaxfile():
+    if request.method == 'POST':
+        queue_id = int(request.form['queue_id'])
+        selected_queue_data = QueueDB.query.get(queue_id)
+        current_queue_sort_index = selected_queue_data.queue_sort_index
+        current_tatami_id = selected_queue_data.tatami_id
+        # выборка очереди на текущем татами
+        tatami_queue_data = QueueDB.query.filter_by(tatami_id = current_tatami_id).all()
+        # выборка записей очереди, которые находятся выше чем текущая запись
+        upper_tatami_queue_data = db.session.query(QueueDB).filter(QueueDB.queue_sort_index < current_queue_sort_index).filter(QueueDB.tatami_id == current_tatami_id).all()
+
+
+        competition_id = selected_queue_data.competition_id
+        move_object_selector = request.form['move_object_selector']
+        tatami_id = int(request.form['selecttatami'])
+        # print("move_object_selector: ", move_object_selector)
+        if move_object_selector == "move_fight":
+            # получаем последнюю запись в выборке элементов, которые находятся сверху
+            try:
+                upper_sibling_data = db.session.query(QueueDB).filter(
+                    QueueDB.queue_sort_index < current_queue_sort_index).filter(
+                    QueueDB.tatami_id == current_tatami_id).order_by(
+                    desc(QueueDB.queue_sort_index)).first()
+                current_upper_sibling_sort_index = upper_sibling_data.queue_sort_index
+
+                # меняем сорт индекс у верхнего элемента
+                upper_sibling_data.queue_sort_index = current_upper_sibling_sort_index + 1
+                selected_queue_data.queue_sort_index = current_queue_sort_index - 1
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    print("ошибка ", e)
+
+            except:
+                pass
+
+        elif move_object_selector == "move_category":
+            # получаем выборку категории выбранной очереди
+            selected_queue_fight_id =  selected_queue_data.fight_id
+            fight_data = FightsDB.query.get(selected_queue_fight_id)
+            reg_data = RegistrationsDB.query.get(fight_data.red_fighter_id)
+            weight_cat_id = reg_data.weight_cat_id
+            age_cat_id = reg_data.age_cat_id
+            # получаем выборку боев в очереди в данной категории
+            # итерируемся по очереди
+            queue_competition_data = QueueDB.query.filter_by(competition_id=competition_id).all()
+
+            # ищем данные категории, которая находится выше текущей
+            # получаем данные поединков, которые находятся выше
+            try:
+                upper_sibling_data = db.session.query(QueueDB).filter(
+                    QueueDB.queue_sort_index < current_queue_sort_index).filter(
+                    QueueDB.tatami_id == current_tatami_id).order_by(
+                    desc(QueueDB.queue_sort_index)).first()
+                upper_sibling_sort_index = upper_sibling_data.queue_sort_index
+                upper_queue_fight_data = FightsDB.query.get(upper_sibling_data)
+                reg_upper_queue_fight_data = RegistrationsDB.query.get(upper_queue_fight_data.red_fighter_id)
+                upper_queue_weight_cat_id = reg_upper_queue_fight_data.weight_cat_id
+                upper_queue_age_cat_id = reg_upper_queue_fight_data.age_cat_id
+
+
+            except:
+                pass
+
+
+            fights_list = []
+            for queue in queue_competition_data:
+                current_queue_fight_id = queue.fight_id
+                current_queue_fight_data = FightsDB.query.get(current_queue_fight_id)
+                reg_current_queue_data = RegistrationsDB.query.get(current_queue_fight_data.red_fighter_id)
+                current_queue_weight_cat_id = reg_current_queue_data.weight_cat_id
+                current_queue_age_cat_id = reg_current_queue_data.age_cat_id
+                if current_queue_weight_cat_id == weight_cat_id and current_queue_age_cat_id == age_cat_id:
+                    fights_list.append(current_queue_fight_id)
+
+
+            selected_category_queue_data = db.session.query(QueueDB).filter(QueueDB.fight_id.in_(fights_list)).all()
+
+
+        queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).order_by(QueueDB.queue_sort_index).all()
+        if tatami_id == 0:
+            queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(
+                QueueDB.queue_sort_index).all()
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
+
+
+@home.route('/queue_ajaxfile', methods=["POST", "GET"])
+def queue_ajaxfile():
+    if request.method == 'POST':
+        selecttatami = int(request.form['selecttatami'])
+        queue_data = QueueDB.query.filter_by(tatami_id=selecttatami).all()
+        # print("queue_data: ", queue_data)
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 @home.route('/add_round_ajaxfile', methods=["POST", "GET"])
 def add_round_ajaxfile():
@@ -1556,10 +1690,27 @@ def delete_weight_cat_ajaxfile():
                                                  number_of_regs=number_of_regs)})
 
 
+
+
+
+@home.route('/add_tatami_ajaxfile', methods=["POST", "GET"])
+def add_tatami_ajaxfile():
+    if request.method == 'POST':
+        competition_id = int(request.form['competition_id'])
+        
+        return jsonify(
+                {'htmlresponse': render_template('response_new_tatami.html', competition_id=competition_id)})
+
+
+
+
+
+
 @home.route('/new_fight_ajaxfile', methods=["POST", "GET"])
 def new_fight_ajaxfile():
     if request.method == 'POST':
         round_id = int(request.form['round_id'])
+        tatami_id = int(request.form['tatami_id'])
         round_data = RoundsDB.query.get(round_id)
         competition_id = round_data.competition_id
         candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
@@ -1580,9 +1731,33 @@ def new_fight_ajaxfile():
                     round_number=round_id,
                     red_fighter_id=red_candidate_reg_id,
                     blue_fighter_id=blue_candidate_reg_id,
+                    tatami_id=tatami_id
                 )
                 db.session.add(new_fight)
                 db.session.commit()
+
+                # создаем очередь для боя
+                # определяем последний созданный бой
+                last_created_fight = FightsDB.query.filter_by(competition_id=competition_id,
+                                                              round_number=round_id).order_by(
+                    desc(FightsDB.fight_id)).first()
+                fight_id = last_created_fight.fight_id
+                # определяем последний сорт индекс в очереди
+                queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).all()
+                max_sort_index = 0
+                if queue_data:
+                    max_sort_index_data = db.session.query(func.max(QueueDB.queue_sort_index)).first()
+                    max_sort_index = list(max_sort_index_data)[0]
+                max_sort_index = max_sort_index + 1
+                new_queue = QueueDB(
+                    tatami_id = tatami_id,
+                    competition_id=competition_id,
+                    fight_id = fight_id,
+                    queue_sort_index = max_sort_index
+                )
+                db.session.add(new_queue)
+                db.session.commit()
+
                 backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 fights_data = FightsDB.query.filter_by(round_number=round_id).all()
 
@@ -1605,6 +1780,10 @@ def delete_fight_ajaxfile():
         round_id = fight_data.round_number
         competition_id = fight_data.competition_id
         if fight_status == 0:
+            # удаляем очередь, связанную с боем
+            queue_data = QueueDB.query.filter_by(fight_id=fight_id).first()
+            if queue_data:
+                db.session.delete(queue_data)
             # удаляем бой
             db.session.delete(fight_data)
             # создаем записи в бэклоге
@@ -1831,7 +2010,7 @@ def add_candidate_ajaxfile():
         backlog_data_to_delete = BacklogDB.query.get(backlog_id)
         reg_id = backlog_data_to_delete.reg_id
         round_id = backlog_data_to_delete.round_id
-        db.session.delete(backlog_data_to_delete)
+
         try:
             db.session.commit()
         except Exception as e:
@@ -1855,6 +2034,7 @@ def add_candidate_ajaxfile():
 
                 # редактируем запись, вписывая в нее красного кандидата
                 candidates_data.red_candidate_reg_id = reg_id
+                db.session.delete(backlog_data_to_delete)
                 db.session.commit()
 
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
@@ -1876,6 +2056,7 @@ def add_candidate_ajaxfile():
             elif red_candidate_reg_id != 0 and blue_candidate_reg_id == 0:
                 # редактируем запись, вписывая в нее красного кандидата
                 candidates_data.blue_candidate_reg_id = reg_id
+                db.session.delete(backlog_data_to_delete)
                 db.session.commit()
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
@@ -1902,6 +2083,7 @@ def add_candidate_ajaxfile():
             elif red_candidate_reg_id == 0 and blue_candidate_reg_id != 0:
                 # редактируем запись, вписывая в нее красного кандидата
                 candidates_data.red_candidate_reg_id = reg_id
+                db.session.delete(backlog_data_to_delete)
                 db.session.commit()
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
@@ -1924,7 +2106,8 @@ def add_candidate_ajaxfile():
 
                      })
 
-            else:
+            elif red_candidate_reg_id != 0 and blue_candidate_reg_id != 0:
+                # print("все кандидаты заполены")
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
                 red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
                 red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
@@ -1945,7 +2128,8 @@ def add_candidate_ajaxfile():
                      'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
 
                      })
-
+            else:
+                print("что-то непонятное")
 
 
         else:
@@ -1955,6 +2139,7 @@ def add_candidate_ajaxfile():
                 red_candidate_reg_id=reg_id
             )
             db.session.add(new_candidate_record)
+            db.session.delete(backlog_data_to_delete)
             db.session.commit()
 
             backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
@@ -1974,6 +2159,10 @@ def add_candidate_ajaxfile():
                  'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
 
                  })
+
+
+
+
 
 
 @home.route('/fights_list_ajaxfile', methods=["POST", "GET"])
@@ -2081,6 +2270,9 @@ def edit_reg_ajaxfile():
                                                         weight_categories_data=weight_categories_data,
                                                         age_catagories_data=age_catagories_data,
                                                         competition_id=competition_id, age_eyars=age_eyars)})
+
+
+
 
 
 # Handler for a message received over 'connect' channel

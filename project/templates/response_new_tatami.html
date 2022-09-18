@@ -1,0 +1,12 @@
+<form method="POST" action="{{ url_for('home.new_tatami_create', competition_id=competition_id) }}">
+
+  <div class="form-group">
+    <label for="round_name_id">Наименование локации</label>
+    <input type="text" class="form-control" id="tatami_name_id" name="tatami_name" required>
+  </div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+</div>
+</form>
