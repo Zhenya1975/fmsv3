@@ -266,7 +266,9 @@ def comp2(competition_id, active_tab_name):
         tatami_id = tatami.tatami_id
         tatami_list.append(tatami_id)
 
-    queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list)).all()
+    # queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list)).all()
+    queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(QueueDB.queue_sort_index).all()
+
     # print("queue_data: ", queue_data)
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
@@ -1312,18 +1314,66 @@ def up_queue_ajaxfile():
     if request.method == 'POST':
         queue_id = int(request.form['queue_id'])
         selected_queue_data = QueueDB.query.get(queue_id)
+        current_queue_sort_index = selected_queue_data.queue_sort_index
+        current_tatami_id = selected_queue_data.tatami_id
+        # выборка очереди на текущем татами
+        tatami_queue_data = QueueDB.query.filter_by(tatami_id = current_tatami_id).all()
+        # выборка записей очереди, которые находятся выше чем текущая запись
+        upper_tatami_queue_data = db.session.query(QueueDB).filter(QueueDB.queue_sort_index < current_queue_sort_index).filter(QueueDB.tatami_id == current_tatami_id).all()
+
+
         competition_id = selected_queue_data.competition_id
         move_object_selector = request.form['move_object_selector']
         tatami_id = int(request.form['selecttatami'])
+        # print("move_object_selector: ", move_object_selector)
         if move_object_selector == "move_fight":
 
+            # получаем последнюю запись в выборке элементов, которые находятся сверху
+            try:
+                upper_sibling_data = db.session.query(QueueDB).filter(
+                    QueueDB.queue_sort_index < current_queue_sort_index).filter(
+                    QueueDB.tatami_id == current_tatami_id).order_by(
+                    desc(QueueDB.queue_sort_index)).first()
+                current_upper_sibling_sort_index = upper_sibling_data.queue_sort_index
 
-        queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).order_by(QueueDB.queue_sort_index).all()
-        if tatami_id == 0:
-            queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(QueueDB.queue_sort_index).all()
-            # queue_data = db.session.query(QueueDB).filter(QueueDB.participant_id.notin_(list_of_participants_ids))
+                # меняем сорт индекс у верхнего элемента
+                upper_sibling_data.queue_sort_index = current_upper_sibling_sort_index + 1
+                # try:
+                #     db.session.commt()
+                #     print("я тут")
+                # except Exception as e:
+                #     print("ошибка ", e)
+                # изменяем сорт индекс на нашего элемента
+                selected_queue_data.queue_sort_index = current_queue_sort_index - 1
 
-        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+                # try:
+                #     db.session.commt()
+                #     print("я тут")
+                # except Exception as e:
+                #     print("ошибка ", e)
+
+                queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).order_by(QueueDB.queue_sort_index).all()
+                # print("current_upper_sibling_sort_index: ", current_upper_sibling_sort_index)
+                # print("tatami_id: ", tatami_id, " type", type(tatami_id))
+
+                if tatami_id == 0:
+                    queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(
+                        QueueDB.queue_sort_index).all()
+                    # queue_data = db.session.query(QueueDB).filter(QueueDB.participant_id.notin_(list_of_participants_ids))
+
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    print("ошибка ", e)
+
+                return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+            except:
+                pass
+
+
+
+
+
 
 @home.route('/queue_ajaxfile', methods=["POST", "GET"])
 def queue_ajaxfile():
