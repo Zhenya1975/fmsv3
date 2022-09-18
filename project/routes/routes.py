@@ -266,7 +266,8 @@ def comp2(competition_id, active_tab_name):
         tatami_id = tatami.tatami_id
         tatami_list.append(tatami_id)
 
-    queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list))
+    queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list)).all()
+    # print("queue_data: ", queue_data)
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
                            w_categories=w_categories, a_categories=a_categories,
@@ -1305,6 +1306,14 @@ def add_rounds_ajaxfile():
                         })
 
 
+@home.route('/queue_ajaxfile', methods=["POST", "GET"])
+def queue_ajaxfile():
+    if request.method == 'POST':
+        selecttatami = int(request.form['selecttatami'])
+        queue_data = QueueDB.query.filter_by(tatami_id=selecttatami).all()
+        # print("queue_data: ", queue_data)
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
 @home.route('/add_round_ajaxfile', methods=["POST", "GET"])
 def add_round_ajaxfile():
     if request.method == 'POST':
@@ -2061,15 +2070,7 @@ def add_candidate_ajaxfile():
                  })
 
 
-@home.route('/queue_ajaxfile', methods=["POST", "GET"])
-def queue_ajaxfile():
-    if request.method == 'POST':
-        tatami_id = int(request.form['tatami_id'])
-        # if tatami_id == 0:
 
-        queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).all()
-        print("tatami_id: ",tatami_id, "queue_data: ", queue_data)
-        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 
 
