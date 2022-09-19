@@ -1333,7 +1333,7 @@ def down_queue_ajaxfile():
             try:
                 down_sibling_data = db.session.query(FightsDB).filter(
                     FightsDB.queue_sort_index > current_queue_sort_index).filter(
-                    FightsDB.tatami_id == current_tatami_id).order_by(
+                    FightsDB.tatami_id == current_tatami_id).filter(FightsDB.queue_catagory_sort_index == current_category_queue_sort_index).order_by(
                     desc(FightsDB.queue_sort_index)).first()
                 down_sibling_sort_index = down_sibling_data.queue_sort_index
                 # меняем сорт индекс у нижнего и текущего элемента
@@ -1349,33 +1349,36 @@ def down_queue_ajaxfile():
         
         elif move_object_selector == "move_category":
             # нужно определить категорию, которая находится ниже
-            down_sibling_data = db.session.query(FightsDB).filter(
-                    FightsDB.queue_catagory_sort_index > current_category_queue_sort_index).filter(
-                    FightsDB.tatami_id == current_tatami_id).order_by(
-                    desc(FightsDB.queue_catagory_sort_index)).first()
-                    
-            # определяем queue_catagory_sort_index в этой категории
-            down_queue_catagory_sort_index = down_sibling_data.queue_catagory_sort_index
-            down_index = down_queue_catagory_sort_index
-            current_index = current_category_queue_sort_index
-            # print("down_queue_catagory_sort_index: ", down_queue_catagory_sort_index)
-            current_category_data = FightsDB.query.filter_by(queue_catagory_sort_index=current_index).all()
-            # получаем выборку, в которой есть это значение
-            down_catagory_data = FightsDB.query.filter_by(queue_catagory_sort_index=down_index).all()
-            # меняем в этой выборке значение сорт индекса
-            for down_category_record in down_catagory_data:
-                # print("down_category_record.queue_catagory_sort_index", down_category_record.queue_catagory_sort_index)
-                # print("current_category_queue_sort_index: ", current_category_queue_sort_index)
-                down_category_record.queue_catagory_sort_index = current_index
-                db.session.commit()
-            # получаем выборку с текущей категорией
-            
-            # меняем в этой выборке значение сорт индекса
-            for current_category_record in current_category_data:
-                # print("current_category_record.queue_catagory_sort_index", current_category_record.queue_catagory_sort_index)
+            try:
+                down_sibling_data = db.session.query(FightsDB).filter(
+                        FightsDB.queue_catagory_sort_index > current_category_queue_sort_index).filter(
+                        FightsDB.tatami_id == current_tatami_id).order_by(
+                        desc(FightsDB.queue_catagory_sort_index)).first()
+
+                # определяем queue_catagory_sort_index в этой категории
+                down_queue_catagory_sort_index = down_sibling_data.queue_catagory_sort_index
+                down_index = down_queue_catagory_sort_index
+                current_index = current_category_queue_sort_index
                 # print("down_queue_catagory_sort_index: ", down_queue_catagory_sort_index)
-                current_category_record.queue_catagory_sort_index = down_index
-                db.session.commit() 
+                current_category_data = FightsDB.query.filter_by(queue_catagory_sort_index=current_index).all()
+                # получаем выборку, в которой есть это значение
+                down_catagory_data = FightsDB.query.filter_by(queue_catagory_sort_index=down_index).all()
+                # меняем в этой выборке значение сорт индекса
+                for down_category_record in down_catagory_data:
+                    # print("down_category_record.queue_catagory_sort_index", down_category_record.queue_catagory_sort_index)
+                    # print("current_category_queue_sort_index: ", current_category_queue_sort_index)
+                    down_category_record.queue_catagory_sort_index = current_index
+                    db.session.commit()
+                # получаем выборку с текущей категорией
+
+                # меняем в этой выборке значение сорт индекса
+                for current_category_record in current_category_data:
+                    # print("current_category_record.queue_catagory_sort_index", current_category_record.queue_catagory_sort_index)
+                    # print("down_queue_catagory_sort_index: ", down_queue_catagory_sort_index)
+                    current_category_record.queue_catagory_sort_index = down_index
+                    db.session.commit()
+            except:
+                pass
             # for current_category_record in current_category_data:
                 # print("current_category_record.queue_catagory_sort_index", current_category_record.queue_catagory_sort_index)
             # for down_category_record in down_catagory_data:
@@ -1404,7 +1407,7 @@ def up_queue_ajaxfile():
         competition_id = selected_queue_data.competition_id
         move_object_selector = request.form['move_object_selector']
         tatami_id = int(request.form['selecttatami'])
-        # print("move_object_selector: ", move_object_selector)
+
         if move_object_selector == "move_fight":
             # получаем последнюю запись в выборке элементов, которые находятся сверху
             try:

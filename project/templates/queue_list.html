@@ -33,7 +33,8 @@
 
         $('.up_queue').click(function(){
            var fight_id = $(this).data('id');
-           var move_object_selector = $('input[name="move_object_radio_selector"]:checked').val();
+           var radio_n = parseInt(fight_id)*1
+           var move_object_selector = $("input[name='" + radio_n + "']:checked").val();
 
            $.ajax({
                  url: '/up_queue_ajaxfile',
@@ -51,7 +52,7 @@
         $('.down_queue').click(function(){
            var fight_id = $(this).data('id');
            var radio_n = parseInt(fight_id)*1
-           console.log("radio_name: ", radio_n)
+
            var move_object_selector = $("input[name='" + radio_n + "']:checked").val();
            // var move_object_selector = $('input[name="move_object_radio_selector3"]:checked').val();
            
