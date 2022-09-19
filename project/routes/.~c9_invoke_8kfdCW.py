@@ -1362,8 +1362,7 @@ def down_queue_ajaxfile():
             down_catagory_data = FightsDB.query.filter_by(queue_catagory_sort_index=down_queue_catagory_sort_index).all()
             # меняем в этой выборке значение сорт индекса
             for down_category_record in down_catagory_data:
-                print("down_category_record.queue_catagory_sort_index", down_category_record.queue_catagory_sort_index)
-                print("current_category_queue_sort_index: ", current_category_queue_sort_index)
+                print()
                 down_category_record.queue_catagory_sort_index = current_category_queue_sort_index
                 
             # получаем выборку с текущей категорией
