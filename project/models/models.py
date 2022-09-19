@@ -40,8 +40,8 @@ class RegistrationsDB(db.Model):
     blue_fighter = db.relationship('FightsDB', backref='blue_fighter', foreign_keys="[FightsDB.blue_fighter_id]")
     winner_reg = db.relationship('FightsDB', backref='winner_reg', foreign_keys="[FightsDB.fight_winner_id]")
     backlog_reg = db.relationship('BacklogDB', backref='backlog_reg')
-    red_candidate = db.relationship('FightcandidateDB', backref='red_candidate', foreign_keys="[FightcandidateDB.red_candidate_reg_id]")
-    blue_candidate = db.relationship('FightcandidateDB', backref='blue_candidate', foreign_keys="[FightcandidateDB.blue_candidate_reg_id]")
+    red_candidate_reg = db.relationship('FightcandidateDB', backref='red_candidate_reg', foreign_keys="[FightcandidateDB.red_candidate_reg_id]")
+    blue_candidate_reg = db.relationship('FightcandidateDB', backref='blue_candidate_reg', foreign_keys="[FightcandidateDB.blue_candidate_reg_id]")
 
 
 
@@ -55,6 +55,8 @@ class FightsDB(db.Model):
     tatami_id = db.Column(db.Integer, db.ForeignKey('tatamiDB.tatami_id'))
     fight_status = db.Column(db.Integer, default=0)  # 0 - не начат, 1 - в процессе, 2 - завершен
     final_status = db.Column(db.String, default='continue')
+    queue_sort_index = db.Column(db.Integer, default=0)
+    queue_catagory_sort_index =  db.Column(db.Integer, default=0)
     queue_fight = db.relationship('QueueDB', backref='queue_fight')
 
 

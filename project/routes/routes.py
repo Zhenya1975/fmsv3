@@ -6,6 +6,7 @@ from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesF
 from functions import check_delete_weight_category, create_backlog_record, new_round_name
 from extensions import extensions
 from sqlalchemy import desc, asc, func
+from sqlalchemy import and_, or_
 from flask_socketio import SocketIO, emit
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -268,8 +269,11 @@ def comp2(competition_id, active_tab_name):
         tatami_list.append(tatami_id)
 
     # queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list)).all()
-    queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(asc(QueueDB.queue_sort_index)).all()
-
+    # queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(asc(QueueDB.queue_sort_index)).all()
+    
+    queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(and_(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index)).all()
+    print("queue_data: ", queue_data)
+    
     # print("queue_data: ", queue_data)
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
@@ -1692,6 +1696,7 @@ def delete_weight_cat_ajaxfile():
 def add_tatami_ajaxfile():
     if request.method == 'POST':
         competition_id = int(request.form['competition_id'])
+        # print("я тут")
 
         return jsonify(
             {'htmlresponse': render_template('response_new_tatami.html', competition_id=competition_id)})
@@ -1705,6 +1710,9 @@ def new_fight_ajaxfile():
         round_data = RoundsDB.query.get(round_id)
         competition_id = round_data.competition_id
         candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+        # определяем весовую и возрастную категорию одного из бойцов
+        red_candidate_weight_cat_id = candidates_data.red_candidate_reg.weight_cat_id
+        red_candidate_age_cat_id = candidates_data.red_candidate_reg.age_cat_id
         if candidates_data:
             red_candidate_reg_id = 0
             blue_candidate_reg_id = 0
@@ -1716,13 +1724,61 @@ def new_fight_ajaxfile():
                 # удаляем кандидатов
                 candidates_data.red_candidate_reg_id = 0
                 candidates_data.blue_candidate_reg_id = 0
+                
+                # определям значение сорт индекса на текущем татами
+                queue_data = FightsDB.query.filter_by(tatami_id=tatami_id).all()
+                max_sort_index = 0
+                if queue_data:
+                    max_sort_index_data = db.session.query(func.max(FightsDB.queue_sort_index)).first()
+                    max_sort_index = list(max_sort_index_data)[0]
+                
+                max_sort_index = max_sort_index + 1
+                queue_sort_index = max_sort_index
+                
+                
+                # print("candidates_data ", candidates_data.red_candidate_reg.weight_cat_id)
+                
+                
+                
+                fights_in_tatami_data = FightsDB.query.filter_by(tatami_id=tatami_id).all()
+                # итерируемся по выборке с поединками
+                max_category_sort_index_data = 0
+                if fights_in_tatami_data:
+                    max_category_sort_index_data = db.session.query(func.max(FightsDB.queue_catagory_sort_index)).first()
+                    max_category_sort_index_data = list(max_category_sort_index_data)[0]     
+                
+                # если уже есть поединки в текущей весовой и возрастной категории. то в новый бой надо записать текущее значение
+                # в этом случае бой добавится последним в категории, но останется в текущем месте в стеке категории
+                fights_list = []
+                for fight in fights_in_tatami_data:
+                    fight_id = fight.fight_id
+                    weight_cat_id = fight.red_fighter.weight_cat_id
+                    age_cat_id = fight.red_fighter.age_cat_id
+                    if weight_cat_id == red_candidate_weight_cat_id and age_cat_id == red_candidate_age_cat_id:
+                        fights_list.append(fight_id)
+                fights_data_temp =db.session.query(FightsDB).filter(FightsDB.fight_id.in_(fights_list)).all()
+                queue_catagory_sort_index = 0
+                if fights_data_temp:
+                    fight_data_temp =db.session.query(FightsDB).filter(FightsDB.fight_id.in_(fights_list)).first()
+                    queue_catagory_sort_index = fight_data_temp.queue_catagory_sort_index
+                else:
+                    # если данных о поединках нет, значит этотт поединок будет первым в этой категории
+                    # прибавляем единицу к текущему максимальному значению
+                    queue_catagory_sort_index = max_category_sort_index_data + 1
+                    
+               
+                
+                
+              
                 # создаем новый бой
                 new_fight = FightsDB(
                     competition_id=competition_id,
                     round_number=round_id,
                     red_fighter_id=red_candidate_reg_id,
                     blue_fighter_id=blue_candidate_reg_id,
-                    tatami_id=tatami_id
+                    tatami_id=tatami_id,
+                    queue_sort_index=queue_sort_index,
+                    queue_catagory_sort_index=queue_catagory_sort_index
                 )
                 db.session.add(new_fight)
                 db.session.commit()
@@ -1734,20 +1790,15 @@ def new_fight_ajaxfile():
                     desc(FightsDB.fight_id)).first()
                 fight_id = last_created_fight.fight_id
                 # определяем последний сорт индекс в очереди
-                queue_data = QueueDB.query.filter_by(tatami_id=tatami_id).all()
-                max_sort_index = 0
-                if queue_data:
-                    max_sort_index_data = db.session.query(func.max(QueueDB.queue_sort_index)).first()
-                    max_sort_index = list(max_sort_index_data)[0]
-                max_sort_index = max_sort_index + 1
-                new_queue = QueueDB(
-                    tatami_id=tatami_id,
-                    competition_id=competition_id,
-                    fight_id=fight_id,
-                    queue_sort_index=max_sort_index
-                )
-                db.session.add(new_queue)
-                db.session.commit()
+               
+                # new_queue = QueueDB(
+                #     tatami_id=tatami_id,
+                #     competition_id=competition_id,
+                #     fight_id=fight_id,
+                #     queue_sort_index=max_sort_index
+                # )
+                # db.session.add(new_queue)
+                # db.session.commit()
 
                 backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 fights_data = FightsDB.query.filter_by(round_number=round_id).all()
@@ -1817,8 +1868,8 @@ def delete_fight_ajaxfile():
 
                 elif red_candidate_reg_id != 0 and blue_candidate_reg_id == 0:
                     candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                    red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-                    red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
+                    red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+                    red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
 
                     backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                     fights_data = FightsDB.query.filter_by(round_number=round_id).all()
@@ -1836,8 +1887,8 @@ def delete_fight_ajaxfile():
 
                 elif red_candidate_reg_id == 0 and blue_candidate_reg_id != 0:
                     candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                    blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
-                    blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                    blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
+                    blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
                     backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                     fights_data = FightsDB.query.filter_by(round_number=round_id).all()
                     return jsonify(
@@ -1853,10 +1904,10 @@ def delete_fight_ajaxfile():
 
                 else:
                     candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                    red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-                    red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
-                    blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
-                    blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                    red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+                    red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
+                    blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
+                    blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
                     backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                     fights_data = FightsDB.query.filter_by(round_number=round_id).all()
                     return jsonify(
@@ -2050,10 +2101,10 @@ def add_candidate_ajaxfile():
                 db.session.delete(backlog_data_to_delete)
                 db.session.commit()
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-                red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
-                blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
-                blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+                red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
+                blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
+                blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
                 backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 fights_data = FightsDB.query.filter_by(round_number=round_id).all()
                 return jsonify(
@@ -2077,10 +2128,10 @@ def add_candidate_ajaxfile():
                 db.session.delete(backlog_data_to_delete)
                 db.session.commit()
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-                red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
-                blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
-                blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+                red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
+                blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
+                blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
                 backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 fights_data = FightsDB.query.filter_by(round_number=round_id).all()
                 return jsonify(
@@ -2100,10 +2151,10 @@ def add_candidate_ajaxfile():
             elif red_candidate_reg_id != 0 and blue_candidate_reg_id != 0:
                 # print("все кандидаты заполены")
                 candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-                red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
-                blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
-                blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+                red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+                red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
+                blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
+                blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
                 backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
                 fights_data = FightsDB.query.filter_by(round_number=round_id).all()
                 return jsonify(
@@ -2137,8 +2188,8 @@ def add_candidate_ajaxfile():
 
             candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
 
-            red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-            red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
+            red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+            red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
             fights_data = FightsDB.query.filter_by(round_number=round_id).all()
             return jsonify(
                 {'htmlresponse_red_candidate': render_template('red_candidate.html',
@@ -2179,8 +2230,8 @@ def fights_list_ajaxfile():
 
                  })
         elif red_candidate_reg_id != 0 and blue_candidate_reg_id == 0:
-            red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-            red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
+            red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+            red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
             return jsonify(
                 {'htmlresponse_red_candidate': render_template('red_candidate.html',
                                                                red_candidate_last_name=red_candidate_last_name,
@@ -2192,8 +2243,8 @@ def fights_list_ajaxfile():
 
                  })
         elif red_candidate_reg_id == 0 and blue_candidate_reg_id != 0:
-            blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
-            blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+            blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
+            blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
             return jsonify(
                 {'htmlresponse_red_candidate': render_template('empty_candidate.html'),
                  'htmlresponse_blue_candidate': render_template('blue_candidate.html',
@@ -2205,10 +2256,10 @@ def fights_list_ajaxfile():
 
                  })
         elif red_candidate_reg_id != 0 and blue_candidate_reg_id != 0:
-            red_candidate_last_name = candidates_data.red_candidate.registration_participant.participant_last_name
-            red_candidate_first_name = candidates_data.red_candidate.registration_participant.participant_first_name
-            blue_candidate_last_name = candidates_data.blue_candidate.registration_participant.participant_last_name
-            blue_candidate_first_name = candidates_data.blue_candidate.registration_participant.participant_first_name
+            red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
+            red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
+            blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
+            blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
             return jsonify(
                 {'htmlresponse_red_candidate': render_template('red_candidate.html',
                                                                red_candidate_last_name=red_candidate_last_name,
