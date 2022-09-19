@@ -623,9 +623,7 @@
         };
 
         // При изменении селекта выбора татами меняем значение переменной  selecttatami
-        {#$("select.tatami_select").change(function(){#}
-        {#        selecttatami = $(this).children("option:selected").val();#}
-        {#     });#}
+        
 
     $("select.tatami_select").change(function() {
         selecttatami = $(this).children("option:selected").val();

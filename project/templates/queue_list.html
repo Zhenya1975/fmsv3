@@ -1,11 +1,11 @@
 {%  for queue in queue_data %}
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title">{{ queue.queue_fight.red_fighter.registration_participant.participant_last_name }} {{ queue.queue_fight.red_fighter.registration_participant.participant_first_name }} - {{ queue.queue_fight.blue_fighter.registration_participant.participant_last_name }} {{ queue.queue_fight.blue_fighter.registration_participant.participant_first_name }}
+        <h5 class="card-title">{{ queue.red_fighter.registration_participant.participant_last_name }} {{ queue.red_fighter.registration_participant.participant_first_name }} - {{ queue.blue_fighter.registration_participant.participant_last_name }} {{ queue.blue_fighter.registration_participant.participant_first_name }}
         </h5>
-        <h6 class="card-subtitle mb-2 text-muted">{{ queue.queue_fight.fight_tatami.tatami_name }}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">{{ queue.fight_tatami.tatami_name }}</h6>
           <p>s.i. : {{ queue.queue_sort_index }}</p>
-        <p class="card-text">Весовая категория: {{ queue.queue_fight.red_fighter.registration.weight_category_name }}. Возрастная категория: {{ queue.queue_fight.red_fighter.registration_age_cat.age_category_name }}</p>
+        <p class="card-text">Весовая категория: {{ queue.red_fighter.registration.weight_category_name }}. Возрастная категория: {{ queue.red_fighter.registration_age_cat.age_category_name }}</p>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="move_object_radio_selector" id="inlineRadio1" value="move_fight">
           <label class="form-check-label" for="inlineRadio1">Поединок</label>
