@@ -8,11 +8,11 @@
           <p>cat.s.i. : {{ queue.queue_catagory_sort_index }}</p>
         <p class="card-text">Весовая категория: {{ queue.red_fighter.registration.weight_category_name }}. Возрастная категория: {{ queue.red_fighter.registration_age_cat.age_category_name }}</p>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="move_object_radio_selector" id="inlineRadio1" value="move_fight" checked>
+          <input class="form-check-input" type="radio" name="{{queue.fight_id}}" id="inlineRadio1" value="move_fight" checked>
           <label class="form-check-label" for="inlineRadio1">Поединок</label>
         </div>
         <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="move_object_radio_selector" id="inlineRadio2" value="move_category">
+          <input class="form-check-input" type="radio" name="{{queue.fight_id}}" id="inlineRadio2" value="move_category">
           <label class="form-check-label" for="inlineRadio2">Категория</label>
         </div>
           <a class="card-link up_queue" data-id="{{ queue.fight_id }}">Вверх</a>
@@ -50,7 +50,12 @@
         
         $('.down_queue').click(function(){
            var fight_id = $(this).data('id');
-           var move_object_selector = $('input[name="move_object_radio_selector"]:checked').val();
+           var radio_n = parseInt(fight_id)*1
+           console.log("radio_name: ", radio_n)
+           var move_object_selector = $("input[name='" + radio_n + "']:checked").val();
+           // var move_object_selector = $('input[name="move_object_radio_selector3"]:checked').val();
+           
+           // console.log("move_object_selector: ", move_object_selector)
 
            $.ajax({
                  url: '/down_queue_ajaxfile',
