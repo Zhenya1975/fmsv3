@@ -5,6 +5,7 @@
         </h5>
         <h6 class="card-subtitle mb-2 text-muted">{{ queue.fight_tatami.tatami_name }}</h6>
           <p>s.i. : {{ queue.queue_sort_index }}</p>
+          <p>cat.s.i. : {{ queue.queue_catagory_sort_index }}</p>
         <p class="card-text">Весовая категория: {{ queue.red_fighter.registration.weight_category_name }}. Возрастная категория: {{ queue.red_fighter.registration_age_cat.age_category_name }}</p>
         <div class="form-check form-check-inline">
           <input class="form-check-input" type="radio" name="move_object_radio_selector" id="inlineRadio1" value="move_fight">
@@ -14,8 +15,8 @@
           <input class="form-check-input" type="radio" name="move_object_radio_selector" id="inlineRadio2" value="move_category">
           <label class="form-check-label" for="inlineRadio2">Категория</label>
         </div>
-          <a class="card-link up_queue" data-id="{{ queue.queue_id }}">Вверх</a>
-        <a class="card-link down_queue" data-id="{{ queue.queue_id }}">Вниз</a>
+          <a class="card-link up_queue" data-id="{{ queue.fight_id }}">Вверх</a>
+        <a class="card-link down_queue" data-id="{{ queue.fight_id }}">Вниз</a>
       </div>
     </div>
 {% endfor %}
@@ -31,13 +32,13 @@
         var selecttatami = $('#tatami_selector_id').children("option:selected").val();
 
         $('.up_queue').click(function(){
-           var queue_id = $(this).data('id');
+           var fight_id = $(this).data('id');
            var move_object_selector = $('input[name="move_object_radio_selector"]:checked').val();
 
            $.ajax({
                  url: '/up_queue_ajaxfile',
                  type: 'post',
-                 data: {queue_id:queue_id, move_object_selector:move_object_selector, selecttatami:selecttatami},
+                 data: {fight_id:fight_id, move_object_selector:move_object_selector, selecttatami:selecttatami},
                  success: function(data){
                     $('.queue_list').html(data);
                     $('.queue_list').append(data.htmlresponse);

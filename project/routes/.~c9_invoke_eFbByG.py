@@ -271,8 +271,8 @@ def comp2(competition_id, active_tab_name):
     # queue_data = db.session.query(QueueDB).filter(QueueDB.tatami_id.in_(tatami_list)).all()
     # queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(asc(QueueDB.queue_sort_index)).all()
     
-    queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
-    # print("commp 2 queue_data: ", queue_data)
+    queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(and_(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index)).all()
+    # print("queue_data: ", queue_data)
     
     # print("queue_data: ", queue_data)
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
@@ -1318,7 +1318,7 @@ def up_queue_ajaxfile():
         fight_id = int(request.form['fight_id'])
         selected_queue_data = FightsDB.query.get(fight_id)
         current_queue_sort_index = selected_queue_data.queue_sort_index
-        current_category_queue_sort_index = selected_queue_data.queue_catagory_sort_index
+        current_category_queue_sort_index = selected_queue_data.queue_catagory_sort_indexqueue_catagory_sort_index
         current_tatami_id = selected_queue_data.tatami_id
         # выборка очереди на текущем татами
         tatami_queue_data = FightsDB.query.filter_by(tatami_id=current_tatami_id).all()
@@ -1391,10 +1391,10 @@ def up_queue_ajaxfile():
 
         #     selected_category_queue_data = db.session.query(QueueDB).filter(QueueDB.fight_id.in_(fights_list)).all()
 
-        queue_data = FightsDB.query.filter_by(tatami_id=tatami_id).order_by(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
-        # print("queue_data: ", queue_data)
+        queue_data = FightsDB.query.filter_by(tatami_id=selecttatami).order_by(and_(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index)).all()
         if tatami_id == 0:
-            queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
+            queue_data = QueueDB.query.filter_by(competition_id=competition_id).order_by(
+                asc(QueueDB.queue_sort_index)).all()
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 
@@ -1404,7 +1404,7 @@ def queue_ajaxfile():
         selecttatami = int(request.form['selecttatami'])
         # queue_data = FightsDB.query.filter_by(tatami_id=selecttatami).order_by(
         #         asc(FightsDB.queue_sort_index)).all()
-        queue_data = FightsDB.query.filter_by(tatami_id=selecttatami).order_by(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
+        queue_data = FightsDB.query.filter_by(tatami_id=selecttatami).order_by(and_(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index)).all()
         # print("queue_data: ", queue_data)        
         # print("queue_data: ", queue_data)
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
@@ -1826,7 +1826,7 @@ def delete_fight_ajaxfile():
         competition_id = fight_data.competition_id
         if fight_status == 0:
             # удаляем очередь, связанную с боем
-            queue_data = FightsDB.query.filter_by(fight_id=fight_id).first()
+            queue_data = QueueDB.query.filter_by(fight_id=fight_id).first()
             if queue_data:
                 db.session.delete(queue_data)
             # удаляем бой
