@@ -1312,6 +1312,46 @@ def add_rounds_ajaxfile():
                         })
 
 
+@home.route('/down_queue_ajaxfile', methods=["POST", "GET"])
+def down_queue_ajaxfile():
+    if request.method == 'POST':
+        fight_id = int(request.form['fight_id'])
+        selected_queue_data = FightsDB.query.get(fight_id)
+        current_queue_sort_index = selected_queue_data.queue_sort_index
+        current_category_queue_sort_index = selected_queue_data.queue_catagory_sort_index
+        current_tatami_id = selected_queue_data.tatami_id
+        tatami_queue_data = FightsDB.query.filter_by(tatami_id=current_tatami_id).all()
+        # выборка записей очереди, которые находятся выше чем текущая запись
+        down_tatami_queue_data = db.session.query(FightsDB).filter(
+            FightsDB.queue_sort_index > current_queue_sort_index).filter(FightsDB.tatami_id == current_tatami_id).all()
+        
+        competition_id = selected_queue_data.competition_id
+        move_object_selector = request.form['move_object_selector']
+        tatami_id = int(request.form['selecttatami'])
+        # print("move_object_selector: ", move_object_selector)
+        if move_object_selector == "move_fight":
+            try:
+                down_sibling_data = db.session.query(FightsDB).filter(
+                    FightsDB.queue_sort_index > current_queue_sort_index).filter(
+                    FightsDB.tatami_id == current_tatami_id).order_by(
+                    desc(FightsDB.queue_sort_index)).first()
+                down_sibling_sort_index = down_sibling_data.queue_sort_index
+                # меняем сорт индекс у нижнего и текущего элемента
+                down_sibling_data.queue_sort_index = current_queue_sort_index
+                selected_queue_data.queue_sort_index = down_sibling_sort_index
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    print("ошибка ", e)
+            except:
+                pass
+                
+        queue_data = FightsDB.query.filter_by(tatami_id=tatami_id).order_by(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
+        # print("queue_data: ", queue_data)
+        if tatami_id == 0:
+            queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})            
+
 @home.route('/up_queue_ajaxfile', methods=["POST", "GET"])
 def up_queue_ajaxfile():
     if request.method == 'POST':

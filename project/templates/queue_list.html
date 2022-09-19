@@ -47,6 +47,23 @@
              });
 
         });
+        
+        $('.down_queue').click(function(){
+           var fight_id = $(this).data('id');
+           var move_object_selector = $('input[name="move_object_radio_selector"]:checked').val();
+
+           $.ajax({
+                 url: '/down_queue_ajaxfile',
+                 type: 'post',
+                 data: {fight_id:fight_id, move_object_selector:move_object_selector, selecttatami:selecttatami},
+                 success: function(data){
+                    $('.queue_list').html(data);
+                    $('.queue_list').append(data.htmlresponse);
+
+                }
+             });
+
+        });
 
 
     })
