@@ -1465,15 +1465,37 @@ def up_queue_ajaxfile():
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 
+@home.route('/queue_show_at_page_load_ajaxfile', methods=["POST", "GET"])
+def queue_show_at_page_load_ajaxfile():
+    if request.method == 'POST':
+        competition_id = int(request.form['competition_id'])
+        tatami_id = int(request.form['selecttatami'])
+        queue_data = FightsDB.query.filter_by(tatami_id=tatami_id).order_by(FightsDB.queue_catagory_sort_index,
+                                                                            FightsDB.queue_sort_index).all()
+        if tatami_id == 0:
+            queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(
+                FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
+        
+
+        
+        return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
+
+
+
+
+
+
 @home.route('/queue_ajaxfile', methods=["POST", "GET"])
 def queue_ajaxfile():
     if request.method == 'POST':
-        selecttatami = int(request.form['selecttatami'])
-        # queue_data = FightsDB.query.filter_by(tatami_id=selecttatami).order_by(
-        #         asc(FightsDB.queue_sort_index)).all()
-        queue_data = FightsDB.query.filter_by(tatami_id=selecttatami).order_by(FightsDB.queue_catagory_sort_index,
-                                                                               FightsDB.queue_sort_index).all()
-        # print("queue_data: ", queue_data)        
+        competition_id = int(request.form['competition_id'])
+        tatami_id = int(request.form['selecttatami'])
+        queue_data = FightsDB.query.filter_by(tatami_id=tatami_id).order_by(FightsDB.queue_catagory_sort_index,
+                                                                            FightsDB.queue_sort_index).all()
+        if tatami_id == 0:
+            queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(
+                FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()       
         # print("queue_data: ", queue_data)
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 

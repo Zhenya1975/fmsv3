@@ -213,7 +213,7 @@
                                 <div class="col">
                                             <div class="input-group">
                                                     <select style="width:auto;" class="tatami_select form-control" id="tatami_selector_id" name="tatami_selector">
-                                                        <option value=0 selected disabled>Выбрать татами</option>
+                                                        <option value=0 selected>Все татами</option>
                                                          {% for tatami in tatami_data %}
                                                             <option value={{ tatami.tatami_id }}>{{ tatami.tatami_name }}</option>
                                                           {% endfor %}
@@ -593,7 +593,20 @@
         var number_of_weight_categories = {{number_of_weight_categories}}
         // console.log("number_of_weight_categories: ", number_of_weight_categories)              
         var selecttatami = $('#tatami_selector_id').children("option:selected").val();
+        
+        var competition_id = {{ competition_data.competition_id }}
+        var selecttatami = $('#tatami_selector_id').children("option:selected").val();
+        
+        $.ajax({
+             url: '/queue_show_at_page_load_ajaxfile',
+             type: 'post',
+             data: {selecttatami:selecttatami,competition_id:competition_id},
+             success: function(data){
 
+                $('.queue_list').html(data);
+                $('.queue_list').append(data.htmlresponse);
+            }
+         });
         
         $('#weight_cat_empty').hide();
         $('#weight_cat_with_data').hide();
@@ -627,20 +640,19 @@
 
     $("select.tatami_select").change(function() {
         selecttatami = $(this).children("option:selected").val();
-        // console.log("selecttatami: ", selecttatami)
-        if (parseInt(selecttatami) !== 0) {
-            $.ajax({
-                url: '/queue_ajaxfile',
-                type: 'post',
-                data: {selecttatami: parseInt(selecttatami)},
-                success: function (response) {
-                    // console.log()
-                    $('.queue_list').html(response);
-                    $('.queue_list').append(response.htmlresponse);
-                }
-            });
 
-        }
+        $.ajax({
+            url: '/queue_ajaxfile',
+            type: 'post',
+            data: {selecttatami:selecttatami,competition_id:competition_id},
+            success: function (response) {
+                // console.log()
+                $('.queue_list').html(response);
+                $('.queue_list').append(response.htmlresponse);
+            }
+        });
+
+        
     })
 
 
