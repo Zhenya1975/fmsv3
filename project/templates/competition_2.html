@@ -597,16 +597,16 @@
         var competition_id = {{ competition_data.competition_id }}
         var selecttatami = $('#tatami_selector_id').children("option:selected").val();
         
-        $.ajax({
-             url: '/queue_show_at_page_load_ajaxfile',
-             type: 'post',
-             data: {selecttatami:selecttatami,competition_id:competition_id},
-             success: function(data){
+        // $.ajax({
+        //      url: '/queue_show_at_page_load_ajaxfile',
+        //      type: 'post',
+        //      data: {selecttatami:selecttatami,competition_id:competition_id},
+        //      success: function(data){
 
-                $('.queue_list').html(data);
-                $('.queue_list').append(data.htmlresponse);
-            }
-         });
+        //         $('.queue_list').html(data);
+        //         $('.queue_list').append(data.htmlresponse);
+        //     }
+        //  });
         
         $('#weight_cat_empty').hide();
         $('#weight_cat_with_data').hide();
