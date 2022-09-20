@@ -50,10 +50,9 @@
                     </ul>
                     {% endif %}
                 {% endwith %}
+                
+                <p><a href="{{url_for('home.competitions')}}">Список соревнований</a></p>
 
-
-        <p><a href="{{url_for('home.competitions')}}">Список соревнований</a></p>
-{#                <p></p>#}
                 <h3>{{ competition_data.competition_name }}</h3>
 
                 <ul class="nav nav-tabs">
@@ -62,7 +61,7 @@
                     <li class="nav-item"><a class="nav-link" href="#schedule_tab" data-toggle="tab">Расписание</a></li>
                     <li class="nav-item"><a class="nav-link" href="#competition_settings" data-toggle="tab">Настройки</a></li>
                 </ul>
-
+                
                 <div class="tab-content" id="tabs">
                     <div class="tab-pane" id="competition_general_info">
                         <div style="margin-top: 10px"> <!-- div формы общие сведения о соревновании -->
@@ -127,33 +126,25 @@
 
 
                               </form>
-                        </div> <!-- конец div формы общие сведения о соревновании -->
+                        </div>
                     </div>
-
+                    
                     <div class="tab-pane" id="registrations_tab">
-                        <p></p>
+                    <p></p>
+                    
+                    <select class="my-select selectpicker w-50" id="select_reg" data-live-search="true" title="Выберете участника из списка" name="fighter_pick">
+                      {% for participant in participants_data_for_selection %}
+                        <option value={{ participant.participant_id }}>{{ participant.participant_first_name }} {{ participant.participant_last_name }}</option>
 
-                            <div>
-                            <div>
-{#                            <form id="select_fighter_form" method="POST" action="{{ url_for('home.registration_new_2', competition_id = competition_data.competition_id)}}">#}
-                                    <select class="my-select selectpicker w-50" id="select_reg" data-live-search="true" title="Выберете участника из списка" name="fighter_pick">
-                                      {% for participant in participants_data_for_selection %}
-                                        <option value={{ participant.participant_id }}>{{ participant.participant_first_name }} {{ participant.participant_last_name }}</option>
-
-                                       {% endfor %}
-                                    </select>
-
-                                <p></p>
-                            <div>
-                                <button class="btn btn-primary select_new_reg" type="button" data-id={{ competition_data.competition_id }} >Выбрать</button>
-                            </div>
-
-{#                            </form>#}
-
-                                <p></p>
-
-
-                            <table id="registration_table" class="table table-striped table-bordered" style="width:100%">
+                       {% endfor %}
+                    </select>
+                    
+                    <p></p>
+                    <div>
+                        <button class="btn btn-primary select_new_reg" type="button" data-id={{ competition_data.competition_id }} >Выбрать</button>
+                    </div>
+                    <p></p>
+                    <table id="registration_table" class="table table-striped table-bordered" style="width:100%">
                                     <thead>
                                         <tr>
                                             <th>№</th>
@@ -197,14 +188,7 @@
 
                                         </tr>
                                     {% endfor %}
-
-
                                 </table>
-
-                        </div>
-
-
-                    </div>
                     </div>
                     <div class="tab-pane" id="schedule_tab">
                         <div style="margin-top: 20px">
@@ -236,10 +220,9 @@
                                 </div>
                             </div>
                         </div>
-
+                        
+                    
                     </div>
-
-
                     <div class="tab-pane" id="competition_settings">
                         <div style="margin-top: 20px">
                           <div id="weight_cat_empty">
@@ -333,95 +316,17 @@
 
 
                         </div>
-                        <!-- МОДАЛЫ ВНУТРИ ВКЛАДКИ НАСТРОЙКИ-->
-
-
-                      <div class="modal fade" id="add_weight_category_with_data_modal" tabindex="-1" role="dialog" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                      <div class="modal-header">
-                                            <h5 class="modal-title">Весовая категория</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                      </div>
-
-                                      <div class="modal-body">
-
-                                      </div>
-
-                                </div>
-                          </div>
-                        </div>
-
-                      
-                      <div class="modal fade" id="add_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                      <div class="modal-header">
-                                            <h5 class="modal-title">Весовая категория</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                      </div>
-
-                                      <div class="modal-body">
-
-                                      </div>
-
-                                </div>
-                          </div>
-                        </div>
-
-
-
-
-
-
-                      
-                        <div class="modal fade" id="create_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                      <div class="modal-header">
-                                            <h5 class="modal-title">Весовая категория</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                      </div>
-
-                                      <div class="modal-body">
-
-                                      </div>
-
-                                </div>
-                          </div>
-                        </div>
-
-
-
-                        <div class="modal fade" id="weight_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                      <div class="modal-header">
-                                            <h5 class="modal-title">Весовая категория</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                      </div>
-
-                                      <div class="modal-body">
-
-                                      </div>
-
-                                </div>
-                          </div>
-                        </div>
-
-                        <div class="modal fade" id="weight_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                            <div class="modal-content">
+                    
+                    </div>
+                </div>
+                
+                
+                <!--НАЧАЛО МОДАЛОВ-->
+                <div class="modal fade" id="add_weight_category_with_data_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                        <div class="modal-content">
                               <div class="modal-header">
-                                    <h5 class="modal-title">Удаление весовой категории</h5>
+                                    <h5 class="modal-title">Весовая категория</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -430,37 +335,16 @@
                               <div class="modal-body">
 
                               </div>
-                            </div>
-                          </div>
+
                         </div>
-
-
-
-
-                        <div class="modal fade" id="create_age_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                      <div class="modal-header">
-                                            <h5 class="modal-title">Возрастная категория</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                      </div>
-
-                                      <div class="modal-body">
-
-                                      </div>
-
-                                </div>
-                          </div>
-                        </div>
-
-
-                        <div class="modal fade" id="age_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                            <div class="modal-content">
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="add_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                        <div class="modal-content">
                               <div class="modal-header">
-                                    <h5 class="modal-title">Удаление возрастной категории</h5>
+                                    <h5 class="modal-title">Весовая категория</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
@@ -469,13 +353,67 @@
                               <div class="modal-body">
 
                               </div>
-                            </div>
-                          </div>
-                        </div>
 
-                        <div class="modal fade" id="age_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                            <div class="modal-content">
+                        </div>
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="create_weight_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                              <div class="modal-header">
+                                    <h5 class="modal-title">Весовая категория</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                              </div>
+
+                              <div class="modal-body">
+
+                              </div>
+
+                        </div>
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="weight_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                              <div class="modal-header">
+                                    <h5 class="modal-title">Весовая категория</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                              </div>
+
+                              <div class="modal-body">
+
+                              </div>
+
+                        </div>
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="weight_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                            <h5 class="modal-title">Удаление весовой категории</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                      </div>
+
+                      <div class="modal-body">
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="create_age_category_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                        <div class="modal-content">
                               <div class="modal-header">
                                     <h5 class="modal-title">Возрастная категория</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -487,20 +425,46 @@
 
                               </div>
 
-                            </div>
-                          </div>
                         </div>
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="age_cat_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                            <h5 class="modal-title">Удаление возрастной категории</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                      </div>
 
+                      <div class="modal-body">
 
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="age_cat_edit_modal" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                            <h5 class="modal-title">Возрастная категория</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                      </div>
 
+                      <div class="modal-body">
 
+                      </div>
 
                     </div>
-
-
-
-
-        <div class="modal fade" id="registration_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  </div>
+                </div>
+                
+                <div class="modal fade" id="registration_delete_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                       <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                           <div class="modal-header">
@@ -516,9 +480,9 @@
 
                                 </div>
                       </div>
-        </div>
-
-        <div class="modal fade" id="new_reg_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                </div>
+                
+                <div class="modal fade" id="new_reg_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                       <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                   <div class="modal-header">
@@ -533,10 +497,10 @@
 
                             </div>
                       </div>
-        </div>
-
-        <div class="modal fade" id="registration_edit_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
+                </div>
+                
+                <div class="modal fade" id="registration_edit_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
                     <div class="modal-content">
                           <div class="modal-header">
                                 <h5 class="modal-title">Регистрация участника соревнований</h5>
@@ -550,35 +514,41 @@
                           </div>
 
                     </div>
-              </div>
-        </div>
-
-
-        <div class="modal fade" id="add_tatami_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                  <div class="modal-header">
-                        <h5 class="modal-title">Новая локация</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
                   </div>
-
-                  <div class="modal-body">
+                </div>
+                
+                <div class="modal fade" id="add_tatami_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                          <div class="modal-header">
+                                <h5 class="modal-title">Новая локация</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                          </div>
+        
+                          <div class="modal-body">
+                          </div>
+        
+                    </div>
                   </div>
-
-            </div>
-          </div>
-        </div>
-
-
-
-
-
+                </div>
+                
+                
+            
+                <!--КОНЕЦ МОДАЛОВ-->
+                
+                
+                
+                
+                
+                
+                
+                
         </div>
     </div>
 </div>
-</div>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
@@ -588,7 +558,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.min.js"></script>
 
 <script>
-    data_dict = {{ data | tojson }}
+data_dict = {{ data | tojson }}
     $(document).ready(function(){
         var number_of_weight_categories = {{number_of_weight_categories}};
         // console.log("number_of_weight_categories: ", number_of_weight_categories)              
@@ -597,48 +567,16 @@
         var competition_id = {{ competition_data.competition_id }}
         var selecttatami = $('#tatami_selector_id').children("option:selected").val();
         
-        $.ajax({
-             url: '/queue_show_at_page_load_ajaxfile',
-             type: 'post',
-             data: {selecttatami:selecttatami,competition_id:competition_id},
-             success: function(data){
-
-                $('.queue_list').html(data);
-                $('.queue_list').append(data.htmlresponse);
-            }
-         });
-        
-        $('#weight_cat_empty').hide();
-        $('#weight_cat_with_data').hide();
-
-  
-        if (number_of_weight_categories==0) {
-          $('#weight_cat_empty').show();
-          $('#weight_cat_with_data').hide();
-        }
-          else {
-            $('#weight_cat_empty').hide();
-          $('#weight_cat_with_data').show();
-          }
-        
         var socket = io.connect();
-       // Мы получили с сервера сообщение по каналу 'after connect'
-        // Получив по каналу собщение мы отображаем его в консоли.
-        // socket.on('after connect', function(msg){
-        //     console.log('After connect', msg.data);
-        // });
-
+        
         var active_tab = data_dict['active_tab_pass'];
 
         activaTab(active_tab);
         function activaTab(tab){
           $('.nav-tabs a[href="#' + tab + '"]').tab('show');
         };
-
-        // При изменении селекта выбора татами меняем значение переменной  selecttatami
         
-
-    $("select.tatami_select").change(function() {
+        $("select.tatami_select").change(function() {
         selecttatami = $(this).children("option:selected").val();
 
         $.ajax({
@@ -649,12 +587,12 @@
                 // console.log()
                 $('.queue_list').html(response);
                 $('.queue_list').append(response.htmlresponse);
-            }
+                }
+            });
         });
-    })
-
-
-     $('.create_age_category').click(function(){
+        
+        
+        $('.create_age_category').click(function(){
         var competition_id = $(this).data('id');
 
          $.ajax({
@@ -669,11 +607,9 @@
             }
          });
         });
-
-
-  
-
-      $('.add_weight_category_with_data').click(function(){
+        
+        
+        $('.add_weight_category_with_data').click(function(){
         var weight_cat_id = $(this).data('id');
 
          $.ajax({
@@ -688,9 +624,9 @@
             }
          });
         });
-  
-
-      $('.add_weight_category').click(function(){
+        
+        
+        $('.add_weight_category').click(function(){
         var competition_id = $(this).data('id');
 
          $.ajax({
@@ -705,8 +641,9 @@
             }
          });
         });
-
-     $('.create_weight_category').click(function(){
+        
+        
+        $('.create_weight_category').click(function(){
         var competition_id = $(this).data('id');
 
          $.ajax({
@@ -721,34 +658,33 @@
             }
          });
         });
-
-
-
-    $('.select_new_reg').click(function() {
-        var participant_id = parseInt($('#select_reg').val());
-        var competition_id = parseInt($(this).data('id'));
-        if (parseInt(participant_id) > 0) {
-            console.log("participant_id: ", participant_id, ". competition_id: ", competition_id)
-           $.ajax({
-                 url: '/new_reg_ajaxfile',
-                 type: 'post',
-                 data: {competition_id:competition_id, participant_id:participant_id},
-                 success: function(data){
-
-                    $('.modal-body').html(data);
-                    $('.modal-body').append(data.htmlresponse);
-                    $('#new_reg_modal').modal('show');
+        
+        
+        $('.select_new_reg').click(function() {
+            var participant_id = parseInt($('#select_reg').val());
+            var competition_id = parseInt($(this).data('id'));
+            if (parseInt(participant_id) > 0) {
+                console.log("participant_id: ", participant_id, ". competition_id: ", competition_id)
+               $.ajax({
+                     url: '/new_reg_ajaxfile',
+                     type: 'post',
+                     data: {competition_id:competition_id, participant_id:participant_id},
+                     success: function(data){
+    
+                        $('.modal-body').html(data);
+                        $('.modal-body').append(data.htmlresponse);
+                        $('#new_reg_modal').modal('show');
+                    }
+                 });
+                } else {
+                   alert("Выберете спортсмена!");
                 }
-             });
-        } else {
-           alert("Выберете спортсмена!");
-        }
-
-
-    });
-
-
-    $('.delete_age_cat').click(function(){
+    
+    
+        });
+        
+        
+        $('.delete_age_cat').click(function(){
         var age_cat_id = $(this).data('id');
         // console.log('нажата кнопка удаления', reg_id)
 
@@ -764,12 +700,9 @@
             }
          });
         });
-
-
-
-
-
-    $('.delete_weight_cat').click(function(){
+        
+        
+        $('.delete_weight_cat').click(function(){
         var weight_cat_id = $(this).data('id');
         // console.log('нажата кнопка удаления', reg_id)
 
@@ -785,9 +718,9 @@
             }
          });
         });
-
-
-    $('.delete_reg').click(function(){
+        
+        
+        $('.delete_reg').click(function(){
             var reg_id = $(this).data('id');
             // console.log('нажата кнопка удаления', reg_id)
 
@@ -803,10 +736,10 @@
                 }
              });
             });
-
-
-
-    $('.edit_age_cat').click(function(){
+            
+            
+        
+        $('.edit_age_cat').click(function(){
             var age_cat_id = $(this).data('id');
 
              $.ajax({
@@ -821,10 +754,9 @@
                 }
              });
             });
-
-
-
-    $('.edit_weight_cat').click(function(){
+        
+        
+        $('.edit_weight_cat').click(function(){
             var weight_cat_id = $(this).data('id');
 
              $.ajax({
@@ -838,10 +770,10 @@
                     $('#weight_cat_edit_modal').modal('show');
                 }
              });
-            });
-
-
-    $('.edit_reg').click(function(){
+            });    
+        
+        
+        $('.edit_reg').click(function(){
             var reg_id = $(this).data('id');
 
              $.ajax({
@@ -857,7 +789,8 @@
              });
             });
             
-    $('.add_tatami_button').click(function(){
+        
+        $('.add_tatami_button').click(function(){
            var competition_id = $(this).data('compid');
            $.ajax({
                  url: '/add_tatami_ajaxfile',
@@ -871,13 +804,14 @@
                 }
              });
 
-        });        
-            
-            
-            
-            
+        }); 
+        
+        
+         
+        
+    })
 
-    });
 </script>
+
 </body>
 </html>

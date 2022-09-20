@@ -214,12 +214,64 @@ def edit_comp_general(competition_id):
         competition_data.added_time = form.added_time.data
 
         db.session.commit()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=1))
     else:
         flash('Форма не валидировалась', 'alert-danger')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=1))
 
 
+@home.route('/comp3/<int:competition_id>/<active_tab_name>')
+def comp3(competition_id, active_tab_name):
+    data = {'active_tab_pass': 'competition_general_info'}
+    if int(active_tab_name) == 1:
+        data = {'active_tab_pass': 'competition_general_info'}
+    elif int(active_tab_name) == 2:
+        data = {'active_tab_pass': 'registrations_tab'}
+    elif int(active_tab_name) == 3:
+        data = {'active_tab_pass': 'schedule_tab'}
+    elif int(active_tab_name) == 4:
+        data = {'active_tab_pass': 'competition_settings'}
+    else:
+        print("непонятно что передано вместо номера вкладки")
+    
+    competition_data = CompetitionsDB.query.get(competition_id)
+    form_general_info = CompetitionForm()
+    
+    regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
+        ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
+    regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
+    list_of_participants_ids = []
+    for registration in regs_data:
+        participant_id = registration.participant_id
+        list_of_participants_ids.append(participant_id)
+    result = db.session.query(ParticipantsDB).filter(ParticipantsDB.participant_id.notin_(list_of_participants_ids))
+    not_registered_participants = []
+    for row in result:
+        not_registered_participants.append(row.participant_id)
+    participants_data_for_selection = db.session.query(ParticipantsDB).filter(
+        ParticipantsDB.participant_id.in_(not_registered_participants))
+    
+    tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
+    w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        WeightcategoriesDB.sort_index).all()
+    a_categories = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        AgecategoriesDB.sort_index).all()
+    number_of_weight_categories = len(list(w_categories))
+    
+    return render_template(
+        'competition_3.html',
+        data=data,
+        competition_data=competition_data,
+        form_general_info=form_general_info,
+        participants_data_for_selection=participants_data_for_selection,
+        regs=regs,
+        tatami_data=tatami_data,
+        w_categories=w_categories,
+        a_categories=a_categories,
+        number_of_weight_categories=number_of_weight_categories
+    )
+    
+    
 @home.route('/comp2/<int:competition_id>/<active_tab_name>')
 def comp2(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
@@ -302,7 +354,7 @@ def age_category_new(competition_id):
         except Exception as e:
             print(e)
             db.session.rollback()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 # добавление весовой категории из непустой
@@ -316,14 +368,14 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
             weight_value_from_form = int(request.form.get('from'))
         else:
             flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+            return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
         weight_value_to_form = int(request.form.get('to'))
         if weight_value_to_form:
             weight_value_to_form = int(request.form.get('to'))
         else:
             flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+            return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
         current_weight_category_data = WeightcategoriesDB.query.get(weight_cat_id)
         current_weight_category_from_value = current_weight_category_data.weight_category_start
@@ -364,11 +416,11 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
                 next_weight_category_data.weight_category_name = f"От {weight_value_to_form} до {next_weight_category_data_to_value} кг"
                 db.session.commit()
                 flash('Изменения сохранены', 'alert-success')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+                return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
             else:
                 flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+                return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
         # Если следующая запись есть и она последняя
         elif status_of_last_record == 1:
@@ -406,12 +458,12 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
 
                 db.session.commit()
                 flash('Изменения сохранены', 'alert-success')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+                return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
             else:
                 flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+                return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
         # Если следующая записи нет
         elif status_of_last_record == 0:
@@ -435,19 +487,19 @@ def add_weight_category_with_data(competition_id, weight_cat_id, status_of_last_
 
                 db.session.commit()
                 flash('Изменения сохранены', 'alert-success')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+                return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 
 
             else:
                 flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-                return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+                return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
         else:
             flash('Изменения не сохранены. Что-то пошло не так', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+            return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 # добавление весовой категории из пустой
@@ -486,10 +538,10 @@ def add_empty_weight_category_new(competition_id):
                 print(e)
                 db.session.rollback()
 
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+            return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
         else:
             flash('Изменения не сохранены. Значение границы весовой категории некорректно', 'alert-danger')
-            return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+            return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 # создание весовой категории
@@ -510,8 +562,8 @@ def weight_category_new(competition_id):
         except Exception as e:
             print(e)
             db.session.rollback()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
-    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
+    # return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/participantdelete/<int:participant_id>/delete/')
@@ -551,7 +603,7 @@ def competition_delete(competition_id):
               'alert-danger')
         regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
             asc(ParticipantsDB.participant_last_name)).all()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
     else:
         db.session.delete(competition_data)
         try:
@@ -562,7 +614,7 @@ def competition_delete(competition_id):
             print(e)
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/competition_start/')
@@ -586,7 +638,7 @@ def competition_create_new():
         competition_id = created_competition_data.competition_id
         regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
             asc(ParticipantsDB.participant_last_name)).all()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=1))
 
 
 # registration list
@@ -638,7 +690,7 @@ def new_tatami_create(competition_id):
             print(e)
             flash(f'Изменения не сохранены. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=3))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=3))
 
 
 @home.route('/new_round_create/<int:competition_id>/<int:weight_cat_id>/<int:age_cat_id>', methods=["POST", "GET"])
@@ -789,8 +841,8 @@ def registration_new(competition_id, participant_id):
         # создаем запись в бэклоге
         create_backlog_record.create_backlog_record(competition_id, reg_id, round_id)
 
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=2))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=2))
 
 
 @home.route('/age_category_edit/<int:age_cat_id>/', methods=["POST", "GET"])
@@ -806,10 +858,10 @@ def age_category_edit(age_cat_id):
 
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
     else:
         flash(f"Форма не валидировалась", 'alert-danger')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_category_edit/<int:weight_cat_id>/', methods=["POST", "GET"])
@@ -825,11 +877,11 @@ def weight_category_edit(weight_cat_id):
 
         db.session.commit()
         flash(f"Изменения сохранены", 'alert-success')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
     else:
         flash(f"Форма не валидировалась", 'alert-danger')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
-    # return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
+    # return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/registration_edit/<int:reg_id>/', methods=["POST", "GET"])
@@ -844,7 +896,7 @@ def registration_edit(reg_id):
     fights_qty = fights_red_qty + fights_blue_qty
     if fights_qty > 0:
         flash(f"Изменения не сохранены. Есть связанные поединки", 'alert-danger')
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=2))
 
     if request.method == 'POST':
         weight_value_from_form = request.form.get('weight_input')
@@ -874,8 +926,8 @@ def registration_edit(reg_id):
 
         # print("weight_cat_id с формы: ", weight_cat_id)
         # print("weight_cat_select_id с формы: ", weight_cat_select_id)
-        return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+        return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=2))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=2))
 
 
 @home.route('/age_cat_delete/<int:age_cat_id>/', methods=["POST", "GET"])
@@ -899,7 +951,7 @@ def age_cat_delete(age_cat_id):
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_1_cat_delete/<int:competition_id>/<int:weight_cat_id>', methods=["POST", "GET"])
@@ -1018,7 +1070,7 @@ def weight_1_cat_delete(competition_id, weight_cat_id):
         flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
         db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_2_cat_delete/<int:competition_id>/', methods=["POST", "GET"])
@@ -1036,7 +1088,7 @@ def weight_2_cat_delete(competition_id):
         flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
         db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/weight_cat_delete/<int:weight_cat_id>/', methods=["POST", "GET"])
@@ -1106,7 +1158,7 @@ def weight_cat_delete(weight_cat_id):
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=4))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=4))
 
 
 @home.route('/registration_delete/<int:reg_id>/', methods=["POST", "GET"])
@@ -1157,7 +1209,7 @@ def registration_delete(reg_id):
             flash(f'Что-то пошло не так. Ошибка: {e}', 'alert-danger')
             db.session.rollback()
 
-    return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=2))
+    return redirect(url_for('home.comp3', competition_id=competition_id, active_tab_name=2))
 
 
 @home.route('/rounds_edit/<int:competition_id>/<int:weight_cat_id>//<int:age_cat_id>', methods=["POST", "GET"])
