@@ -56,27 +56,35 @@
                 <div class="row"> <!-- это ряд, в котором лежат два блока - карточка боя и настройки -->
                     <div class="col-9 shadow bg-white rounded text-center"> <!-- это колонка с карточкой боя -->
                         <h6 class="text-left">Возрастная категория: {{ fight_data.red_fighter.registration_age_cat.age_category_name }}. Весовая категория: {{ fight_data.red_fighter.registration.weight_category_name }}. {{ round_name }}</h6>
-                        <div class="row"> <!--ряд с участниками -->
-                            <div class="col-sm d-flex justify-content-start"> <!--левая колонка для левого участника -->
-                                <div style="background-color: red; width: 10px; margin-right: 5px"></div> <!-- это див с красной полоской -->
-                                <div> <!-- это див с левым участником  style="overflow: auto; white-space: nowrap;"  -->
-                                    <div style="white-space: nowrap;">
-                                        <h4>{{ fight_data.red_fighter.registration_participant.participant_first_name +" " + fight_data.red_fighter.registration_participant.participant_last_name}}</h4>
-                                    </div>
-                                    <img src= {{ fight_data.red_fighter.registration_participant.fighter_image }} class="float-left" alt="Responsive image" style="display: block; max-width: 100%; height: auto;">
-                                </div>
-                            </div>
-                            <div class="col-sm d-flex justify-content-start"> <!--правая колонка для правого участника -->
-                                <div style="background-color: blue; width: 10px; margin-right: 5px"></div> <!-- это див с красной полоской -->
-                                <div> <!-- это див с правым участником-->
-                                    <div style="white-space: nowrap;">
-                                        <h4>{{ fight_data.blue_fighter.registration_participant.participant_first_name +" " + fight_data.blue_fighter.registration_participant.participant_last_name}}</h4>
-                                    </div>
-                                    <img src= {{ fight_data.blue_fighter.registration_participant.fighter_image }} class="float-left" alt="Responsive image" style="display: block; max-width: 100%; height: auto;">
-                                </div>
-                            </div>
+                            <div class="row"> <!--ряд с участниками -->
 
-                        </div>
+
+                                <div class="col"> <!--в этой колонке красный участник -->
+                                    <div class="row">
+                                        <div class="col d-flex">
+                                            <div style="background-color: red; width: 10px; margin-right: 5px"></div>
+                                            <div>
+                                                <h4>{{ fight_data.red_fighter.registration_participant.participant_first_name +" " + fight_data.red_fighter.registration_participant.participant_last_name}}</h4>
+                                                <img src= {{ fight_data.red_fighter.registration_participant.fighter_image }} class="float-left" alt="Responsive image" style="display: block; max-width: 100%; height: auto;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col"> <!--в этой колонке синий участник -->
+                                    <div class="row">
+                                        <div class="col d-flex">
+                                            <div style="background-color: blue; width: 10px; margin-right: 5px"></div>
+                                            <div>
+                                                <h4>{{ fight_data.blue_fighter.registration_participant.participant_first_name +" " + fight_data.blue_fighter.registration_participant.participant_last_name}}</h4>
+                                                <img src= {{ fight_data.blue_fighter.registration_participant.fighter_image }} class="float-left" alt="Responsive image" style="display: block; max-width: 100%; height: auto;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
                     </div>
                     
                     <!--Колонка с настройками-->
