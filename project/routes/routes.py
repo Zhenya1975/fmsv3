@@ -1397,17 +1397,27 @@ def confirm_fight_result_ajaxfile():
     if request.method == 'POST':
         fight_id = int(request.form['fight_id'])
         fight_data = FightsDB.query.get(fight_id)
+
         winner_id = int(request.form['winner_id'])
+
         red_fighter_id = fight_data.red_fighter_id
         blue_fighter_id =fight_data.blue_fighter_id
+
+        # Пусть победитель - красный. Тогда лузер - синий
         looser_id = fight_data.blue_fighter_id
-        winner_reg = RegistrationsDB.query.filter_by(red_fighter=winner_id).first()
-        looser_reg = RegistrationsDB.query.filter_by(blue_fighter=winner_id).first()
-        if winner_id:
-            if winner_id == red_fighter_id:
-                looser_id = fight_data.blue_fighter_id
-        
-        return jsonify({'htmlresponse': render_template('response_fight_result.html', fight_data=fight_data, regs_data=regs_data, winner_id=winner_id, looser_id=looser_id)})
+
+        winner_reg = RegistrationsDB.query.filter_by(reg_id=winner_id).first()
+        looser_reg = RegistrationsDB.query.filter_by(reg_id=looser_id).first()
+
+        if winner_id == blue_fighter_id:
+            # если победитель - синий, то лузер - красный
+            looser_id = fight_data.red_fighter_id
+            winner_reg = RegistrationsDB.query.filter_by(reg_id=looser_id).first()
+            looser_reg = RegistrationsDB.query.filter_by(reg_id=winner_id).first()
+
+
+        return jsonify({'htmlresponse': render_template('response_fight_result.html', fight_data=fight_data, winner_reg=winner_reg, looser_reg=looser_reg)})
+
 
 
 @home.route('/down_queue_ajaxfile', methods=["POST", "GET"])
