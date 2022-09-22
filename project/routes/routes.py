@@ -133,8 +133,34 @@ def fight(fight_id):
     competition_data = CompetitionsDB.query.get(competition_id)
     fight_duration = competition_data.fight_duration
     added_time = competition_data.added_time
+    tatami_id = fight_data.tatami_id
+    # Список боев на татами
+    fights_data_on_tatami = FightsDB.query.filter_by(tatami_id=tatami_id).order_by(FightsDB.queue_catagory_sort_index,
+                                                                                  FightsDB.queue_sort_index).all()
+    check_var = 0
+    next_fight_id = 0
+    for fight in fights_data_on_tatami:
+        f_id = fight.fight_id
+        if f_id == fight_id:
+            check_var = check_var + 1
+        if check_var == 1:
+            next_fight_id = f_id
+    
+    next_fight_data = FightsDB.query.get(next_fight_id)
+    next_fight_weight_cat = ""
+    next_fight_fighters = "Нет"
+    if next_fight_data:
+        red_fighter_last_name = next_fight_data.red_fighter.registration_participant.participant_last_name
+        red_fighter_first_name = next_fight_data.red_fighter.registration_participant.participant_first_name
+        blue_fighter_last_name = next_fight_data.blue_fighter.registration_participant.participant_last_name
+        blue_fighter_first_name = next_fight_data.blue_fighter.registration_participant.participant_first_name
+        weight_category_name = next_fight_data.red_fighter.registration.weight_category_name
+        next_fight_weight_cat = weight_category_name
+        next_fight_fighters =  red_fighter_last_name + " " + red_fighter_first_name + " - " + blue_fighter_last_name + " " + blue_fighter_first_name
+    
+
     return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration,
-                           added_time=added_time)
+                           added_time=added_time, next_fight_weight_cat= next_fight_weight_cat, next_fight_fighters=next_fight_fighters)
 
 
 @home.route('/fights/<int:competition_id>/')
