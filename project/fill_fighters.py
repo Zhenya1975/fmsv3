@@ -1,5 +1,5 @@
 import csv
-from models.models import ParticipantsDB
+from models.models import ParticipantsDB, CompetitionsDB, Fight_statusDB
 from extensions import extensions
 from app import app
 
@@ -27,3 +27,4 @@ def fill_fighters():
 
 
 fill_fighters()
+

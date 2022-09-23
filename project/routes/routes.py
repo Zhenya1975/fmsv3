@@ -664,6 +664,9 @@ def competition_create_new():
         competition_id = created_competition_data.competition_id
         regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
             asc(ParticipantsDB.participant_last_name)).all()
+        
+        
+        
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
 
 
@@ -1511,7 +1514,7 @@ def up_queue_ajaxfile():
         tatami_id = int(request.form['selecttatami'])
 
         if move_object_selector == "move_fight":
-            # получаем последнюю запись в выборке элементов, которые находятся сверху
+            # получаем последнюю зап��сь в выборке элементов, которые находятся сверху
             try:
                 upper_sibling_data = db.session.query(FightsDB).filter(
                     FightsDB.queue_sort_index < current_queue_sort_index).filter(
