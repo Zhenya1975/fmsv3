@@ -1608,6 +1608,15 @@ def queue_ajaxfile():
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 
+
+
+@home.route('/fight_status_ajaxfile', methods=["POST", "GET"])
+def fight_status_ajaxfile():
+    if request.method == 'POST':
+        # competition_id = int(request.form['competition_id'])
+        return jsonify({'htmlresponse': render_template('ops')})
+
+
 @home.route('/add_round_ajaxfile', methods=["POST", "GET"])
 def add_round_ajaxfile():
     if request.method == 'POST':
