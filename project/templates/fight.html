@@ -264,7 +264,7 @@
         $('.finish_fight_button').click(function(){
             var winner_id_selected = parseInt($("input[name='fightresult']:checked").val());
             var fight_id = {{ fight_data.fight_id }}
-
+            // console.log("winner_id_selected: ", winner_id_selected)
            $.ajax({
                  url: '/confirm_fight_result_ajaxfile',
                  type: 'post',

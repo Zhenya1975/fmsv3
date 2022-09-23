@@ -1403,19 +1403,17 @@ def confirm_fight_result_ajaxfile():
         red_fighter_id = fight_data.red_fighter_id
         blue_fighter_id =fight_data.blue_fighter_id
 
-        # Пусть победитель - красный. Тогда лузер - синий
-        looser_id = fight_data.blue_fighter_id
+        if winner_id == red_fighter_id:
+            looser_id = fight_data.blue_fighter_id
+            winner_reg = RegistrationsDB.query.filter_by(reg_id=red_fighter_id).first()
+            looser_reg = RegistrationsDB.query.filter_by(reg_id=blue_fighter_id).first()
 
-        winner_reg = RegistrationsDB.query.filter_by(reg_id=winner_id).first()
-        looser_reg = RegistrationsDB.query.filter_by(reg_id=looser_id).first()
-
-        if winner_id == blue_fighter_id:
-            # если победитель - синий, то лузер - красный
+        elif winner_id == blue_fighter_id:
             looser_id = fight_data.red_fighter_id
-            winner_reg = RegistrationsDB.query.filter_by(reg_id=looser_id).first()
-            looser_reg = RegistrationsDB.query.filter_by(reg_id=winner_id).first()
+            winner_reg = RegistrationsDB.query.filter_by(reg_id=blue_fighter_id).first()
+            looser_reg = RegistrationsDB.query.filter_by(reg_id=red_fighter_id).first()
 
-
+        print("winner_reg: ", winner_reg, " looser_reg: ", looser_reg)
         return jsonify({'htmlresponse': render_template('response_fight_result.html', fight_data=fight_data, winner_reg=winner_reg, looser_reg=looser_reg)})
 
 
