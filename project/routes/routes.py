@@ -3,7 +3,7 @@ from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, R
     AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB, QueueDB, Fight_statusDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
-from functions import check_delete_weight_category, create_backlog_record, new_round_name
+from functions import check_delete_weight_category, create_backlog_record, new_round_name, candidates_and_queue
 from extensions import extensions
 from sqlalchemy import desc, asc, func
 from sqlalchemy import and_, or_
@@ -132,6 +132,7 @@ def fight(fight_id):
     competition_id = round_data.competition_id
     competition_data = CompetitionsDB.query.get(competition_id)
     fight_duration = competition_data.fight_duration
+    fight_timer = fight_data.fight_timer
     added_time = competition_data.added_time
     tatami_id = fight_data.tatami_id
     # Список боев на татами
@@ -159,16 +160,18 @@ def fight(fight_id):
         next_fight_weight_cat = weight_category_name
         next_fight_fighters = red_fighter_last_name + " " + red_fighter_first_name + " - " + blue_fighter_last_name + " " + blue_fighter_first_name
 
-    fight_status_description = fight_data.fight_fight_status.fight_status_description
+    # ight_status_description = fight_data.fight_fight_status.fight_status_description
 
     fight_status_0_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(
         fight_status_code=0).first()
     fight_status_0_description = fight_status_0_data.fight_status_description
 
 
-    return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration,
+    return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration, fight_timer=fight_timer,
                            added_time=added_time, next_fight_weight_cat=next_fight_weight_cat,
-                           next_fight_fighters=next_fight_fighters, fight_status_description=fight_status_description)
+                           next_fight_fighters=next_fight_fighters,
+                           # fight_status_description=fight_status_description
+                           )
 
 
 @home.route('/fights/<int:competition_id>/')
@@ -1504,6 +1507,8 @@ def down_queue_ajaxfile():
 def fight_status_start_ajaxfile():
     if request.method == 'POST':
         fight_id = int(request.form['fight_id'])
+        time = int(request.form['time'])
+
         fight_data = FightsDB.query.get(fight_id)
         competition_id = fight_data.competition_id
         fight_status_1_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(fight_status_code=1).first()
@@ -1923,6 +1928,8 @@ def new_fight_ajaxfile():
         tatami_id = int(request.form['tatami_id'])
         round_data = RoundsDB.query.get(round_id)
         competition_id = round_data.competition_id
+        competition_data = CompetitionsDB.query.get(competition_id)
+        fight_duration = competition_data.fight_duration
         candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
         # определяем весовую и возрастную категорию одного из бойцов
         red_candidate_weight_cat_id = candidates_data.red_candidate_reg.weight_cat_id
@@ -1986,7 +1993,9 @@ def new_fight_ajaxfile():
                     blue_fighter_id=blue_candidate_reg_id,
                     tatami_id=tatami_id,
                     queue_sort_index=queue_sort_index,
-                    queue_catagory_sort_index=queue_catagory_sort_index
+                    queue_catagory_sort_index=queue_catagory_sort_index,
+                    fight_timer=fight_duration,
+                    fight_status=0
                 )
                 db.session.add(new_fight)
                 db.session.commit()
@@ -2029,6 +2038,7 @@ def delete_fight_ajaxfile():
         blue_fighter_id = fight_data.blue_fighter_id
         round_id = fight_data.round_number
         competition_id = fight_data.competition_id
+        # print("fight_status: ", fight_status)
         if fight_status == 0:
             # удаляем очередь, связанную с боем
             queue_data = FightsDB.query.filter_by(fight_id=fight_id).first()
@@ -2053,97 +2063,21 @@ def delete_fight_ajaxfile():
 
             candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
             backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+            fights_data = FightsDB.query.filter_by(round_number=round_id).all()
 
-            red_candidate_reg_id = 0
-            blue_candidate_reg_id = 0
-            # если запись о кандидатах уже есть
-            if candidates_data:
-                if candidates_data.red_candidate_reg_id:
-                    red_candidate_reg_id = candidates_data.red_candidate_reg_id
-                if candidates_data.blue_candidate_reg_id:
-                    blue_candidate_reg_id = candidates_data.blue_candidate_reg_id
+            # Запуск функции генерации блоков на странице fights
+            jsonify_dict = candidates_and_queue.candidates_and_queue(candidates_data, backlog_data, fights_data=fights_data, round_id=round_id)
 
-                if red_candidate_reg_id == 0 and blue_candidate_reg_id == 0:
-                    backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
-                    fights_data = FightsDB.query.filter_by(round_number=round_id).all()
-                    return jsonify(
-                        {'htmlresponse_red_candidate': render_template('empty_candidate.html'),
-                         'htmlresponse_blue_candidate': render_template('empty_candidate.html'),
-                         'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
-                         'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
+            return jsonify_dict
 
-                         })
+        elif fight_status == 1:
+            candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+            backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+            fights_data = FightsDB.query.filter_by(round_number=round_id).all()
+            jsonify_dict = candidates_and_queue.candidates_and_queue(candidates_data, backlog_data,
+                                                                     fights_data=fights_data, round_id=round_id)
 
-                elif red_candidate_reg_id != 0 and blue_candidate_reg_id == 0:
-                    candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                    red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
-                    red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
-
-                    backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
-                    fights_data = FightsDB.query.filter_by(round_number=round_id).all()
-                    return jsonify(
-                        {'htmlresponse_red_candidate': render_template('red_candidate.html',
-                                                                       red_candidate_last_name=red_candidate_last_name,
-                                                                       red_candidate_first_name=red_candidate_first_name,
-                                                                       round_id=round_id),
-                         'htmlresponse_blue_candidate': render_template('empty_candidate.html'),
-                         'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
-                         'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
-
-                         })
-
-
-                elif red_candidate_reg_id == 0 and blue_candidate_reg_id != 0:
-                    candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                    blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
-                    blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
-                    backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
-                    fights_data = FightsDB.query.filter_by(round_number=round_id).all()
-                    return jsonify(
-                        {'htmlresponse_red_candidate': render_template('empty_candidate.html'),
-                         'htmlresponse_blue_candidate': render_template('blue_candidate.html',
-                                                                        blue_candidate_last_name=blue_candidate_last_name,
-                                                                        blue_candidate_first_name=blue_candidate_first_name,
-                                                                        round_id=round_id),
-                         'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
-                         'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
-
-                         })
-
-                else:
-                    candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
-                    red_candidate_last_name = candidates_data.red_candidate_reg.registration_participant.participant_last_name
-                    red_candidate_first_name = candidates_data.red_candidate_reg.registration_participant.participant_first_name
-                    blue_candidate_last_name = candidates_data.blue_candidate_reg.registration_participant.participant_last_name
-                    blue_candidate_first_name = candidates_data.blue_candidate_reg.registration_participant.participant_first_name
-                    backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
-                    fights_data = FightsDB.query.filter_by(round_number=round_id).all()
-                    return jsonify(
-                        {'htmlresponse_red_candidate': render_template('red_candidate.html',
-                                                                       red_candidate_last_name=red_candidate_last_name,
-                                                                       red_candidate_first_name=red_candidate_first_name,
-                                                                       round_id=round_id),
-                         'htmlresponse_blue_candidate': render_template('blue_candidate.html',
-                                                                        blue_candidate_last_name=blue_candidate_last_name,
-                                                                        blue_candidate_first_name=blue_candidate_first_name,
-                                                                        round_id=round_id),
-                         'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
-                         'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
-
-                         })
-
-
-
-            else:
-                backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
-                fights_data = FightsDB.query.filter_by(round_number=round_id).all()
-                return jsonify(
-                    {'htmlresponse_red_candidate': render_template('empty_candidate.html'),
-                     'htmlresponse_blue_candidate': render_template('empty_candidate.html'),
-                     'htmlresponse_backlog': render_template('backlog.html', backlog_data=backlog_data),
-                     'htmlresponse_fights': render_template('fights_in_round.html', fights_data=fights_data),
-
-                     })
+            return jsonify_dict
 
 
 @home.route('/delete_blue_candidate_ajaxfile', methods=["POST", "GET"])

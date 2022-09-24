@@ -67,6 +67,7 @@ class FightsDB(db.Model):
     queue_sort_index = db.Column(db.Integer, default=0)
     queue_catagory_sort_index = db.Column(db.Integer, default=0)
     queue_fight = db.relationship('QueueDB', backref='queue_fight')
+    fight_timer = db.Column(db.Integer, default=0)
 
 
 class BacklogDB(db.Model):
