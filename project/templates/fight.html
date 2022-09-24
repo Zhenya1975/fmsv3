@@ -89,7 +89,8 @@
                     
                     <!--Колонка с настройками-->
                     <div class="col-3 shadow bg-white rounded"> <!-- это колонка с настройками -->
-                        <div class="fight_status">
+                        <div class="fight_status" style="margin-top: 5px; text-align: center;">
+                            {{fight_status_description}}
 
                         </div>
                         <h3 id="timer_master" style="text-align: center"></h3>
@@ -201,7 +202,7 @@
             $('#start-stop-button').on('click', function() {
                 var fight_id = {{ fight_data.fight_id }}
                 $.ajax({
-                     url: '/fight_status_ajaxfile',
+                     url: '/fight_status_start_ajaxfile',
                      type: 'post',
                      data: {fight_id:fight_id},
                      success: function(data){

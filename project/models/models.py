@@ -32,7 +32,7 @@ class Fight_statusDB(db.Model):
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
     fight_status_code = db.Column(db.Integer, default=0)
     fight_status_description = db.Column(db.String)
-
+    fight_fight_status = db.relationship('FightsDB', backref='fight_fight_status')
 
 class RegistrationsDB(db.Model):
     reg_id = db.Column(db.Integer, primary_key=True)

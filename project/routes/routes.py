@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, \
-    AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB, QueueDB
+    AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB, QueueDB, Fight_statusDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
 from functions import check_delete_weight_category, create_backlog_record, new_round_name
@@ -159,9 +159,16 @@ def fight(fight_id):
         next_fight_weight_cat = weight_category_name
         next_fight_fighters = red_fighter_last_name + " " + red_fighter_first_name + " - " + blue_fighter_last_name + " " + blue_fighter_first_name
 
+    fight_status_description = fight_data.fight_fight_status.fight_status_description
+
+    fight_status_0_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(
+        fight_status_code=0).first()
+    fight_status_0_description = fight_status_0_data.fight_status_description
+
+
     return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration,
                            added_time=added_time, next_fight_weight_cat=next_fight_weight_cat,
-                           next_fight_fighters=next_fight_fighters)
+                           next_fight_fighters=next_fight_fighters, fight_status_description=fight_status_description)
 
 
 @home.route('/fights/<int:competition_id>/')
@@ -1493,12 +1500,18 @@ def down_queue_ajaxfile():
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 
-@home.route('/fight_status_ajaxfile', methods=["POST", "GET"])
-def fight_status_ajaxfile_ajaxfile():
+@home.route('/fight_status_start_ajaxfile', methods=["POST", "GET"])
+def fight_status_start_ajaxfile():
     if request.method == 'POST':
         fight_id = int(request.form['fight_id'])
+        fight_data = FightsDB.query.get(fight_id)
+        competition_id = fight_data.competition_id
+        fight_status_1_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(fight_status_code=1).first()
+        fight_status_1_description = fight_status_1_data.fight_status_description
+        fight_data.fight_status = 1
+        db.session.commit()
 
-        return jsonify({'htmlresponse': 'test2'})
+        return jsonify({'htmlresponse': fight_status_1_description})
 
 
 @home.route('/up_queue_ajaxfile', methods=["POST", "GET"])
@@ -1606,12 +1619,6 @@ def queue_ajaxfile():
             # print("queue_data: ", queue_data)
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
-
-@home.route('/fight_status_ajaxfile', methods=["POST", "GET"])
-def fight_status_ajaxfile():
-    if request.method == 'POST':
-        # competition_id = int(request.form['competition_id'])
-        return jsonify({'htmlresponse': render_template('ops')})
 
 
 @home.route('/add_round_ajaxfile', methods=["POST", "GET"])
