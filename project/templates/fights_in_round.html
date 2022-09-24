@@ -4,8 +4,9 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                     <a href="{{url_for('home.fight', fight_id=fight.fight_id)}}">
-                      {{ fight.red_fighter.registration_participant.participant_last_name }} {{ fight.red_fighter.registration_participant.participant_first_name }} - {{ fight.blue_fighter.registration_participant.participant_last_name }} {{ fight.blue_fighter.registration_participant.participant_first_name }}
+                      {{ fight.red_fighter.registration_participant.participant_last_name }} {{ fight.red_fighter.registration_participant.participant_first_name }} - {{ fight.blue_fighter.registration_participant.participant_last_name }} {{ fight.blue_fighter.registration_participant.participant_first_name }}.
                     </a>
+                    {{ fight.fight_fight_status.fight_status_description }}
                     <br>
                     <small>
                         {{ fight.fight_tatami.tatami_name }}

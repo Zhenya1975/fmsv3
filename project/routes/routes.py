@@ -2071,6 +2071,7 @@ def delete_fight_ajaxfile():
             return jsonify_dict
 
         elif fight_status == 1:
+            # flash('Удаление запрещено. Поединок продолжается', 'alert-danger')
             candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
             backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
             fights_data = FightsDB.query.filter_by(round_number=round_id).all()
