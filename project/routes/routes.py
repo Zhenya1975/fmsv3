@@ -162,15 +162,12 @@ def fight(fight_id):
 
     # ight_status_description = fight_data.fight_fight_status.fight_status_description
 
-    fight_status_0_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(
-        fight_status_code=0).first()
-    fight_status_0_description = fight_status_0_data.fight_status_description
+
 
 
     return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration, fight_timer=fight_timer,
                            added_time=added_time, next_fight_weight_cat=next_fight_weight_cat,
-                           next_fight_fighters=next_fight_fighters,
-                           # fight_status_description=fight_status_description
+                           next_fight_fighters=next_fight_fighters
                            )
 
 
@@ -1514,6 +1511,9 @@ def fight_status_start_ajaxfile():
         fight_status_1_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(fight_status_code=1).first()
         fight_status_1_description = fight_status_1_data.fight_status_description
         fight_data.fight_status = 1
+
+        fight_data.fight_timer = time
+
         db.session.commit()
 
         return jsonify({'htmlresponse': fight_status_1_description})
