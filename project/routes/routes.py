@@ -136,7 +136,8 @@ def fight(fight_id):
     tatami_id = fight_data.tatami_id
     # Список боев на татами
     fights_data_on_tatami = FightsDB.query.filter_by(tatami_id=tatami_id).order_by(FightsDB.queue_catagory_sort_index,
-                                                                                  FightsDB.queue_sort_index).all()
+                                                                                   FightsDB.queue_sort_index).all()
+
     check_var = 0
     next_fight_id = 0
     for fight in fights_data_on_tatami:
@@ -145,7 +146,7 @@ def fight(fight_id):
             check_var = check_var + 1
         if check_var == 1:
             next_fight_id = f_id
-    
+
     next_fight_data = FightsDB.query.get(next_fight_id)
     next_fight_weight_cat = ""
     next_fight_fighters = "Нет"
@@ -156,11 +157,11 @@ def fight(fight_id):
         blue_fighter_first_name = next_fight_data.blue_fighter.registration_participant.participant_first_name
         weight_category_name = next_fight_data.red_fighter.registration.weight_category_name
         next_fight_weight_cat = weight_category_name
-        next_fight_fighters =  red_fighter_last_name + " " + red_fighter_first_name + " - " + blue_fighter_last_name + " " + blue_fighter_first_name
-    
+        next_fight_fighters = red_fighter_last_name + " " + red_fighter_first_name + " - " + blue_fighter_last_name + " " + blue_fighter_first_name
 
     return render_template("fight.html", fight_data=fight_data, round_name=round_name, fight_duration=fight_duration,
-                           added_time=added_time, next_fight_weight_cat= next_fight_weight_cat, next_fight_fighters=next_fight_fighters)
+                           added_time=added_time, next_fight_weight_cat=next_fight_weight_cat,
+                           next_fight_fighters=next_fight_fighters)
 
 
 @home.route('/fights/<int:competition_id>/')
@@ -259,10 +260,10 @@ def comp3(competition_id, active_tab_name):
         data = {'active_tab_pass': 'competition_settings'}
     else:
         print("непонятно что передано вместо номера вкладки")
-    
+
     competition_data = CompetitionsDB.query.get(competition_id)
     form_general_info = CompetitionForm()
-    
+
     regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(
         ParticipantsDB.registration_participant).order_by(ParticipantsDB.participant_last_name.asc()).all()
     regs_data = RegistrationsDB.query.filter_by(competition_id=competition_id).all()
@@ -276,14 +277,14 @@ def comp3(competition_id, active_tab_name):
         not_registered_participants.append(row.participant_id)
     participants_data_for_selection = db.session.query(ParticipantsDB).filter(
         ParticipantsDB.participant_id.in_(not_registered_participants))
-    
+
     tatami_data = TatamiDB.query.filter_by(competition_id=competition_id).all()
     w_categories = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         WeightcategoriesDB.sort_index).all()
     a_categories = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         AgecategoriesDB.sort_index).all()
     number_of_weight_categories = len(list(w_categories))
-    
+
     return render_template(
         'competition_3.html',
         data=data,
@@ -296,8 +297,8 @@ def comp3(competition_id, active_tab_name):
         a_categories=a_categories,
         number_of_weight_categories=number_of_weight_categories
     )
-    
-    
+
+
 @home.route('/comp2/<int:competition_id>/<active_tab_name>')
 def comp2(competition_id, active_tab_name):
     competition_data = CompetitionsDB.query.get(competition_id)
@@ -664,9 +665,7 @@ def competition_create_new():
         competition_id = created_competition_data.competition_id
         regs = RegistrationsDB.query.filter_by(competition_id=competition_id).join(ParticipantsDB).order_by(
             asc(ParticipantsDB.participant_last_name)).all()
-        
-        
-        
+
         return redirect(url_for('home.comp2', competition_id=competition_id, active_tab_name=1))
 
 
@@ -1394,7 +1393,6 @@ def add_rounds_ajaxfile():
                         })
 
 
-
 @home.route('/confirm_fight_result_ajaxfile', methods=["POST", "GET"])
 def confirm_fight_result_ajaxfile():
     if request.method == 'POST':
@@ -1404,7 +1402,7 @@ def confirm_fight_result_ajaxfile():
         winner_id = int(request.form['winner_id'])
 
         red_fighter_id = fight_data.red_fighter_id
-        blue_fighter_id =fight_data.blue_fighter_id
+        blue_fighter_id = fight_data.blue_fighter_id
 
         if winner_id == red_fighter_id:
             looser_id = fight_data.blue_fighter_id
@@ -1417,8 +1415,8 @@ def confirm_fight_result_ajaxfile():
             looser_reg = RegistrationsDB.query.filter_by(reg_id=red_fighter_id).first()
 
         print("winner_reg: ", winner_reg, " looser_reg: ", looser_reg)
-        return jsonify({'htmlresponse': render_template('response_fight_result.html', fight_data=fight_data, winner_reg=winner_reg, looser_reg=looser_reg)})
-
+        return jsonify({'htmlresponse': render_template('response_fight_result.html', fight_data=fight_data,
+                                                        winner_reg=winner_reg, looser_reg=looser_reg)})
 
 
 @home.route('/down_queue_ajaxfile', methods=["POST", "GET"])
@@ -1493,6 +1491,14 @@ def down_queue_ajaxfile():
             queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(
                 FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
+
+@home.route('/fight_status_ajaxfile', methods=["POST", "GET"])
+def fight_status_ajaxfile_ajaxfile():
+    if request.method == 'POST':
+        fight_id = int(request.form['fight_id'])
+
+        return jsonify({'htmlresponse': 'test2'})
 
 
 @home.route('/up_queue_ajaxfile', methods=["POST", "GET"])
@@ -1583,15 +1589,8 @@ def queue_show_at_page_load_ajaxfile():
         if tatami_id == 0:
             queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(
                 FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
-        
 
-        
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
-
-
-
-
-
 
 
 @home.route('/queue_ajaxfile', methods=["POST", "GET"])
@@ -1603,11 +1602,9 @@ def queue_ajaxfile():
                                                                             FightsDB.queue_sort_index).all()
         if tatami_id == 0:
             queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(
-                FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()       
-        # print("queue_data: ", queue_data)
+                FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
+            # print("queue_data: ", queue_data)
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
-
-
 
 
 @home.route('/fight_status_ajaxfile', methods=["POST", "GET"])

@@ -30,8 +30,9 @@ class CompetitionsDB(db.Model):
 class Fight_statusDB(db.Model):
     fight_status_id = db.Column(db.Integer, primary_key=True)
     competition_id = db.Column(db.Integer, db.ForeignKey('competitionsDB.competition_id'))
-    fight_status_code = db.Column(db.Integer, default = 0)
+    fight_status_code = db.Column(db.Integer, default=0)
     fight_status_description = db.Column(db.String)
+
 
 class RegistrationsDB(db.Model):
     reg_id = db.Column(db.Integer, primary_key=True)
@@ -60,7 +61,8 @@ class FightsDB(db.Model):
     blue_fighter_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     fight_winner_id = db.Column(db.Integer, db.ForeignKey('registrationsDB.reg_id'))
     tatami_id = db.Column(db.Integer, db.ForeignKey('tatamiDB.tatami_id'))
-    fight_status = db.Column(db.Integer, db.ForeignKey('fight_statusDB.fight_status_code'))  # 0 - не начат, 1 - в процессе, 2 - завершен 
+    fight_status = db.Column(db.Integer, db.ForeignKey(
+        'fight_statusDB.fight_status_code'))  # 0 - не начат, 1 - в процессе, 2 - завершен
     final_status = db.Column(db.String, default='continue')
     queue_sort_index = db.Column(db.Integer, default=0)
     queue_catagory_sort_index = db.Column(db.Integer, default=0)

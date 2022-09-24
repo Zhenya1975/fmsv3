@@ -89,7 +89,10 @@
                     
                     <!--Колонка с настройками-->
                     <div class="col-3 shadow bg-white rounded"> <!-- это колонка с настройками -->
-                        <h3 id="timer_master" style="text-align: center"></h1>
+                        <div class="fight_status">
+
+                        </div>
+                        <h3 id="timer_master" style="text-align: center"></h3>
                         <button id="start-stop-button" type="button" class="btn btn-dark btn-block">Start</button>
                         <br>
                         <hr/>
@@ -196,6 +199,20 @@
             
             
             $('#start-stop-button').on('click', function() {
+                var fight_id = {{ fight_data.fight_id }}
+                $.ajax({
+                     url: '/fight_status_ajaxfile',
+                     type: 'post',
+                     data: {fight_id:fight_id},
+                     success: function(data){
+                        $('.fight_status').html(data);
+                        $('.fight_status').append(data.htmlresponse);
+
+                    }
+                 });
+
+
+
                 var $this = $(this);
                 if ($this.hasClass('btn-dark')) {
                     $this.removeClass('btn-dark').addClass('btn-primary');
