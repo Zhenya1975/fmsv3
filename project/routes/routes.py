@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, abort, request, jsonify, flash
 from models.models import ParticipantsDB, FightsDB, CompetitionsDB, BacklogDB, RegistrationsDB, WeightcategoriesDB, \
-    AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB, QueueDB, Fight_statusDB
+    AgecategoriesDB, RoundsDB, FightcandidateDB, TatamiDB, QueueDB, Fight_statusDB, UserDB
 from forms.forms import CompetitionForm, RegistrationeditForm, WeightCategoriesForm, AgeCategoriesForm, ParticipantForm, \
     ParticipantNewForm
 from functions import check_delete_weight_category, create_backlog_record, new_round_name, candidates_and_queue
@@ -174,6 +174,34 @@ def fight(fight_id):
 @home.route('/fights/<int:competition_id>/')
 def fights(competition_id):
     competition_data = CompetitionsDB.query.get(competition_id)
+    user_data = UserDB.query.first()
+    user_saved_weight_cat_id = user_data.user_saved_weight_cat_id
+    user_saved_age_cat_id = user_data.user_saved_age_cat_id
+    user_saved_round_id = user_data.user_saved_round_id
+
+
+    age_cat_first_data= AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        AgecategoriesDB.sort_index.asc()).first()
+    age_cat_first_id = age_cat_first_data.age_cat_id
+    preselected_age_cat_id = age_cat_first_id
+    if user_saved_age_cat_id !=0:
+        preselected_age_cat_id = user_saved_age_cat_id
+
+    weight_cat_first_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
+        WeightcategoriesDB.sort_index.asc()).first()
+    weight_cat_first_id = weight_cat_first_data.weight_cat_id
+    preselected_weight_cat_id = weight_cat_first_id
+    if user_saved_weight_cat_id !=0:
+        preselected_weight_cat_id = user_saved_weight_cat_id
+
+
+    round_first_data = RoundsDB.query.filter_by(competition_id=competition_id).filter_by(weight_cat_id=preselected_weight_cat_id).filter_by(age_cat_id=preselected_age_cat_id).first()
+    round_first_id = round_first_data.round_id
+    preselected_round_id = round_first_id
+    if user_saved_round_id != 0:
+        preselected_round_id = user_saved_round_id
+
+
     age_catagories_data = AgecategoriesDB.query.filter_by(competition_id=competition_id).order_by(
         AgecategoriesDB.sort_index.asc()).all()
     weight_categories_data = WeightcategoriesDB.query.filter_by(competition_id=competition_id).order_by(
@@ -184,7 +212,10 @@ def fights(competition_id):
                            competition_data=competition_data,
                            age_catagories_data=age_catagories_data,
                            weight_categories_data=weight_categories_data,
-                           tatami_data=tatami_data
+                           tatami_data=tatami_data,
+                           preselected_age_cat_id=preselected_age_cat_id,
+                           preselected_weight_cat_id=preselected_weight_cat_id,
+                           preselected_round_id=preselected_round_id
                            )
 
 
@@ -359,14 +390,14 @@ def comp2(competition_id, active_tab_name):
 
     queue_data = FightsDB.query.filter_by(competition_id=competition_id).order_by(FightsDB.queue_catagory_sort_index,
                                                                                   FightsDB.queue_sort_index).all()
-    # print("commp 2 queue_data: ", queue_data)
 
-    # print("queue_data: ", queue_data)
+    user_data = UserDB.query.first()
+
     return render_template('competition_2.html', competition_data=competition_data, data=data, form_general_info
     =form_general_info, regs=regs, participants_data_for_selection=participants_data_for_selection,
                            w_categories=w_categories, a_categories=a_categories,
                            number_of_weight_categories=number_of_weight_categories, tatami_data=tatami_data,
-                           queue_data=queue_data)
+                           queue_data=queue_data, user_data=user_data)
 
 
 # создание возрастной категории
