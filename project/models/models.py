@@ -3,11 +3,13 @@ from datetime import datetime, date
 
 db = extensions.db
 
+
 class UserDB(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
-    user_saved_weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'), default = 0)
+    user_saved_weight_cat_id = db.Column(db.Integer, db.ForeignKey('weightcategoriesDB.weight_cat_id'), default=0)
     user_saved_age_cat_id = db.Column(db.Integer, db.ForeignKey('agecategoriesDB.age_cat_id'), default=0)
     user_saved_round_id = db.Column(db.Integer, db.ForeignKey('roundsDB.round_id'), default=0)
+
 
 class ParticipantsDB(db.Model):
     participant_id = db.Column(db.Integer, primary_key=True)
@@ -38,6 +40,7 @@ class Fight_statusDB(db.Model):
     fight_status_code = db.Column(db.Integer, default=0)
     fight_status_description = db.Column(db.String)
     fight_fight_status = db.relationship('FightsDB', backref='fight_fight_status')
+
 
 class RegistrationsDB(db.Model):
     reg_id = db.Column(db.Integer, primary_key=True)

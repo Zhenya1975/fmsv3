@@ -218,11 +218,11 @@
         var selectedagecategory = $('#age_cat_select').children("option:selected").val();
         var selectround = $('#round_selector_id').children("option:selected").val();
         var selecttatami = $('#tatami_selector_id').children("option:selected").val();
+        var competition_id = {{ competition_data.competition_id }}
 
-        $('.backlog').hide()
-        $('.fights_div').hide()
-        // $('.fights_data').html();
-        // $('.fights_data').append("test");
+        // $('.backlog').hide()
+        // $('.fights_div').hide()
+
 
 
         // при загрузке страницы отправляем на сервер значения в селектах 
@@ -242,7 +242,31 @@
             });
           })
 
+         // загружаем в блоки на странице данные
+        var preselected_weight_cat_id = {{ preselected_weight_cat_id }}
+        var preselected_age_cat_id = {{ preselected_age_cat_id }}
+        var preselected_round_id = {{ preselected_round_id }}
 
+        $('#weight_cat_select').val(preselected_weight_cat_id)
+        $('#age_cat_select').val(preselected_age_cat_id)
+        $('#round_selector_id').val(preselected_round_id)
+        $.ajax({
+                 url: '/fights_page_load_ajaxfile',
+                 type: 'post',
+                 data: {competition_id:competition_id},
+                 success: function(response){
+                    // $('.backlog').show()
+                    // $('.fights_div').show()
+                    $('.red_candidate').html(response);
+                    $('.red_candidate').append(response.htmlresponse_red_candidate);
+                    $('.blue_candidate').html(response);
+                    $('.blue_candidate').append(response.htmlresponse_blue_candidate);
+                    $('.backlog_list').html(response);
+                    $('.backlog_list').append(response.htmlresponse_backlog);
+                    $('.fights_list').html(response);
+                    $('.fights_list').append(response.htmlresponse_fights);
+                }
+             });
 
           $("select.round_select").change(function(){
               // Получаем значение из селекта раунда

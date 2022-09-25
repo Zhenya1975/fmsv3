@@ -124,6 +124,8 @@ def participants():
     return render_template('participants_list.html', participants_data=participants_data)
 
 
+
+
 @home.route('/fight/<int:fight_id>')
 def fight(fight_id):
     fight_data = FightsDB.query.get(fight_id)
@@ -1668,6 +1670,27 @@ def queue_show_at_page_load_ajaxfile():
 
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
+
+
+@home.route('/fights_page_load_ajaxfile', methods=["POST", "GET"])
+def fights_page_load_ajaxfile():
+    if request.method == 'POST':
+        competition_id = int(request.form['competition_id'])
+        current_user_data = UserDB.query.first()
+
+        # первый попавшийся раунд в данном соревновании
+        any_round_in_comp = RoundsDB.query.filter_by(competition_id=competition_id).first()
+        round_id = any_round_in_comp.round_id
+        user_selected_round_id = current_user_data.user_saved_round_id
+        if user_selected_round_id !=0:
+            round_id = user_selected_round_id
+
+        candidates_data = FightcandidateDB.query.filter_by(round_id=round_id).first()
+        backlog_data = BacklogDB.query.filter_by(round_id=round_id).all()
+        fights_data = FightsDB.query.filter_by(round_number=round_id).all()
+
+        jsonify_dict = candidates_and_queue.candidates_and_queue(candidates_data, backlog_data, fights_data=fights_data, round_id=round_id)
+        return jsonify_dict
 
 
 @home.route('/test_test_ajaxfile', methods=["POST", "GET"])
