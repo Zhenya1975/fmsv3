@@ -1500,6 +1500,30 @@ def down_queue_ajaxfile():
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
 
 
+
+@home.route('/fight_status_reset_ajaxfile', methods=["POST", "GET"])
+def fight_status_reset_ajaxfile():
+    if request.method == 'POST':
+        fight_id = int(request.form['fight_id'])
+        time = int(request.form['time'])
+        fight_data = FightsDB.query.get(fight_id)
+        competition_id = fight_data.competition_id
+        competition_data = CompetitionsDB.query.get(competition_id)
+        fight_status_0_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(
+            fight_status_code=0).first()
+        fight_status_0_description = fight_status_0_data.fight_status_description
+
+        # меняем статус боя на 0
+        fight_data.fight_status = 0
+
+        # в значение таймера записываем значение продолжительности поединка
+        fight_data.fight_timer = competition_data.fight_duration
+        db.session.commit()
+
+        return jsonify({'htmlresponse': fight_status_0_description})
+
+
+
 @home.route('/fight_status_start_ajaxfile', methods=["POST", "GET"])
 def fight_status_start_ajaxfile():
     if request.method == 'POST':
@@ -1510,6 +1534,8 @@ def fight_status_start_ajaxfile():
         competition_id = fight_data.competition_id
         fight_status_1_data = Fight_statusDB.query.filter_by(competition_id=competition_id).filter_by(fight_status_code=1).first()
         fight_status_1_description = fight_status_1_data.fight_status_description
+
+        # меняем статус боя на 1
         fight_data.fight_status = 1
 
         fight_data.fight_timer = time

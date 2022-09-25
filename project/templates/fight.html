@@ -252,6 +252,7 @@
 
             $('#reset_button').on('click', function(event) {
                 time = {{fight_duration}}
+                var fight_id = {{ fight_data.fight_id }}
                 document.getElementById('timer_master').innerHTML = timer_display(time)
                 socket.emit('Timer value changed', {'timer_sent': time});
                 clearInterval(myInterval);
@@ -261,6 +262,18 @@
                 if ($this.hasClass('btn-primary')) {
                     $this.removeClass('btn-primary').addClass('btn-dark');
                     }
+                $.ajax({
+                     url: '/fight_status_reset_ajaxfile',
+                     type: 'post',
+                     data: {fight_id:fight_id, time:time},
+                     success: function(data){
+                        $('.fight_status').html(data);
+                        $('.fight_status').append(data.htmlresponse);
+
+                    }
+                 });
+
+
                 })
 
 
