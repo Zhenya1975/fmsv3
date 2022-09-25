@@ -97,7 +97,8 @@ def clear_backlog(competition_id):
 
 @home.route('/test')
 def test():
-    return render_template('test.html')
+    response = {'htmlresponse': "test"}
+    return render_template('test.html', response=response)
 
 
 @home.route('/test2')
@@ -1666,6 +1667,13 @@ def queue_show_at_page_load_ajaxfile():
                 FightsDB.queue_catagory_sort_index, FightsDB.queue_sort_index).all()
 
         return jsonify({'htmlresponse': render_template('queue_list.html', queue_data=queue_data)})
+
+
+
+@home.route('/test_test_ajaxfile', methods=["POST", "GET"])
+def test_test_ajaxfile():
+    if request.method == 'POST':
+        return jsonify({'htmlresponse': "test"})
 
 
 @home.route('/queue_ajaxfile', methods=["POST", "GET"])

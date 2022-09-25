@@ -43,4 +43,4 @@ def create_user():
 
         print("uset id: ", last_created_user.user_id, " has been created")
 
-# create_user()
+create_user()

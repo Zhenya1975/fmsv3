@@ -260,7 +260,7 @@
                          type: 'post',
                          data: {selectround:parseInt(selectround)},
                          success: function(response){
-                           // console.log("должен отработать список боев")
+                            // console.log(response.htmlresponse_red_candidate)
                             $('.backlog').show()
                             $('.fights_div').show()
                             $('.red_candidate').html(response);
